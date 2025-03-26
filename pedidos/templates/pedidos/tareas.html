@@ -1,0 +1,16 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+<h1>Tareas</h1>
+<ul>
+    {% for tarea in tareas %}  <!-- Variable correcta -->
+    <li>
+        {{ tarea.descripcion }} - 
+        {{ tarea.fecha|date:"d/m/Y" }} - 
+        {% if tarea.realizada %}✅{% else %}❌{% endif %}
+    </li>
+    {% empty %}
+    <li>No hay tareas registradas</li>
+    {% endfor %}
+</ul>
+{% endblock %}
