@@ -1,0 +1,18 @@
+{% extends 'pedidos/base.html' %}
+
+{% block content %}
+    <h2>Lista de Tareas</h2>
+    <ul>
+        {% for tarea in tareas %}
+            <li>
+                {{ tarea.descripcion }} - {{ tarea.fecha }}
+                {% if not tarea.realizada %}
+                    <a href="{% url 'pedidos:marcar_tarea' tarea.id %}">Marcar como realizada</a>
+                {% else %}
+                    <span>Completada</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'pedidos:agregar_tarea' %}">Agregar tarea</a>
+{% endblock %}
