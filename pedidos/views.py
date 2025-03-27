@@ -1,68 +1,87 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Pedido, Producto, Tarea, Nota
-from .forms import PedidoForm, TareaForm, NotaForm
-from django.views.decorators.http import require_POST
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
+from .models import Tarea, Pedido, Producto
+from .forms import TareaForm, PedidoForm, ProductoForm
+from django.urls import reverse_lazy
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
 from django.utils import timezone
+import json
 
-def lista_pedidos(request):
-    pedidos = Pedido.objects.all().order_by('fecha_inicio')
-    return render(request, 'pedidos/lista_pedidos.html', {'pedidos': pedidos})
+# ========== TAREAS ==========
 
-# Vista para editar pedidos
-def editar_pedido(request, pk):
-    pedido = get_object_or_404(Pedido, pk=pk)
-    if request.method == 'POST':
-        form = PedidoForm(request.POST, instance=pedido)
-        if form.is_valid():
-            form.save()
-            return redirect('pedidos:lista_pedidos')
-    else:
-        form = PedidoForm(instance=pedido)
-    return render(request, 'pedidos/editar_pedido.html', {'form': form})
+def cambiar_estado_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
+    tarea.completada = not tarea.completada
+    tarea.save()
+    return JsonResponse({'completada': tarea.completada})
+class TareaListView( ListView):
+    model = Tarea
+    template_name = 'pedidos/tareas.html'
+    context_object_name = 'tareas'
+    
+    def get_queryset(self):
+        return Tarea.objects.all().order_by('-fecha_creacion')
+    
+class TareaCreateView(CreateView):
+    model = Tarea
+    fields = ['titulo', 'descripcion','fecha_especifica', 'completada']
+    success_url = reverse_lazy('pedidos:tareas')
+    def form_valid(self, form):
+        form.save()
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'errors': form.errors}, status=400)
+        return super().form_invalid(form)
+    
+class TareaUpdateView( UpdateView):
+    model = Tarea
+    form_class = TareaForm
+    template_name = 'pedidos/tarea_form.html'
+    success_url = reverse_lazy('tareas')
 
-@require_POST
-def cambiar_estado(request, pedido_id):
-    pedido = get_object_or_404(Pedido, id=pedido_id)
-    pedido.estado = request.POST.get('estado')
-    pedido.save()
-    return redirect('pedidos_list')
+class TareaDeleteView( DeleteView):
+    model = Tarea
+    success_url = reverse_lazy('tareas')
 
-def calendario_pedidos(request):
-    pedidos = Pedido.objects.all()
-    return render(request, 'pedidos/calendario.html', {'pedidos': pedidos})
+# ========== PEDIDOS ==========
+class PedidoListView( ListView):
+    model = Pedido
+    template_name = 'pedidos/pedidos_lista.html'
+    context_object_name = 'pedidos'
+class PedidoCreateView( CreateView):
+    model = Pedido
+    form_class = PedidoForm
+    template_name = 'pedidos/pedido_form.html'
+    success_url = reverse_lazy('pedidos:pedidos_lista')
 
-def control_stock(request):
-    productos = Producto.objects.all()
-    return render(request, 'pedidos/stock.html', {'productos': productos})
+# ========== PRODUCTOS ==========
+class ProductoListView(ListView):
+    model = Producto
+    template_name = 'pedidos/productos_lista.html'
 
-@require_POST
-def ajustar_stock(request, producto_id):
-    producto = get_object_or_404(Producto, id=producto_id)
-    accion = request.POST.get('accion')
-    if accion == 'sumar':
-        producto.cantidad += 1
-    elif accion == 'restar' and producto.cantidad > 0:
-        producto.cantidad -= 1
-    producto.save()
-    return redirect('control_stock')
+class ProductoUpdateView( UpdateView):
+    model = Producto
+    form_class = ProductoForm
+    template_name = 'pedidos/producto_form.html'
+    success_url = reverse_lazy('productos_lista')
+    
+# ========== Calendario ==========
+class CalendarioView(TemplateView):
+    template_name = 'pedidos/calendario.html'
 
-def tareas(request):
-    tareas_hoy = Tarea.objects.filter(fecha=timezone.now().date(), realizada=False)
-    tareas_futuras = Tarea.objects.filter(fecha__gt=timezone.now().date())
-    return render(request, 'pedidos/tareas.html', {
-        'tareas_hoy': tareas_hoy,
-        'tareas_futuras': tareas_futuras
-    })
-def agregar_tarea(request):
-    if request.method == 'POST':
-        form = TareaForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('pedidos:lista_tareas')
-    else:
-        form = TareaForm()
-    return render(request, 'pedidos/agregar_tarea.html', {'form': form})
-
-def lista_tareas(request):
-    tareas = Tarea.objects.all().order_by("-fecha")
-    return render(request, 'pedidos/tareas.html', {'tareas': tareas})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        eventos = []
+        for tarea in Tarea.objects.all():
+            if tarea.fecha_especifica:  
+                eventos.append({
+                    'title': tarea.titulo,
+                    'start': tarea.fecha_especifica.isoformat(),
+                    'description': tarea.descripcion,
+                })
+        context['eventos'] = json.dumps(eventos)
+        return context

@@ -1,5 +1,14 @@
 from django.db import models
-from django.urls import reverse
+from django.contrib.auth.models import User
+
+class Producto(models.Model):
+    nombre = models.CharField(max_length=100)
+    cantidad = models.IntegerField(default=0)
+    almacen = models.CharField(max_length=50)
+    ultima_actualizacion = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"{self.nombre} ({self.get_almacen_display()})"
 
 class Pedido(models.Model):
     ESTADOS = [
@@ -10,39 +19,17 @@ class Pedido(models.Model):
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField(null=True, blank=True)
     empresa = models.CharField(max_length=100)
-    lugar_entrega = models.CharField(max_length=200)
-    cantidad_radios = models.IntegerField()
-    excursion = models.CharField(max_length=100)
-    guia = models.CharField(max_length=100)
-    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
-    
-    def get_absolute_url(self):
-        return reverse('detalle_pedido', args=[str(self.id)])
-
-class Producto(models.Model):
-    ALMACENES = [
-        ('principal', 'Almacén Principal'),
-        ('secundario', 'Almacén Secundario'),
-        ('reserva', 'Almacén de Reserva'),
-    ]
-    nombre = models.CharField(max_length=100)
-    cantidad = models.IntegerField(default=0)
-    almacen = models.CharField(max_length=50, choices=ALMACENES)
-    
-    def __str__(self):
-        return f"{self.nombre} ({self.get_almacen_display()})"
+    productos = models.ManyToManyField(Producto)
+    estado = models.CharField(max_length=20, choices=ESTADOS,)
+    notas = models.TextField(blank=True)
 
 class Tarea(models.Model):
-    PRIORIDADES = [
-        ('alta', '🔥 Alta'),
-        ('media', '⚠️ Media'),
-        ('baja', '💤 Baja'),
-    ]
-    descripcion = models.CharField(max_length=200)
-    fecha = models.DateField()
-    prioridad = models.CharField(max_length=20, choices=PRIORIDADES, default='media')
-    realizada = models.BooleanField(default=False)
+    titulo = models.CharField(max_length=200)
+    descripcion = models.TextField()
+    prioridad = models.CharField(max_length=20, choices=[('alta', 'Alta'), ('media', 'Media'), ('baja', 'Baja')])
+    completada = models.BooleanField(default=False)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_especifica = models.DateField(null=True, blank=True)
 
-class Nota(models.Model):
-    contenido = models.TextField()
-    fecha = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.titulo

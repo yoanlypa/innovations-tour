@@ -1,0 +1,73 @@
+/* Estilos generales */
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.list-group-item {
+    margin-bottom: 10px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.8em;
+    padding: 0.5em 0.75em;
+}
+
+/* Colores de prioridad */
+.bg-danger { background-color: #dc3545!important; }
+.bg-warning { background-color: #ffc107!important; }
+.bg-success { background-color: #28a745!important; }
+
+
+
+/* Contenedor del título y botón */
+.header-sticky {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Botón flotante pegajoso */
+/* styles.css */
+.btn-floating {
+    background: #007bff;
+    color: white;
+    z-index: 1000;
+    position: fixed;  /* Usa "fixed" en lugar de "sticky" */
+    bottom: 30px;
+    right: 30px;  /* Lo posiciona en la esquina inferior derecha */
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      /* Asegúrate de que esté por encima de todo */
+    transition: all 0.3s ease;  /* Para efectos suaves */
+}
+
+/* Efecto al hacer scroll */
+.btn-floating.sticky {
+    top: 10px; /* Posición cuando está "pegado" */
+}
+@media (max-width: 768px) {
+    .btn-floating {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+}

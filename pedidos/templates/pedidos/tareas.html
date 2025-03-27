@@ -1,16 +1,123 @@
 {% extends 'pedidos/base.html' %}
 
 {% block content %}
-<h1>Tareas</h1>
-<ul>
-    {% for tarea in tareas %}  <!-- Variable correcta -->
-    <li>
-        {{ tarea.descripcion }} - 
-        {{ tarea.fecha|date:"d/m/Y" }} - 
-        {% if tarea.realizada %}✅{% else %}❌{% endif %}
-    </li>
-    {% empty %}
-    <li>No hay tareas registradas</li>
-    {% endfor %}
-</ul>
+
+        <button 
+            type="button" 
+            class="btn btn-primary btn-floating"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalNuevaTarea"
+        >
+            ➕
+        </button>
+    </div>
+    <div class="container">
+        <h1>Tareas</h1>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Tarea</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="{% url 'pedidos:tarea_nueva' %}">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" name="titulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha Especìfica</label>
+                            <input type="date" class="form-control" name="fecha_especifica">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas_agrupadas %}
+{% for grupo in tareas_agrupadas %}
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h4>📅 {{ grupo.grouper }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for tarea in grupo.list %}  <!-- Bucle de tareas por fecha -->
+                    <div class="list-group-item">
+                        <h5>{{ tarea.titulo }}</h5>
+                        <p>{{ tarea.descripcion }}</p>
+                        
+                        <!-- Botón para cambiar estado (¡Versión AJAX!) -->
+                        <button 
+                            type="button" 
+                            class="btn btn-sm {% if tarea.completada %}btn-success{% else %}btn-warning{% endif %}"
+                            data-tarea-id="{{ tarea.id }}"
+                            onclick="cambiarEstado(this)"
+                        >
+                            {% if tarea.completada %}✅ Realizada{% else %}⏳ Pendiente{% endif %}
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+    
+
+
+<!-- Script JS para que cambie de estado la tarea -->
+<script>
+async function cambiarEstado(boton) {
+    const tareaId = boton.dataset.tareaId;
+    try {
+        const response = await fetch(`/pedidos/tareas/cambiar-estado/${tareaId}/`);
+        if (response.ok) {
+            const esRealizada = boton.textContent.includes('Realizada');
+            boton.textContent = esRealizada ? '⏳ Pendiente' : '✅ Realizada';
+            boton.classList.toggle('btn-success');
+            boton.classList.toggle('btn-warning');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+     // Script JS para agregar la tarea nueva -->
+document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch("{% url 'pedidos:tarea_nueva' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        });
+        
+        if (response.ok) {
+            window.location.reload(); 
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+</script>
+
 {% endblock %}

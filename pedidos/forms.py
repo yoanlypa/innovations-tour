@@ -1,32 +1,21 @@
 from django import forms
-from .models import Pedido, Tarea, Nota
+from .models import Tarea, Pedido, Producto
 
-class PedidoForm(forms.ModelForm):
-    class Meta:
-        model = Pedido
-        fields = [
-            'fecha_inicio', 
-            'fecha_fin',
-            'empresa', 
-            'lugar_entrega', 
-            'cantidad_radios', 
-            'estado', 
-            'guia'
-        ]
-        widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date'}),
-            'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
-        }
 
 class TareaForm(forms.ModelForm):
     class Meta:
         model = Tarea
-        fields = ['descripcion', 'fecha', 'prioridad']
+        fields = ['titulo', 'descripcion', 'prioridad', 'completada']  # ✅ Campos existentes
+
+class PedidoForm(forms.ModelForm):
+    class Meta:
+        model = Pedido
+        fields = ['empresa', 'productos', 'estado', 'notas']
         widgets = {
-            'fecha': forms.DateInput(attrs={'type': 'date'})
+            'productos': forms.CheckboxSelectMultiple,
         }
 
-class NotaForm(forms.ModelForm):
+class ProductoForm(forms.ModelForm):
     class Meta:
-        model = Nota
-        fields = ['contenido']
+        model = Producto
+        fields = ['nombre', 'cantidad', 'almacen']
