@@ -3,7 +3,7 @@ from . import views
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView,
     PedidoListView, PedidoCreateView,
-    ProductoListView, ProductoUpdateView, CalendarioView
+    ProductoListView, ProductoUpdateView,StockControlListView, agregar_stock,
 )
 app_name = 'pedidos'
 urlpatterns = [
@@ -24,5 +24,9 @@ urlpatterns = [
     path('productos/editar/<int:pk>/', ProductoUpdateView.as_view(), name='producto_editar'),
     
     # Calendario
-    path('calendario/', CalendarioView.as_view(), name='calendario'),
+    #path('calendario/', CalendarioView.as_view(), name='calendario'),
+    
+    # Stock Control
+    path('stock/', StockControlListView.as_view(), name='stock_control'),
+    path('stock/agregar/', agregar_stock, name='agregar_stock'),
 ]

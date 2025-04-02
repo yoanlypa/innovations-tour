@@ -71,3 +71,9 @@ body {
         font-size: 20px;
     }
 }
+#calendar {
+    height: 600px;  /* Altura mínima */
+    padding: 20px;
+    margin: 20px auto;
+    background-color: white;
+}

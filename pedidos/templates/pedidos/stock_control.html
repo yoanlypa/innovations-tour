@@ -1,0 +1,70 @@
+{% extends 'pedidos/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Control de Stock</h2>
+    
+    <!-- Tabla de stock -->
+    <form method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>PAX</th>
+                    <th>Lugar de E/R</th>
+                    <th>Excursión</th>
+                    <th>Guía</th>
+                    <th>Fecha de E/R</th>
+                    <th>E</th>
+                    <th>R</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form in formset %}
+                <tr>
+                    <td>{{ form.pax }}</td>
+                    <td>{{ form.lugar_er }}</td>
+                    <td>{{ form.excursion }}</td>
+                    <td>{{ form.guia }}</td>
+                    <td>{{ form.fecha_er }}</td>
+                    <td>{{ form.entregado }}</td>
+                    <td>{{ form.recogido }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    </form>
+
+    <!-- Formulario para agregar nuevo registro -->
+    <div class="mt-5">
+        <h4>Agregar Nuevo Registro</h4>
+        <form method="post" action="{% url 'pedidos:agregar_stock' %}">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <input type="text" name="pax" class="form-control" placeholder="PAX" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="lugar_er" class="form-control" placeholder="Lugar de E/R" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="excursion" class="form-control" placeholder="Excursión" required>
+                </div>
+                <div class="col">
+                    <input type="text" name="guia" class="form-control" placeholder="Guía" required>
+                </div>
+                <div class="col">
+                    <input type="date" name="fecha_er" class="form-control" required>
+                </div>
+                <div class="col">
+                    <button type="submit" class="btn btn-success">➕ Agregar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

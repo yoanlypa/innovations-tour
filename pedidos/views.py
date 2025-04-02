@@ -1,8 +1,8 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Tarea, Pedido, Producto
-from .forms import TareaForm, PedidoForm, ProductoForm
+from .models import Tarea, Pedido, Producto, StockControl
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet
 from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
 from django.utils import timezone
 import json
@@ -26,6 +26,7 @@ class TareaCreateView(CreateView):
     model = Tarea
     fields = ['titulo', 'descripcion','fecha_especifica', 'completada']
     success_url = reverse_lazy('pedidos:tareas')
+    
     def form_valid(self, form):
         form.save()
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -36,6 +37,25 @@ class TareaCreateView(CreateView):
         if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'errors': form.errors}, status=400)
         return super().form_invalid(form)
+
+    def form_valid(self, form):
+        # Guarda la tarea primero
+        response = super().form_valid(form)
+        
+        # Verifica si la solicitud es AJAX  
+        if self.request.is_ajax():
+            # Devuelve una respuesta JSON con el ID de la tarea creada
+            data = {
+                'id': self.object.id,
+                'titulo': self.object.titulo,
+                'descripcion': self.object.descripcion,
+                'fecha_creacion': self.object.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
+                'completada': self.object.completada,
+            }
+            return JsonResponse(data)
+        # Si no es AJAX, redirige a la URL de éxito
+        return super().form_valid(form)
+    
     
 class TareaUpdateView( UpdateView):
     model = Tarea
@@ -69,19 +89,30 @@ class ProductoUpdateView( UpdateView):
     template_name = 'pedidos/producto_form.html'
     success_url = reverse_lazy('productos_lista')
     
-# ========== Calendario ==========
-class CalendarioView(TemplateView):
-    template_name = 'pedidos/calendario.html'
+# ========== Control de Stock ==========
+class StockControlListView(ListView):
+    model = StockControl
+    template_name = 'pedidos/stock_control.html'
+    context_object_name = 'items'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        eventos = []
-        for tarea in Tarea.objects.all():
-            if tarea.fecha_especifica:  
-                eventos.append({
-                    'title': tarea.titulo,
-                    'start': tarea.fecha_especifica.isoformat(),
-                    'description': tarea.descripcion,
-                })
-        context['eventos'] = json.dumps(eventos)
+        context['formset'] = StockControlFormSet(queryset=StockControl.objects.all())
         return context
+
+    def post(self, request, *args, **kwargs):
+        formset = StockControlFormSet(request.POST)
+        if formset.is_valid():
+            formset.save()
+        return self.get(request, *args, **kwargs)
+    
+def agregar_stock(request):
+    if request.method == 'POST':
+        StockControl.objects.create(
+            pax=request.POST['pax'],
+            lugar_er=request.POST['lugar_er'],
+            excursion=request.POST['excursion'],
+            guia=request.POST['guia'],
+            fecha_er=request.POST['fecha_er'],
+        )
+    return redirect('pedidos:stock_control')
