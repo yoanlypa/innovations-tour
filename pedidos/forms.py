@@ -27,13 +27,11 @@ class ProductoForm(forms.ModelForm):
         model = Producto
         fields = ['nombre', 'cantidad', 'almacen']
         
+
 class StockControlForm(forms.ModelForm):
     class Meta:
         model = StockControl
-        fields = '__all__'
-        widgets = {
-            'fecha_er': forms.DateInput(attrs={'type': 'date'}),
-        }
+        fields = ['pax', 'lugar_er', 'excursion', 'guia', 'fecha_er', 'entregado', 'recogido']
 
 # Formset para edición múltiple
 StockControlFormSet = forms.modelformset_factory(
@@ -45,3 +43,7 @@ StockControlFormSet = forms.modelformset_factory(
         'recogido': forms.CheckboxInput(),
     }
 )
+class StockERForm(forms.ModelForm):
+    class Meta:
+        model = StockControl
+        fields = ['entregado', 'recogido']

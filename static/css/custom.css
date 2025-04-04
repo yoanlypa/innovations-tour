@@ -1,0 +1,37 @@
+/* Estado de pedidos */
+.estado-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+.estado-pendiente { background: #f39c12; color: white; }
+.estado-confirmado { background: #27ae60; color: white; }
+.estado-entregado { background: #2980b9; color: white; }
+
+/* Formularios móviles */
+.input-mobile {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+/* Botones flotantes para móviles */
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--secondary);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+}

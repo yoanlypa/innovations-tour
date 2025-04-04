@@ -1,9 +1,10 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from .models import Tarea, Pedido, Producto, StockControl
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import json
 
@@ -90,29 +91,70 @@ class ProductoUpdateView( UpdateView):
     success_url = reverse_lazy('productos_lista')
     
 # ========== Control de Stock ==========
-class StockControlListView(ListView):
-    model = StockControl
-    template_name = 'pedidos/stock_control.html'
-    context_object_name = 'items'
 
-    def get_context_data(self, **kwargs):
+def stock_control_view(request):
+        stocks = StockControl.objects.all()  # o un filtrado específico
+        return render(request, 'pedidos/stock_control.html', {'pedidos': stocks})
+
+def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['formset'] = StockControlFormSet(queryset=StockControl.objects.all())
         return context
 
-    def post(self, request, *args, **kwargs):
+def post(self, request, *args, **kwargs):
         formset = StockControlFormSet(request.POST)
         if formset.is_valid():
             formset.save()
         return self.get(request, *args, **kwargs)
     
 def agregar_stock(request):
-    if request.method == 'POST':
-        StockControl.objects.create(
-            pax=request.POST['pax'],
-            lugar_er=request.POST['lugar_er'],
-            excursion=request.POST['excursion'],
-            guia=request.POST['guia'],
-            fecha_er=request.POST['fecha_er'],
-        )
-    return redirect('pedidos:stock_control')
+        if request.method == 'POST':
+            StockControl.objects.create(
+                pax=request.POST['pax'],
+                lugar_er=request.POST['lugar_er'],
+                excursion=request.POST['excursion'],
+                guia=request.POST['guia'],
+                fecha_er=request.POST['fecha_er'],
+            )
+        return redirect('pedidos:stock_control')
+
+def editar_stock(request, pk):
+    registro = get_object_or_404(StockControl, pk=pk)
+    if request.method == "POST":
+        form = StockERForm(request.POST, instance=registro)
+        if form.is_valid():
+            form.save()
+            return redirect('pedidos:stock_control')
+    else:
+        form = StockERForm(instance=registro)
+    return render(request, 'pedidos/editar_stock.html', {'form': form, 'registro': registro})
+
+@csrf_exempt
+def ajax_update_checklist(request):
+    if request.method == "POST":
+        record_id = request.POST.get("id")
+        field = request.POST.get("field")
+        value = request.POST.get("value") == "true"
+
+        registro = get_object_or_404(StockControl, id=record_id)
+        if field == "entregado":
+            registro.entregado = value
+        elif field == "recogido":
+            registro.recogido = value
+        else:
+            return JsonResponse({"success": False, "error": "Campo no válido"})
+
+        registro.save()
+        return JsonResponse({"success": True})
+    return JsonResponse({"success": False, "error": "Método no permitido"})
+
+@csrf_exempt
+def eliminar_stock(request, pk):
+    if request.method == "POST":
+        registro = get_object_or_404(StockControl, pk=pk)
+        try:
+            registro.delete()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Método no permitido"})

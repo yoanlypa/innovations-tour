@@ -33,14 +33,15 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.titulo
+
 class StockControl(models.Model):
-    pax = models.CharField("PAX", max_length=100)  # Nombre o número de PAX
-    lugar_er = models.CharField("Lugar de E/R", max_length=200)  # Lugar de entrega/recogida
-    excursion = models.CharField("Excursión", max_length=200)  # Nombre de la excursión
-    guia = models.CharField("Guía", max_length=100)  # Nombre del guía
-    fecha_er = models.DateField("Fecha de E/R")  # Fecha de entrega/recogida
-    entregado = models.BooleanField("E", default=False)  # Checkbox para Entrega
-    recogido = models.BooleanField("R", default=False)  # Checkbox para Recogida
+    pax = models.IntegerField()
+    lugar_er = models.CharField(max_length=255)
+    excursion = models.CharField(max_length=255)
+    guia = models.CharField(max_length=255)
+    fecha_er = models.DateField()
+    entregado = models.BooleanField(default=False)
+    recogido = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.excursion} - {self.pax}"
+        return f"{self.pax} - {self.excursion}"

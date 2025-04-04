@@ -8,9 +8,6 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/wsgi/
 """
 
 import os
-
 from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'control_radioguias.settings')
-
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tu_proyecto.settings')
 application = get_wsgi_application()

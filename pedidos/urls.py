@@ -3,7 +3,7 @@ from . import views
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView,
     PedidoListView, PedidoCreateView,
-    ProductoListView, ProductoUpdateView,StockControlListView, agregar_stock,
+    ProductoListView, ProductoUpdateView,stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
 urlpatterns = [
@@ -27,6 +27,11 @@ urlpatterns = [
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
     # Stock Control
-    path('stock/', StockControlListView.as_view(), name='stock_control'),
+    path('stock/', views.stock_control_view, name='stock_control'),
     path('stock/agregar/', agregar_stock, name='agregar_stock'),
+    path('editar_stock/<int:pk>/', views.editar_stock, name='editar_stock'),
+    path('eliminar_stock/<int:pk>/', views.eliminar_stock, name='eliminar_stock'),
+    
+    path("ajax_update_checklist/", views.ajax_update_checklist, name="ajax_update_checklist"),
+
 ]

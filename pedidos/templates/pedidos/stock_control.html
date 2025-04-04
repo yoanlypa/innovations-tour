@@ -5,66 +5,172 @@
 <div class="container mt-4">
     <h2>Control de Stock</h2>
     
-    <!-- Tabla de stock -->
-    <form method="post">
-        {% csrf_token %}
-        {{ formset.management_form }}
-        
-        <table class="table table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>PAX</th>
-                    <th>Lugar de E/R</th>
-                    <th>Excursión</th>
-                    <th>Guía</th>
-                    <th>Fecha de E/R</th>
-                    <th>E</th>
-                    <th>R</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for form in formset %}
-                <tr>
-                    <td>{{ form.pax }}</td>
-                    <td>{{ form.lugar_er }}</td>
-                    <td>{{ form.excursion }}</td>
-                    <td>{{ form.guia }}</td>
-                    <td>{{ form.fecha_er }}</td>
-                    <td>{{ form.entregado }}</td>
-                    <td>{{ form.recogido }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    </form>
+    <!-- Tabla de registros en un contenedor responsive -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-hover">
+          <thead class="table-dark">
+              <tr>
+                  <th>PAX</th>
+                  <th>Lugar de E/R</th>
+                  <th>Excursión</th>
+                  <th>Guía</th>
+                  <th>Fecha de E/R</th>
+                  <th>E</th>
+                  <th>R</th>
+                  <th>Acciones</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for pedido in pedidos %}
+            <tr data-id="{{ pedido.id }}">
+                <td class="campo-pax">{{ pedido.pax }}</td>
+                <td class="campo-lugar">{{ pedido.lugar_er }}</td>
+                <td class="campo-excursion">{{ pedido.excursion }}</td>
+                <td class="campo-guia">{{ pedido.guia }}</td>
+                <td class="campo-fecha">{{ pedido.fecha_er }}</td>
+                <td class="campo-e">
+                    <input type="checkbox" class="checklist" data-field="entregado" {% if pedido.entregado %}checked{% endif %}>
+                </td>
+                <td class="campo-r">
+                    <input type="checkbox" class="checklist" data-field="recogido" {% if pedido.recogido %}checked{% endif %}>
+                </td>
 
-    <!-- Formulario para agregar nuevo registro -->
-    <div class="mt-5">
-        <h4>Agregar Nuevo Registro</h4>
-        <form method="post" action="{% url 'pedidos:agregar_stock' %}">
-            {% csrf_token %}
-            <div class="row">
-                <div class="col">
-                    <input type="text" name="pax" class="form-control" placeholder="PAX" required>
-                </div>
-                <div class="col">
-                    <input type="text" name="lugar_er" class="form-control" placeholder="Lugar de E/R" required>
-                </div>
-                <div class="col">
-                    <input type="text" name="excursion" class="form-control" placeholder="Excursión" required>
-                </div>
-                <div class="col">
-                    <input type="text" name="guia" class="form-control" placeholder="Guía" required>
-                </div>
-                <div class="col">
-                    <input type="date" name="fecha_er" class="form-control" required>
-                </div>
-                <div class="col">
-                    <button type="submit" class="btn btn-success">➕ Agregar</button>
-                </div>
-            </div>
-        </form>
+                <td>
+                    <button type="button" class="btn btn-sm btn-warning btn-editar" data-id="{{ pedido.id }}">Editar</button>
+                    <button type="button" class="btn btn-sm btn-secondary btn-duplicar" data-id="{{ pedido.id }}">Duplicar</button>
+                    <button type="button" class="btn btn-sm btn-danger btn-eliminar" data-id="{{ pedido.id }}">Eliminar</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No hay registros en la base de datos.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-dark">
+              <tr>
+                  <th colspan="8">Total de Registros: {{ pedidos.count }}</th>
+              </tr>
+          </tfoot>
+
+      </table>
     </div>
+
+    <!-- Botón flotante para abrir el modal de Nuevo Registro (si se crea desde cero) -->
+    <button type="button" class="btn btn-primary btn-floating" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal" style="position: fixed; bottom: 20px; right: 20px; z-index: 1050;">
+      <i class="bi bi-plus-lg"></i>
+    </button>
 </div>
-{% endblock %}
+
+<!-- Modal para Editar (toda la fila) -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="formEditar" method="post" action="">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarModalLabel">Editar Registro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Campos del registro a editar -->
+          <div class="mb-3">
+            <label for="editarPax" class="form-label">PAX</label>
+            <input type="text" class="form-control" id="editarPax" name="pax" required>
+          </div>
+          <div class="mb-3">
+            <label for="editarLugar" class="form-label">Lugar de E/R</label>
+            <input type="text" class="form-control" id="editarLugar" name="lugar_er" required>
+          </div>
+          <div class="mb-3">
+            <label for="editarExcursion" class="form-label">Excursión</label>
+            <input type="text" class="form-control" id="editarExcursion" name="excursion" required>
+          </div>
+          <div class="mb-3">
+            <label for="editarGuia" class="form-label">Guía</label>
+            <input type="text" class="form-control" id="editarGuia" name="guia" required>
+          </div>
+          <div class="mb-3">
+            <label for="editarFecha" class="form-label">Fecha de E/R</label>
+            <input type="date" class="form-control" id="editarFecha" name="fecha_er" required>
+          </div>
+          <!-- Checkboxes para E y R -->
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="editarE" name="entregado">
+            <label class="form-check-label" for="editarE">Entregado (E)</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="editarR" name="recogido">
+            <label class="form-check-label" for="editarR">Recogido (R)</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Nuevo Registro (también se usa para Duplicar) -->
+<div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-labelledby="nuevoRegistroModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form id="formNuevoRegistro" method="post" action="{% url 'pedidos:agregar_stock' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="nuevoRegistroModalLabel">Nuevo Registro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Campos para el nuevo registro -->
+          <div class="mb-3">
+            <label for="nuevoPax" class="form-label">PAX</label>
+            <input type="text" class="form-control" id="nuevoPax" name="pax" required>
+          </div>
+          <div class="mb-3">
+            <label for="nuevoLugar" class="form-label">Lugar de E/R</label>
+            <input type="text" class="form-control" id="nuevoLugar" name="lugar_er" required>
+          </div>
+          <div class="mb-3">
+            <label for="nuevaExcursion" class="form-label">Excursión</label>
+            <input type="text" class="form-control" id="nuevaExcursion" name="excursion" required>
+          </div>
+          <div class="mb-3">
+            <label for="nuevoGuia" class="form-label">Guía</label>
+            <input type="text" class="form-control" id="nuevoGuia" name="guia" required>
+          </div>
+          <div class="mb-3">
+            <label for="nuevaFecha" class="form-label">Fecha de E/R</label>
+            <input type="date" class="form-control" id="nuevaFecha" name="fecha_er" required>
+          </div>
+          <!-- Checkboxes para E y R -->
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="nuevoEntregado" name="entregado">
+            <label class="form-check-label" for="nuevoEntregado">Entregado (E)</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input type="checkbox" class="form-check-input" id="nuevoRecogido" name="recogido">
+            <label class="form-check-label" for="nuevoRecogido">Recogido (R)</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-success">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+<!-- Se carga el script edit.js (ver sección siguiente) -->
+<script src="{% static 'pedidos/js/edit.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock scripts %}
+<!-- Se carga el script de Bootstrap (opcional) --> 
