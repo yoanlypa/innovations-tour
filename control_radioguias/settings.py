@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$cs3fjxo2no#+2&au6n0(6ufqh6&t_ro_o@+=ft=3(39vzqm)g'
+#SECRET_KEY = 'django-insecure-$cs3fjxo2no#+2&au6n0(6ufqh6&t_ro_o@+=ft=3(39vzqm)g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -46,9 +46,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Debe ir JUSTO después de SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',  # ← Añadido para CSRF
+    'django.contrib.auth.middleware.AuthenticationMiddleware',  # ← Requerido para admin
+    'django.contrib.messages.middleware.MessageMiddleware',  # ← Requerido para admin
+    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
 ]
 
 ROOT_URLCONF = 'control_radioguias.urls'
@@ -158,3 +162,11 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Necesario para 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 LOGGING_CONFIG = None
+SECURE_HSTS_SECONDS = 31536000  # 1 año en segundos (HSTS)
+SECURE_SSL_REDIRECT = True 
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  
+SECRET_KEY = os.environ.get('SECRET_KEY', 'clave-por-defecto-solo-desarrollo') 
