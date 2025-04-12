@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 import sys
 from pathlib import Path
+import django
+from django.contrib.auth import get_user_model
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -80,10 +82,7 @@ WSGI_APPLICATION = 'control_radioguias.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL'),
-        conn_max_age=600  # Conexiones persistentes
-    )
+'default': dj_database_url.config(default=os.getenv("DATABASE_URL"))
 }
 
 # Password validation
@@ -153,6 +152,18 @@ if not DEBUG:
             'level': 'INFO',
         },
     }
+    
+def create_superuser():
+    try:
+        User = get_user_model()
+        if not User.objects.filter(username="admin").exists():
+            User.objects.create_superuser("admin", "admin@example.com", "admin123")
+            print("✅ Superusuario creado")
+    except Exception as e:
+        print(f"Error creando superusuario: {e}")
+
+django.setup()
+create_superuser()
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
