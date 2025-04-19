@@ -22,7 +22,7 @@
                     <h5 class="modal-title">Nueva Tarea</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="{% url 'pedidos:tarea_nueva' %}">
+                <form method="POST" >
                     <div class="modal-body">
                         {% csrf_token %}
                         <div class="mb-3">
