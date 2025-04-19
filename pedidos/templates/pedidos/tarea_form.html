@@ -3,7 +3,7 @@
 {% block content %}
 <div class="card">
     <h2>Agregar Nueva Tarea</h2>
-    <form method="post">
+    <form method="post"  id="formNuevaTarea"  action="{% url 'pedidos:tarea_nueva' %}">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Guardar</button>
