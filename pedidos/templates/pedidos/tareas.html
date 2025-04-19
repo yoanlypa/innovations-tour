@@ -22,19 +22,7 @@
                     <h5 class="modal-title">Nueva Tarea</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                ChatGPT Plus
-                El código AJAX que te proporcioné debe colocarse en el archivo de plantilla donde tienes la lógica del formulario para agregar nuevas tareas. En este caso, lo debes incluir en el archivo de plantilla que contiene el formulario en el modal de la nueva tarea, lo que sería el archivo tareas.html.
-                
-                A continuación te indico los pasos específicos para agregar el código AJAX:
-                
-                Pasos para agregar el código AJAX:
-                Abre tu archivo tareas.html donde tienes el formulario para crear una nueva tarea.
-                
-                Encuentra la parte que tiene el formulario en el modal, donde los usuarios ingresan los datos de la tarea:
-                
-                html
-                Copiar
-                Editar
+              
                 <form method="POST" id="formNuevaTarea">
                     {% csrf_token %}
                     <div class="modal-body">
@@ -110,34 +98,27 @@ async function cambiarEstado(boton) {
     }
 }
      // Script JS para agregar la tarea nueva -->
-     <script>
-        document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            
-            try {
-                const response = await fetch("{% url 'pedidos:tarea_nueva' %}", {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                });
-                
-                if (response.ok) {
-                    // Asegúrate de esperar la respuesta antes de recargar la página
-                    const data = await response.json();
-                    if (data.success) {
-                        window.location.reload();  // Recarga la página
-                    }
-                } else {
-                    console.error("Error en la respuesta del servidor:", response.status);
-                }
-            } catch (error) {
-                console.error("Error en la solicitud AJAX:", error);
-            }
+document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    try {
+        const response = await fetch("{% url 'pedidos:tarea_nueva' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
         });
-        </script>
-            
+        
+        if (response.ok) {
+            window.location.reload(); 
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+});
+
+</script>
 
 {% endblock %}
