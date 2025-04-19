@@ -26,26 +26,12 @@ class TareaListView( ListView):
 class TareaCreateView(CreateView):
     model = Tarea
     fields = ['titulo', 'descripcion','fecha_especifica', 'completada']
-    success_url = reverse_lazy('pedidos:tareas')
-    
-    def form_valid(self, form):
-        form.save()
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'success': True})
-        return super().form_valid(form)
-    
-    def form_invalid(self, form):
-        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'errors': form.errors}, status=400)
-        return super().form_invalid(form)
+    success_url = reverse_lazy('tareas')  # Asegúrate que en urls.py uses name='tareas'
 
     def form_valid(self, form):
-        # Guarda la tarea primero
         response = super().form_valid(form)
-        
-        # Verifica si la solicitud es AJAX  
-        if self.request.is_ajax():
-            # Devuelve una respuesta JSON con el ID de la tarea creada
+
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             data = {
                 'id': self.object.id,
                 'titulo': self.object.titulo,
@@ -54,9 +40,8 @@ class TareaCreateView(CreateView):
                 'completada': self.object.completada,
             }
             return JsonResponse(data)
-        # Si no es AJAX, redirige a la URL de éxito
-        return super().form_valid(form)
-    
+        
+        return response
     
 class TareaUpdateView( UpdateView):
     model = Tarea
