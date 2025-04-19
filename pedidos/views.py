@@ -26,7 +26,7 @@ class TareaListView( ListView):
 class TareaCreateView(CreateView):
     model = Tarea
     fields = ['titulo', 'descripcion','fecha_especifica', 'completada']
-    success_url = reverse_lazy('tareas')  # Asegúrate que en urls.py uses name='tareas'
+    success_url = reverse_lazy('pedidos:tareas')  # Asegúrate que en urls.py uses name='tareas'
 
     def form_valid(self, form):
         response = super().form_valid(form)
@@ -47,11 +47,11 @@ class TareaUpdateView( UpdateView):
     model = Tarea
     form_class = TareaForm
     template_name = 'pedidos/tarea_form.html'
-    success_url = reverse_lazy('tareas')
+    success_url = reverse_lazy('pedidos:tareas')
 
 class TareaDeleteView( DeleteView):
     model = Tarea
-    success_url = reverse_lazy('tareas')
+    success_url = reverse_lazy('pedidos:tareas')
 
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):
