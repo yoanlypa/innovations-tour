@@ -9,7 +9,7 @@ app_name = 'pedidos'
 urlpatterns = [
     # Tareas
     path('tareas/', TareaListView.as_view(), name='tareas'),
-    path('tareas/nueva/', TareaCreateView.as_view(), name='tarea_nueva'),
+    path('tareas/nueva/', TareaCreateView.as_view(), name='nueva_tarea'),
     path('tareas/editar/<int:pk>/', TareaUpdateView.as_view(), name='tarea_editar'),
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado'),
