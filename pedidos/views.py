@@ -3,7 +3,8 @@ from .models import Tarea, Pedido, Producto, StockControl
 from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
+
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import json
@@ -15,19 +16,28 @@ def cambiar_estado_tarea(request, tarea_id):
     tarea.completada = not tarea.completada
     tarea.save()
     return JsonResponse({'completada': tarea.completada})
-class TareaListView( ListView):
+
+class TareaListView(ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'
     context_object_name = 'tareas'
-    
+
     def get_queryset(self):
-        return Tarea.objects.all().order_by('-fecha_creacion')
+        try:
+            tareas = Tarea.objects.all().order_by('-fecha_creacion')
+            return tareas
+        except Exception as e:
+            # En caso de error, lo capturamos y lo mostramos
+            print(f"Error al obtener las tareas: {e}")
+            return HttpResponse(f"Error al obtener las tareas: {e}", status=500)
+
     
 class TareaCreateView(CreateView):
     model = Tarea
     fields = ['titulo', 'descripcion','fecha_especifica', 'completada']
-    success_url = reverse_lazy('pedidos:tareas')  # Asegúrate que en urls.py uses name='tareas'
-
+    success_url = reverse_lazy('tareas')  # Asegúrate que en urls.py uses name='tareas'
+    template_name = 'pedidos/tarea_form.html'
+    
     def form_valid(self, form):
         response = super().form_valid(form)
 
