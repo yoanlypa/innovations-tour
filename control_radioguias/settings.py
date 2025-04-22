@@ -35,6 +35,8 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -43,10 +45,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pedidos', 
     'django_extensions',
+    
          
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -164,6 +168,10 @@ def create_superuser():
 
 django.setup()
 create_superuser()
+# Permitir peticiones desde tu sitio WordPress
+CORS_ALLOWED_ORIGINS = [
+    "https://yoawebdesigns.cloud",
+]
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
