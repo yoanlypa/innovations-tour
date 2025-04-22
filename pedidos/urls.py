@@ -1,5 +1,7 @@
 from django.urls import path, include 
 from . import views
+from .api import PedidoCreateAPI, PedidoViewSet, TareaViewSet
+from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView,
     PedidoListView, PedidoCreateView,
@@ -15,7 +17,7 @@ urlpatterns = [
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado'),
 
     # Pedidos
-    
+    path('api/pedidos/', PedidoCreateAPI.as_view(), name='api_pedido_create'),
     path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
