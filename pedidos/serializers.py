@@ -4,7 +4,7 @@ from .models import Pedido, Tarea
 class PedidoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pedido
-        fields = '__all__'
+        fields = ['empresa', 'lugar_entrega', 'cantidad', 'guia']
         extra_kwargs = {
             'fecha_inicio': {'required': False},
             'estado': {'required': False},
