@@ -18,7 +18,14 @@ class Pedido(models.Model):
     ]
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField(null=True, blank=True)
+    lugar_entrega = models.CharField(max_length=100)
+    lugar_recogida = models.CharField(max_length=100)
     empresa = models.CharField(max_length=100)
+    cantidad = models.IntegerField()
+    guia = models.CharField(max_length=100)
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
     productos = models.ManyToManyField(Producto)
     estado = models.CharField(max_length=20, choices=ESTADOS,)
     notas = models.TextField(blank=True)
@@ -33,7 +40,6 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.titulo
-
 class StockControl(models.Model):
     pax = models.IntegerField()
     lugar_er = models.CharField(max_length=255)
