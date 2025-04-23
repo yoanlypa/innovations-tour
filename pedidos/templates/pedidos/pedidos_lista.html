@@ -32,8 +32,9 @@
                 {{ pedido.notas|truncatechars:30 }}
               {% else %}
         </tr>
-      {% empty %}
-        <tr>
+                Sin notas
+              {% endif %}
+            </td>
           <td colspan="6">No hay pedidos registrados.</td>
         </tr>
       {% endfor %}
