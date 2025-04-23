@@ -1,32 +1,38 @@
 {% extends 'pedidos/base.html' %}
 
 {% block content %}
-    <h2>Lista de Pedidos</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Fecha</th>
-                <th>Empresa</th>
-                <th>Lugar de Entrega</th>
-                <th>Cantidad de Radios</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for pedido in pedidos %}
-                <tr>
-                    <td>{{ pedido.fecha }}</td>
-                    <td>{{ pedido.empresa }}</td>
-                    <td>{{ pedido.lugar_entrega }}</td>
-                    <td>{{ pedido.cantidad_radios }}</td>
-                    <td>{{ pedido.estado }}</td>
-                    <td>
-                        <a href="{% url 'editar_pedido' pedido.pk %}" class="btn-editar">Editar</a>
-                        <a href="{% url 'pedidos:eliminar_pedido' pedido.id %}">Eliminar</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+  <h2>Lista de Pedidos</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Fecha Inicio</th>
+        <th>Empresa</th>
+        <th>Lugar de Entrega</th>
+        <th>Cantidad de Radios</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pedido in pedidos %}
+        <tr>
+          <!-- Usa el campo correcto, por ejemplo fecha_inicio -->
+          <td>{{ pedido.fecha_inicio }}</td>
+          <td>{{ pedido.empresa }}</td>
+          <td>{{ pedido.lugar_entrega }}</td>
+          <td>{{ pedido.cantidad }}</td>
+          <td>{{ pedido.get_estado_display }}</td>
+          <td>
+            <!-- URLs con namespace y nombre correcto -->
+            <a href="{% url 'pedidos:pedido_editar' pedido.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+            <a href="{% url 'pedidos:pedido_eliminar' pedido.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6">No hay pedidos registrados.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}
