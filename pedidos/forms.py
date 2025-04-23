@@ -15,12 +15,13 @@ class TareaForm(forms.ModelForm):
         fields = ['titulo', 'descripcion', 'prioridad', 'completada']  # ✅ Campos existentes
 
 class PedidoForm(forms.ModelForm):
+
     class Meta:
         model = Pedido
-        fields = ['empresa', 'productos', 'estado', 'notas']
-        widgets = {
-            'productos': forms.CheckboxSelectMultiple,
-        }
+        fields = [
+            'fecha_inicio', 'fecha_fin', 'lugar_entrega', 'lugar_recogida',
+            'empresa', 'cantidad', 'guia', 'usuario', 'productos', 'estado', 'notas'
+        ]
 
 class ProductoForm(forms.ModelForm):
     class Meta:
