@@ -35,8 +35,6 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
-    'rest_framework',
-    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,12 +43,22 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'pedidos', 
     'django_extensions',
+    'rest_framework',
+    'corsheaders',
+    'whitenoise.runserver_nostatic',  # ← Añadido para Whitenoise
+    'whitenoise',  # ← Añadido para Whitenoise
+    'django.contrib.sites',  # ← Añadido para django-allauth
+    'allauth',  # ← Añadido para django-allauth
+    'allauth.account',  # ← Añadido para django-allauth
+    'allauth.socialaccount',  # ← Añadido para django-allauth
+    'allauth.socialaccount.providers.google',  # ← Añadido para django-allauth
+    'allauth.socialaccount.providers.facebook',  # ← Añadido para django-allauth
+    'allauth.socialaccount.providers.github', 
     
          
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -59,6 +67,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',  # ← Requerido para admin
     'django.contrib.messages.middleware.MessageMiddleware',  # ← Requerido para admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',  # ← Añadido para CORS
+    'django.middleware.security.SecurityMiddleware',  # ← Añadido para seguridad
+        
 ]
 
 ROOT_URLCONF = 'control_radioguias.urls'
@@ -138,6 +149,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+CORS_ALLOWED_ORIGINS = [
+    "https://yoawebdesigns.cloud",
+]
 
 
 
@@ -169,9 +183,7 @@ def create_superuser():
 django.setup()
 create_superuser()
 # Permitir peticiones desde tu sitio WordPress
-CORS_ALLOWED_ORIGINS = [
-    "https://yoawebdesigns.cloud",
-]
+
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
