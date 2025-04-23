@@ -22,11 +22,7 @@
           <td>{{ pedido.lugar_entrega }}</td>
           <td>{{ pedido.cantidad }}</td>
           <td>{{ pedido.get_estado_display }}</td>
-          <td>
-            <!-- URLs con namespace y nombre correcto -->
-            <a href="{% url 'pedidos:pedido_editar' pedido.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-            <a href="{% url 'pedidos:pedido_eliminar' pedido.pk %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
-          </td>
+         
         </tr>
       {% empty %}
         <tr>
