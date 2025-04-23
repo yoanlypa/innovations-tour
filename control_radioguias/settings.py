@@ -45,15 +45,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'corsheaders',
-    'whitenoise.runserver_nostatic',  # ← Añadido para Whitenoise
     'whitenoise',  # ← Añadido para Whitenoise
-    'django.contrib.sites',  # ← Añadido para django-allauth
-    'allauth',  # ← Añadido para django-allauth
-    'allauth.account',  # ← Añadido para django-allauth
-    'allauth.socialaccount',  # ← Añadido para django-allauth
-    'allauth.socialaccount.providers.google',  # ← Añadido para django-allauth
-    'allauth.socialaccount.providers.facebook',  # ← Añadido para django-allauth
-    'allauth.socialaccount.providers.github', 
+
     
          
 ]
@@ -67,9 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',  # ← Requerido para admin
     'django.contrib.messages.middleware.MessageMiddleware',  # ← Requerido para admin
     'django.middleware.clickjacking.XFrameOptionsMiddleware', 
-    'corsheaders.middleware.CorsMiddleware',  # ← Añadido para CORS
-    'django.middleware.security.SecurityMiddleware',  # ← Añadido para seguridad
-        
+    'corsheaders.middleware.CorsMiddleware',  # ← Añadido para CORS        
 ]
 
 ROOT_URLCONF = 'control_radioguias.urls'
