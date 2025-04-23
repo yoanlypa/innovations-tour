@@ -23,3 +23,6 @@ class PedidoListCreateAPI(generics.ListCreateAPIView):
     """
     queryset = Pedido.objects.all().order_by('-fecha_creacion')
     serializer_class = PedidoSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)

@@ -17,7 +17,7 @@ class Pedido(models.Model):
         ('entregado', '🔵 Entregado'),
     ]
 
-    fecha_inicio = models.DateField()
+    fecha_inicio = models.DateTimeField(null=False)
     fecha_fin = models.DateField(null=True, blank=True)
     lugar_entrega = models.CharField(max_length=100, blank=True, default='')
     lugar_recogida = models.CharField(max_length=100, blank=True, default='')
