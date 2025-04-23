@@ -17,12 +17,11 @@ class TareaViewSet(viewsets.ModelViewSet):
     serializer_class = TareaSerializer
     
 class PedidoListCreateAPI(generics.ListCreateAPIView):
-    """
-    GET  /api/pedidos/  → devuelve la lista de pedidos
-    POST /api/pedidos/  → crea un nuevo pedido
-    """
     queryset = Pedido.objects.all().order_by('-fecha_creacion')
     serializer_class = PedidoSerializer
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        if self.request.user.is_authenticated:
+            serializer.save(usuario=self.request.user)
+        else:
+            serializer.save()  # Guarda sin usuario
