@@ -31,7 +31,11 @@ class Pedido(models.Model):
     notas = models.TextField(blank=True)
 
     productos = models.ManyToManyField(Producto, blank=True, related_name='pedidos')
-
+class Maleta(models.Model):
+    pedido = models.ForeignKey(Pedido, related_name='maletas', on_delete=models.CASCADE)
+    cantidad_pax = models.IntegerField()
+    guia = models.CharField(max_length=255)
+    
 class Tarea(models.Model):
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()

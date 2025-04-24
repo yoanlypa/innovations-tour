@@ -10,7 +10,7 @@ from django.utils import timezone
 import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics
 from .serializers import PedidoSerializer
 
 # ========== TAREAS ==========
@@ -77,7 +77,10 @@ class PedidoCreateView( CreateView):
     form_class = PedidoForm
     template_name = 'pedidos/pedido_form.html'
     success_url = reverse_lazy('pedidos:pedidos_lista')
-
+    
+class PedidoCreateView(generics.ListCreateAPIView):
+    queryset = Pedido.objects.all()
+    serializer_class = PedidoSerializer
 class PedidoCreateView(APIView):
     def post(self, request):
         serializer = PedidoSerializer(data=request.data)

@@ -17,8 +17,7 @@ urlpatterns = [
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado'),
 
     # Pedidos
-    path('api/pedidos/', PedidoListCreateAPI.as_view(), name='api_pedidos'),
-    path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
+    path('api/pedidos/', PedidoCreateView.as_view(), name='pedido-create'),    path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
     # Productos
