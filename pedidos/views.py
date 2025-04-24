@@ -4,13 +4,15 @@ from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, Sto
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
-
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+
 from .serializers import PedidoSerializer
 
 # ========== TAREAS ==========
@@ -77,17 +79,14 @@ class PedidoCreateView( CreateView):
     form_class = PedidoForm
     template_name = 'pedidos/pedido_form.html'
     success_url = reverse_lazy('pedidos:pedidos_lista')
-    
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all()
     serializer_class = PedidoSerializer
-class PedidoCreateView(APIView):
-    def post(self, request):
-        serializer = PedidoSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'mensaje': 'Pedido recibido correctamente'}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication, BasicAuthentication]
+
+    def perform_create(self, serializer):
+        serializer.save(usuario=self.request.user)
 
 # ========== PRODUCTOS ==========
 class ProductoListView(ListView):

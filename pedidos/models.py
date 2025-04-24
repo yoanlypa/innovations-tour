@@ -24,12 +24,12 @@ class Pedido(models.Model):
     empresa = models.CharField(max_length=100)
     cantidad = models.IntegerField(default=0, help_text="Cantidad de productos a entregar")
     guia = models.CharField(max_length=100, default='Sin asignar')  # 🛠 Valor por defecto para migrar
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)    
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     estado = models.CharField(max_length=20, choices=ESTADOS)
     notas = models.TextField(blank=True)
-
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pedidos')
     productos = models.ManyToManyField(Producto, blank=True, related_name='pedidos')
 class Maleta(models.Model):
     pedido = models.ForeignKey(Pedido, related_name='maletas', on_delete=models.CASCADE)

@@ -4,15 +4,13 @@ class MaletaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Maleta
         fields = ['cantidad_pax', 'guia']
-
 class PedidoSerializer(serializers.ModelSerializer):
-    # Hacemos usuario de solo lectura
-    usuario = serializers.PrimaryKeyRelatedField(read_only=True)
     maletas = MaletaSerializer(many=True)
+    usuario = serializers.HiddenField(default=serializers.CurrentUserDefault())  # ⬅️ Esto lo soluciona
 
     class Meta:
         model = Pedido
-        fields = ['id', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas', 'maletas']
+        fields = ['id', 'usuario', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas', 'maletas']
 
     def create(self, validated_data):
         maletas_data = validated_data.pop('maletas')
