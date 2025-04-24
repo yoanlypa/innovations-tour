@@ -10,7 +10,9 @@ import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 
 from .serializers import PedidoSerializer
@@ -167,3 +169,29 @@ def eliminar_stock(request, pk):
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Método no permitido"})
+
+
+
+class SincronizarUsuarioAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        data = request.data
+        username = data.get('username')
+        email = data.get('email')
+        nombre = data.get('nombre', '')
+
+        if not username or not email:
+            return Response({'error': 'Faltan datos requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user, created = User.objects.get_or_create(username=username, defaults={
+            'email': email,
+            'first_name': nombre
+        })
+
+        if not created:
+            user.email = email
+            user.first_name = nombre
+            user.save()
+
+        return Response({'mensaje': 'Usuario sincronizado correctamente'}, status=status.HTTP_200_OK)

@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView,
     PedidoListView, PedidoCreateView,
-    ProductoListView, ProductoUpdateView,stock_control_view, agregar_stock,
+    ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
 urlpatterns = [
@@ -27,6 +27,8 @@ urlpatterns = [
     # Calendario
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
+    #Usuario
+     path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
     path('stock/', views.stock_control_view, name='stock_control'),
     path('stock/agregar/', agregar_stock, name='agregar_stock'),
