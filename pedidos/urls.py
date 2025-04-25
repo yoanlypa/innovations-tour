@@ -4,7 +4,7 @@ from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, 
-    PedidoListView, PedidoCreateView,
+    PedidoListView, PedidoCreateView,RegistroAPIView,
     ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
