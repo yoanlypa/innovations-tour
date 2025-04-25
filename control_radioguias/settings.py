@@ -33,13 +33,6 @@ DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
-}
-
-
 
 # Application definition
 
@@ -54,8 +47,8 @@ INSTALLED_APPS = [
     'django_extensions',
     'rest_framework',
     'rest_framework.authtoken',
-
-    
+    'corsheaders',  # ← Añadido para CORS
+       
          
 ]
 
@@ -164,7 +157,23 @@ CORS_ALLOWED_ORIGINS = [
     "https://yoawebdesigns.cloud",
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
+
+# Configuración de django-allauth
+SITE_ID = 1  # ID del sitio para django-allauth
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_LOGOUT_REDIRECT_URL = '/admin/login/' 
 
 if not DEBUG:
     LOGGING = {
