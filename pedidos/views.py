@@ -10,7 +10,7 @@ import json
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework import status, generics
+from rest_framework import status, generics, serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
@@ -73,9 +73,8 @@ class TareaDeleteView( DeleteView):
     model = Tarea
     success_url = reverse_lazy('pedidos:tareas')
 
-# ========== PEDIDOS ==========
 
-
+# ========== LOGIN Y REGISTRO==========
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -87,10 +86,35 @@ class LoginAPIView(APIView):
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
         return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+
+class RegistroSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'password', 'email')
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+
+class RegistroAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegistroSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# ========== PEDIDOS ==========
 class PedidoListView( ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
     context_object_name = 'pedidos'
+
+
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all()
     serializer_class = PedidoSerializer
@@ -99,7 +123,6 @@ class PedidoCreateView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
-
 
 # ========== PRODUCTOS ==========
 class ProductoListView(ListView):
