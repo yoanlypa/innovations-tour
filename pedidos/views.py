@@ -8,12 +8,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 import json
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status, generics
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 from .serializers import PedidoSerializer
 
@@ -72,23 +74,32 @@ class TareaDeleteView( DeleteView):
     success_url = reverse_lazy('pedidos:tareas')
 
 # ========== PEDIDOS ==========
+
+
+class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 class PedidoListView( ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
     context_object_name = 'pedidos'
-class PedidoCreateView( CreateView):
-    model = Pedido
-    form_class = PedidoForm
-    template_name = 'pedidos/pedido_form.html'
-    success_url = reverse_lazy('pedidos:pedidos_lista')
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all()
     serializer_class = PedidoSerializer
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-    authentication_classes = [SessionAuthentication, BasicAuthentication]
 
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
+
 
 # ========== PRODUCTOS ==========
 class ProductoListView(ListView):
