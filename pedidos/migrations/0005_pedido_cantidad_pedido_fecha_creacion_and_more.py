@@ -5,6 +5,14 @@ import django.utils.timezone
 from django.conf import settings
 from django.db import migrations, models
 
+def set_default_user(apps, schema_editor):
+    Pedido = apps.get_model('pedidos', 'Pedido')
+    User = apps.get_model(settings.AUTH_USER_MODEL.split('.')[0], settings.AUTH_USER_MODEL.split('.')[1])
+    default_user = User.objects.first()  # o filtra uno específico si sabes cuál
+    for pedido in Pedido.objects.all():
+        pedido.usuario = default_user
+        pedido.save()
+
 
 class Migration(migrations.Migration):
 
@@ -45,10 +53,11 @@ class Migration(migrations.Migration):
             name='lugar_recogida',
             field=models.CharField(blank=True, default='', max_length=100),
         ),
-        migrations.AddField(
+        migrations.RunPython(set_default_user),
+        migrations.AlterField(
             model_name='pedido',
             name='usuario',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
         ),
         migrations.AlterField(
             model_name='pedido',
