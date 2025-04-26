@@ -75,38 +75,28 @@ class TareaDeleteView( DeleteView):
 
 
 # ========== LOGIN Y REGISTRO==========
+class RegistroAPIView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+        if not username or not email or not password:
+            return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
+        user = User.objects.create_user(username=username, email=email, password=password)
+        token = Token.objects.create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
-
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
         if user:
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
-        return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
-
-class RegistroSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'password', 'email')
-        extra_kwargs = {'password': {'write_only': True}}
-
-    def create(self, validated_data):
-        user = User.objects.create_user(**validated_data)
-        return user
-
-class RegistroAPIView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        serializer = RegistroSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
             token, _ = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):
@@ -120,7 +110,6 @@ class PedidoCreateView(generics.ListCreateAPIView):
     serializer_class = PedidoSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
     def perform_create(self, serializer):
         serializer.save(usuario=self.request.user)
 
