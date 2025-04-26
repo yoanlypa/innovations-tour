@@ -106,7 +106,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('pedidos:login_view')nse({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+    return redirect('pedidos:login_view')
 
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):

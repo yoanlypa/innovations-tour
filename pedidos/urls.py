@@ -1,6 +1,6 @@
 from django.urls import path, include 
 from . import views
-from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet
+from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet, RegistroAPIView
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, 
@@ -18,8 +18,9 @@ urlpatterns = [
 
     # Pedidos
     path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
+    path('api/registro/', RegistroAPIView.as_view(), name='api_registro'),
     path('api/login/', LoginAPIView.as_view(), name='api_login'),
-    path('api/pedidos/', PedidoCreateView.as_view(), name='pedido-create'),    path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
+    path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
     # Productos
@@ -28,6 +29,11 @@ urlpatterns = [
     
     # Calendario
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
+    
+    # Login y registro
+    path('registro/', views.registro_view, name='registro_view'),
+    path('login/', views.login_view, name='login_view'),
+    path('logout/', views.logout_view, name='logout_view'),
     
     #Usuario
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
