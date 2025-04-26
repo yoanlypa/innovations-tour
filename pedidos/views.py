@@ -6,8 +6,9 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import send_mail
 from django.utils import timezone
-from .models import Tarea, Pedido, Producto, StockControl
+from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente
 from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -84,21 +85,31 @@ class RegistroAPIView(APIView):
         username = request.data.get('username')
         email = request.data.get('email')
         password = request.data.get('password')
+        empresa = request.data.get('empresa', '')
+        telefono = request.data.get('telefono', '')
 
-        if not username or not email or not password:
+        if not username or not email or not password or not empresa:
             return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if User.objects.filter(username=username).exists():
-            return Response({'detail': 'El nombre de usuario ya existe'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        if User.objects.filter(email=email).exists():
-            return Response({'detail': 'El email ya está registrado'}, status=status.HTTP_400_BAD_REQUEST)
-
         user = User.objects.create_user(username=username, email=email, password=password)
-        token, _ = Token.objects.get_or_create(user=user)
 
-        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+        # Crear el RegistroCliente
+        RegistroCliente.objects.create(user=user, empresa=empresa)
 
+        # Enviar correo a pyoanly@gmail.com
+        send_mail(
+            subject="🎉 Nuevo registro en Innovations Tours",
+            message=f"Nuevo usuario registrado:\n\nNombre: {username}\nEmpresa: {empresa}\Email: {email}\telefono: {telefono}",
+            from_email='info@yoawebdesigns.cloud',
+            recipient_list=['pyoanly@gmail.com'],
+            fail_silently=False,
+        )
+
+        token = Token.objects.create(user=user)
+        return Response({
+            'token': token.key,
+            'message': '✅ Registro exitoso. Ahora puedes iniciar sesión.'
+        }, status=status.HTTP_201_CREATED)
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 

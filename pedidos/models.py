@@ -57,3 +57,14 @@ class StockControl(models.Model):
 
     def __str__(self):
         return f"{self.pax} - {self.excursion}"
+    
+
+class RegistroCliente(models.Model):
+    nombre_usuario = models.CharField(max_length=150)
+    email = models.EmailField()
+    empresa = models.CharField(max_length=255, blank=True, null=True)
+    telefono = models.CharField(max_length=50, blank=True, null=True)
+    fecha_registro = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre_usuario} -  {self.empresa}"

@@ -164,6 +164,14 @@ REST_FRAMEWORK = {
 }
 
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = 'info@yoawebdesigns.cloud'
+EMAIL_HOST_PASSWORD = 'Infoyoawebsdesign00**'
+DEFAULT_FROM_EMAIL = 'Innovations Tours <info@yoawebdesigns.cloud>'
+
 # Configuración de django-allauth
 SITE_ID = 1  # ID del sitio para django-allauth
 ACCOUNT_EMAIL_VERIFICATION = "none"
