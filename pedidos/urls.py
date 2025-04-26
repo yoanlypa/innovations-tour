@@ -1,6 +1,6 @@
 from django.urls import path, include 
 from . import views
-from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet, RegistroAPIView
+from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, RegistroAPIView,
