@@ -18,8 +18,6 @@ urlpatterns = [
 
     # Pedidos
     path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
-    path('api/registro/', RegistroAPIView.as_view(), name='api_registro'),
-    path('api/login/', LoginAPIView.as_view(), name='api_login'),
     path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
