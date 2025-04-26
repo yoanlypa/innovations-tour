@@ -1,23 +1,22 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
-from .models import Tarea, Pedido, Producto, StockControl
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-import json
+from .models import Tarea, Pedido, Producto, StockControl
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import status, generics, serializers
-from django.contrib import messages
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.decorators import login_required
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
+from rest_framework.authtoken.models import Token
+
 
 from .serializers import PedidoSerializer
 
@@ -78,36 +77,44 @@ class TareaDeleteView( DeleteView):
 
 # ========== LOGIN Y REGISTRO==========
 
-@csrf_protect
-def registro_view(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)  # Lo loguea automáticamente
-            return redirect('pedidos:pedido_nuevo')  # Redirige a nuevo pedido
-    else:
-        form = UserCreationForm()
-    return render(request, 'pedidos/registro.html', {'form': form})
+class RegistroAPIView(APIView):
+    permission_classes = [AllowAny]
 
-@csrf_protect
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('pedidos:pedido_nuevo')
+    def post(self, request):
+        username = request.data.get('username')
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        if not username or not email or not password:
+            return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if User.objects.filter(username=username).exists():
+            return Response({'detail': 'El nombre de usuario ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if User.objects.filter(email=email).exists():
+            return Response({'detail': 'El email ya está registrado'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = User.objects.create_user(username=username, email=email, password=password)
+        token, _ = Token.objects.get_or_create(user=user)
+
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+
+class LoginAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if not username or not password:
+            return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = authenticate(username=username, password=password)
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
         else:
-            messages.error(request, "Usuario o contraseña incorrectos.")
-    else:
-        form = AuthenticationForm()
-    return render(request, 'pedidos/login.html', {'form': form})
-
-def logout_view(request):
-    logout(request)
-    return redirect('pedidos:login_view')
-
+            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):
     model = Pedido

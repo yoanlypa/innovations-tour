@@ -3,9 +3,8 @@ from . import views
 from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet, RegistroAPIView
 from rest_framework.routers import DefaultRouter
 from .views import (
-    TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, 
-    PedidoListView, PedidoCreateView,
-    ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
+    TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, RegistroAPIView,
+    PedidoListView, PedidoCreateView,ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
 urlpatterns = [
@@ -29,8 +28,8 @@ urlpatterns = [
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
     # Login y registro
-    path('registro/', views.registro_view, name='registro_view'),
-    path('login/', views.login_view, name='login_view'),
+    path('api/registro/', RegistroAPIView.as_view(), name='api_registro'),
+    path('api/login/', LoginAPIView.as_view(), name='api_login'),
     path('logout/', views.logout_view, name='logout_view'),
     
     #Usuario
