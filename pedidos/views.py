@@ -1,6 +1,6 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
@@ -115,6 +115,11 @@ class LoginAPIView(APIView):
             return Response({'token': token.key})
         else:
             return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
+        
+def logout_view(request):
+    logout(request)  
+    return redirect('pedidos:tareas')
+        
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):
     model = Pedido
