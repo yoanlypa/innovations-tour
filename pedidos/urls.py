@@ -4,7 +4,7 @@ from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, 
-    PedidoListView, PedidoCreateView,RegistroAPIView,
+    PedidoListView, PedidoCreateView,
     ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
@@ -17,9 +17,9 @@ urlpatterns = [
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado'),
 
     # Pedidos
+    path('pedidos/', PedidoListCreateAPI.as_view(), name='api_pedidos'),
     path('api/login/', LoginAPIView.as_view(), name='api_login'),
-    path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),   
-    path('api/registro/', RegistroAPIView.as_view(), name='api_registro'),
+    path('api/pedidos/', PedidoCreateView.as_view(), name='pedido-create'),    path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
     # Productos
