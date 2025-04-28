@@ -1,6 +1,11 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.conf import settings
+from rest_framework.views import APIView
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
@@ -130,6 +135,51 @@ class LoginAPIView(APIView):
 def logout_view(request):
     logout(request)  
     return redirect('pedidos:tareas')
+
+class PasswordResetRequestAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({'detail':'Email requerido'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # No decimos si existe o no, por seguridad
+            return Response({'detail':'Si el email existe, recibirás un enlace'}, status=status.HTTP_200_OK)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_link = f"{settings.FRONTEND_URL}/new-password/?uid={uid}&token={token}"
+        subject = "🔑 Restablece tu contraseña"
+        message = (
+            f"Hola {user.username},\n\n"
+            "Solicitaste restablecer tu contraseña. "
+            f"Pulsa este enlace para crear una nueva:\n\n{reset_link}\n\n"
+            "Si no lo solicitaste, ignora este correo."
+        )
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
+        return Response({'detail':'En breve recibirás un email con instrucciones'}, status=status.HTTP_200_OK)
+
+class PasswordResetConfirmAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        uidb64 = request.data.get('uid')
+        token  = request.data.get('token')
+        new_password = request.data.get('new_password')
+        if not uidb64 or not token or not new_password:
+            return Response({'detail':'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except Exception:
+            return Response({'detail':'Enlace inválido'}, status=status.HTTP_400_BAD_REQUEST)
+        if not default_token_generator.check_token(user, token):
+            return Response({'detail':'Token inválido o caducado'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'detail':'Contraseña restablecida correctamente'}, status=status.HTTP_200_OK)
         
 # ========== PEDIDOS ==========
 class PedidoListView( ListView):

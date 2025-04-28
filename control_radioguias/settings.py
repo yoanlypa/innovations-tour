@@ -171,6 +171,8 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = 'info@yoawebdesigns.cloud'
 EMAIL_HOST_PASSWORD = 'Infoyoawebsdesign00**'
 DEFAULT_FROM_EMAIL = 'Innovations Tours <info@yoawebdesigns.cloud>'
+FRONTEND_URL = 'https://yoawebdesigns.cloud'
+
 
 # Configuración de django-allauth
 SITE_ID = 1  # ID del sitio para django-allauth

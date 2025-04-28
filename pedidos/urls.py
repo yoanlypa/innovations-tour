@@ -1,10 +1,9 @@
 from django.urls import path, include 
 from . import views
-from .api import PedidoListCreateAPI, PedidoViewSet, TareaViewSet
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, RegistroAPIView,
-    PedidoListView, PedidoCreateView,ProductoListView, ProductoUpdateView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
+    PedidoListView, PedidoCreateView,ProductoListView, ProductoUpdateView,PasswordResetConfirmAPIView, PasswordResetRequestAPIView, SincronizarUsuarioAPIView, stock_control_view, agregar_stock,
 )
 app_name = 'pedidos'
 urlpatterns = [
@@ -28,9 +27,11 @@ urlpatterns = [
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
     # Login y registro
-    path('api/registro/', RegistroAPIView.as_view(), name='api_registro'),
-    path('api/login/', LoginAPIView.as_view(), name='api_login'),
-    path('logout/', views.logout_view, name='logout_view'),
+      path('api/login/',    LoginAPIView.as_view(),               name='api_login'),
+    path('api/registro/', RegistroAPIView.as_view(),            name='api_registro'),
+    path('api/password-reset/',        PasswordResetRequestAPIView.as_view(), name='api_password_reset'),
+    path('api/password-reset-confirm/',PasswordResetConfirmAPIView.as_view(), name='api_password_reset_confirm'),
+    path('api/logout/', views.logout_view, name='logout_view'),
     
     #Usuario
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
