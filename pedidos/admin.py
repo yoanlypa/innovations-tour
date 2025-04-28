@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Tarea, StockControl
+from .models import Tarea, StockControl, Maleta, Pedido
 from django.utils.html import format_html
 
 
@@ -17,3 +17,15 @@ class StockControlAdmin(admin.ModelAdmin):
     list_filter = ('fecha_er', 'entregado', 'recogido')
     search_fields = ('excursion', 'guia')
     ordering = ('fecha_er',)
+    
+    
+    
+class MaletaInline(admin.TabularInline):
+    model = Maleta
+    extra = 0
+
+@admin.register(Pedido)
+class PedidoAdmin(admin.ModelAdmin):
+    list_display = ('id','usuario','empresa','fecha_inicio','estado')
+    list_filter = ('estado',)
+    inlines = [MaletaInline]

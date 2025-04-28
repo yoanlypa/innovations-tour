@@ -227,19 +227,45 @@ class PasswordResetConfirmAPIView(APIView):
         return Response({'detail':'Contraseña restablecida correctamente'}, status=status.HTTP_200_OK)
         
 # ========== PEDIDOS ==========
-class PedidoListView( ListView):
+class PedidoListView(ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
     context_object_name = 'pedidos'
 
+    def get_queryset(self):
+        return Pedido.objects.filter(usuario=self.request.user).order_by('-fecha_inicio')
+
 
 class PedidoCreateView(generics.ListCreateAPIView):
-    queryset = Pedido.objects.all()
+    queryset = Pedido.objects.all().order_by('-fecha_inicio')
     serializer_class = PedidoSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        # 1) Guardamos en BD
+        pedido = serializer.save(usuario=self.request.user)
+
+        # 2) (Opcional) Enviar correo con datos del pedido
+        details = [
+            f"Empresa: {pedido.empresa}",
+            f"Lugar entrega: {pedido.lugar_entrega}",
+            f"Lugar recogida: {pedido.lugar_recogida or 'N/A'}",
+            f"Fecha inicio: {pedido.fecha_inicio}",
+            f"Fecha fin: {pedido.fecha_fin or 'N/A'}",
+            f"Notas: {pedido.notas or 'Ninguna'}",
+            "Maletas:"
+        ]
+        for m in pedido.maletas.all():
+            details.append(f"  - Pax: {m.cantidad_pax}, Guía: {m.guia}")
+
+        send_mail(
+            subject=f"Nuevo pedido #{pedido.id}",
+            message="\n".join(details),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['pyoanly@gmail.com'],
+            fail_silently=True,
+        )
 
 # ========== PRODUCTOS ==========
 class ProductoListView(ListView):
