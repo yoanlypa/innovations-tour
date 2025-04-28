@@ -8,6 +8,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 from rest_framework.views import APIView
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
@@ -227,14 +228,29 @@ class PasswordResetConfirmAPIView(APIView):
         return Response({'detail':'Contraseña restablecida correctamente'}, status=status.HTTP_200_OK)
         
 # ========== PEDIDOS ==========
-class PedidoListView(ListView):
+class PedidoListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
     context_object_name = 'pedidos'
+    login_url = '/login/'  # o tu página de login
 
+    # Solo permitimos staff o superuser
+    def test_func(self):
+        return self.request.user.is_staff or self.request.user.is_superuser
+
+    # Si no pasa test_func, redirige aquí o lanza 403
+    def handle_no_permission(self):
+        if not self.request.user.is_authenticated:
+            return super().handle_no_permission()
+        # Para usuarios autenticados pero sin permiso, mostramos 403
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No tienes permiso para ver esta página.")
+
+    # Filtrado de queryset
     def get_queryset(self):
-        return Pedido.objects.filter(usuario=self.request.user).order_by('-fecha_inicio')
-
+        qs = Pedido.objects.all().order_by('-fecha_inicio')
+        # Como solo entran staff o super, devolvemos todos
+        return qs
 
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all().order_by('-fecha_inicio')

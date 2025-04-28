@@ -2,8 +2,10 @@
 
 {% block content %}
   <h2 class="mb-4">Lista de Pedidos</h2>
-
-  {% if pedidos %}
+  {% if not user.is_staff %}
+  <p><strong>AVISO:</strong> No tienes permiso para ver esta página.</p>
+  {% else %}
+  
     <div class="table-responsive">
       <table class="table table-striped">
         <thead>
@@ -20,17 +22,17 @@
           </tr>
         </thead>
         <tbody>
-          {% for pedido in pedidos %}
+          {% for p in pedidos %}
             <tr>
-              <td>{{ pedido.fecha_inicio }}</td>
+              <td>{{ p.fecha_inicio }}</td>
               <td>{% if pedido.fecha_fin %}{{ pedido.fecha_fin }}{% else %}—{% endif %}</td>
-              <td>{{ pedido.empresa }}</td>
-              <td>{{ pedido.lugar_entrega }}</td>
-              <td>{{ pedido.lugar_recogida }}</td>
-              <td>{{ pedido.cantidad }}</td>
-              <td>{{ pedido.guia }}</td>
-              <td>{{ pedido.get_estado_display }}</td>
-              <td>{% if pedido.notas %}{{ pedido.notas|truncatechars:30 }}{% else %}—{% endif %}</td>
+              <td>{{ p.empresa }}</td>
+              <td>{{ p.lugar_entrega }}</td>
+              <td>{{ p.lugar_recogida }}</td>
+              <td>{{ p.cantidad }}</td>
+              <td>{{ p.guia }}</td>
+              <td>{{ p.get_estado_display }}</td>
+              <td>{% if p.notas %}{{ p.notas|truncatechars:30 }}{% else %}—{% endif %}</td>
             </tr>
           {% endfor %}
         </tbody>
