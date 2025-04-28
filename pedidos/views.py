@@ -1,8 +1,9 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, logout
+from django.contrib.auth import authenticate, logout, get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.db import IntegrityError
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 from rest_framework.views import APIView
@@ -83,38 +84,82 @@ class TareaDeleteView( DeleteView):
 
 # ========== LOGIN Y REGISTRO==========
 
+User = get_user_model()
+
 class RegistroAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
-        empresa = request.data.get('empresa', '')
-        telefono = request.data.get('telefono', '')
+        username = request.data.get('username', '').strip()
+        email    = request.data.get('email', '').strip()
+        password = request.data.get('password', '')
+        empresa  = request.data.get('empresa', '').strip()
+        telefono = request.data.get('telefono', '').strip()
 
-        if not username or not email or not password or not empresa:
-            return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
+        # 1) Campos obligatorios
+        if not username or not email or not password:
+            return Response(
+                {'detail': 'username, email y password son requeridos.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        user = User.objects.create_user(username=username, email=email, password=password)
+        # 2) Validar longitud de contraseña
+        if len(password) < 8:
+            return Response(
+                {'detail': 'La contraseña debe tener al menos 8 caracteres.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Crear el RegistroCliente
-        RegistroCliente.objects.create(user=user, empresa=empresa)
+        # 3) Validar unicidad manual
+        if User.objects.filter(username=username).exists():
+            return Response(
+                {'detail': 'El nombre de usuario ya existe.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'detail': 'El email ya está registrado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-        # Enviar correo a pyoanly@gmail.com
-        send_mail(
-            subject="🎉 Nuevo registro en Innovations Tours",
-            message=f"Nuevo usuario registrado:\n\nNombre: {username}\nEmpresa: {empresa}\Email: {email}\telefono: {telefono}",
-            from_email='info@yoawebdesigns.cloud',
-            recipient_list=['pyoanly@gmail.com'],
-            fail_silently=False,
+        # 4) Intentar crear usuario y atrapar cualquier duplicado residual
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password)
+        except IntegrityError:
+            return Response(
+                {'detail':'No se pudo crear el usuario. Username o email duplicado.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 5) Guardar en tu modelo RegistroCliente
+        RegistroCliente.objects.create(
+            nombre_usuario=username,
+            email=email,
+            empresa=empresa,
+            telefono=telefono
         )
 
+        # 6) Generar token
         token = Token.objects.create(user=user)
-        return Response({
-            'token': token.key,
-            'message': '✅ Registro exitoso. Ahora puedes iniciar sesión.'
-        }, status=status.HTTP_201_CREATED)
+
+        # 7) Enviar correo de notificación al admin
+        send_mail(
+            subject="🎉 Nuevo registro en Innovations Tours",
+            message=(
+                f"Nuevo usuario registrado:\n\n"
+                f"Nombre: {username}\n"
+                f"Email: {email}\n"
+                f"Empresa: {empresa}\n"
+                f"Teléfono: {telefono}\n"
+                f"Fecha: {user.date_joined.strftime('%Y-%m-%d %H:%M')}"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['pyoanly@gmail.com'],
+            fail_silently=True,
+        )
+
+        # 8) Responder con token
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 
