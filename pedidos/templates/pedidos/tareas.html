@@ -101,7 +101,7 @@
     async function cambiarEstado(btn) {
       const tareaId = btn.getAttribute('data-tarea-id');
       try {
-        const res = await fetch(`/pedidos/tareas/cambiar-estado/${tareaId}/`, {
+        const res = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
           method: 'POST',
           credentials: 'same-origin',             // envía la cookie de sesión
           headers: {
