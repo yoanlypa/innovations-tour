@@ -16,7 +16,7 @@ urlpatterns = [
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
     path('api/tareas/cambiar-estado/<int:id>/', cambiar_estado_tarea, name='cambiar_estado_tarea'),
     # Pedidos
-    path('pedidos/', PedidoListView().as_view, name='pedidos_lista'),
+    path('pedidos/', PedidoListView.as_view(),  name='pedidos_lista'),
     path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
