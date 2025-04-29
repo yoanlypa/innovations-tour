@@ -7,6 +7,8 @@ from django.db import IntegrityError
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 from rest_framework.views import APIView
+from rest_framework.decorators import permission_classes,api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -30,12 +32,13 @@ from .serializers import PedidoSerializer
 
 # ========== TAREAS ==========
 
-def cambiar_estado_tarea(request, tarea_id):
-    tarea = get_object_or_404(Tarea, id=tarea_id)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def cambiar_estado_tarea(request, id):
+    tarea = get_object_or_404(Tarea, id=id)
     tarea.completada = not tarea.completada
     tarea.save()
-    return JsonResponse({'completada': tarea.completada})
-
+    return Response({'success': True, 'realizada': tarea.completada})
 class TareaListView(ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'

@@ -81,24 +81,37 @@
 
     
 
-
-<!-- Script JS para que cambie de estado la tarea -->
 <script>
-async function cambiarEstado(boton) {
-    const tareaId = boton.dataset.tareaId;
-    try {
-        const response = await fetch(`/pedidos/tareas/cambiar-estado/${tareaId}/`);
-        if (response.ok) {
-            const esRealizada = boton.textContent.includes('Realizada');
-            boton.textContent = esRealizada ? '⏳ Pendiente' : '✅ Realizada';
-            boton.classList.toggle('btn-success');
-            boton.classList.toggle('btn-warning');
+    async function cambiarEstado(button) {
+        const tareaId = button.getAttribute('data-tarea-id');
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            alert("⚠️ Debes iniciar sesión para cambiar el estado.");
+            return;
         }
-    } catch (error) {
-        console.error('Error:', error);
+
+        try {
+            const res = await fetch(`/api/tareas/cambiar-estado/${tareaId}/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Token ${token}`,
+                }
+            });
+
+            if (!res.ok) throw new Error('Error al cambiar el estado');
+            const data = await res.json();
+
+            // Actualizar botón según nuevo estado
+            button.classList.toggle('btn-success', data.realizada);
+            button.classList.toggle('btn-warning', !data.realizada);
+            button.innerHTML = data.realizada ? '✅ Realizada' : '⏳ Pendiente';
+
+        } catch (error) {
+            alert(`❌ No se pudo cambiar el estado: ${error.message}`);
+        }
     }
-}
-     // Script JS para agregar la tarea nueva -->
+</script>
+JS para agregar la tarea nueva -->
 document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
