@@ -21,9 +21,9 @@
                 <div class="ml-auto">
                     {% if user.is_authenticated %}
                       <span class="nav-link">Hola, {{ user.username }}</span>
-                      <a href="{% url 'logout' %}" class="btn btn-secondary">Cerrar sesión</a>
+                      <a href="{% url 'pedidos:logout' %}" class="btn btn-secondary">Cerrar sesión</a>
                     {% else %}
-                      <a href="{% url 'login' %}" class="btn btn-primary">Iniciar sesión</a>
+                      <a href="{% url 'pedidos:login' %}" class="btn btn-primary">Iniciar sesión</a>
                     {% endif %}
 
             </div>
