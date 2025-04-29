@@ -1,6 +1,7 @@
 {% extends 'pedidos/base.html' %}
 
 {% block content %}
+<form id="csrf-form">{% csrf_token %}</form>
 
         <button 
             type="button" 
