@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout, get_user_model
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.db import IntegrityError
@@ -10,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
@@ -401,3 +403,14 @@ class SincronizarUsuarioAPIView(APIView):
             user.save()
 
         return Response({'mensaje': 'Usuario sincronizado correctamente'}, status=status.HTTP_200_OK)
+# ========== login y registro django ==========
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Cuenta creada correctamente. Ya puedes iniciar sesión.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'pedidos/register.html', {'form': form})
