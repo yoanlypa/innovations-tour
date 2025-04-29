@@ -81,20 +81,14 @@
 
     
 <script>
-    function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-        document.cookie.split(';').forEach(cookie => {
-          const [key, val] = cookie.trim().split('=');
-          if (key === name) cookieValue = decodeURIComponent(val);
-        });
-      }
-      return cookieValue;
+    function getCSRFToken() {
+      const el = document.querySelector('meta[name="csrf-token"]');
+      return el ? el.getAttribute('content') : '';
     }
     
     async function cambiarEstado(btn) {
       const tareaId = btn.dataset.tareaId;
-      const csrftoken = getCookie('csrftoken');
+      const csrftoken = getCSRFToken();
     
       try {
         const res = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
@@ -102,8 +96,8 @@
           credentials: 'same-origin',
           headers: {
             'X-CSRFToken': csrftoken,
-            'Accept': 'application/json'
-          }
+            'Accept': 'application/json',
+          },
         });
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
@@ -116,12 +110,12 @@
     }
     
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
-        btn.addEventListener('click', () => cambiarEstado(btn));
-      });
+      document.querySelectorAll('button[data-tarea-id]').forEach(btn =>
+        btn.addEventListener('click', () => cambiarEstado(btn))
+      );
     });
     </script>
-
+    
 <script> 
     document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
     e.preventDefault();
