@@ -1,5 +1,7 @@
 from django.urls import path, include 
 from . import views
+
+from django.contrib.auth import views as auth_views
 from rest_framework.routers import DefaultRouter
 from .views import (
     TareaListView, TareaCreateView, TareaUpdateView, TareaDeleteView, LoginAPIView, RegistroAPIView,
@@ -25,12 +27,21 @@ urlpatterns = [
     # Calendario
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
-    # Login y registro
+    # Login y registro de la API en WordPress
       path('api/login/',    LoginAPIView.as_view(),               name='api_login'),
     path('api/registro/', RegistroAPIView.as_view(),            name='api_registro'),
     path('api/password-reset/',        PasswordResetRequestAPIView.as_view(), name='api_password_reset'),
     path('api/password-reset-confirm/',PasswordResetConfirmAPIView.as_view(), name='api_password_reset_confirm'),
     path('api/logout/', views.logout_view, name='logout_view'),
+    
+    # Login y registro de la API en WordPress
+    path('login/', auth_views.LoginView.as_view(template_name='pedidos/login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('register/', pedidos_views.register, name='register'),
+    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
+    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='pedidos/password_reset_done.html'), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='pedidos/password_reset_confirm.html'), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='pedidos/password_reset_complete.html'), name='password_reset_complete'),
     
     #Usuario
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
