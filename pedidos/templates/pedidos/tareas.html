@@ -82,37 +82,53 @@
     
 
 <script>
-    async function cambiarEstado(button) {
-        const tareaId = button.getAttribute('data-tarea-id');
-        const token = localStorage.getItem('auth_token');
-        if (!token) {
-            alert("⚠️ Debes iniciar sesión para cambiar el estado.");
-            return;
-        }
-
-        try {
-            const res = await fetch(`/api/tareas/cambiar-estado/${tareaId}/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Token ${token}`,
-                }
-            });
-
-            if (!res.ok) throw new Error('Error al cambiar el estado');
-            const data = await res.json();
-
-            // Actualizar botón según nuevo estado
-            button.classList.toggle('btn-success', data.realizada);
-            button.classList.toggle('btn-warning', !data.realizada);
-            button.innerHTML = data.realizada ? '✅ Realizada' : '⏳ Pendiente';
-
-        } catch (error) {
-            alert(`❌ No se pudo cambiar el estado: ${error.message}`);
-        }
+    // 1) Función para leer la cookie CSRF
+    function getCookie(name) {
+      let value = null;
+      if (document.cookie && document.cookie !== '') {
+        document.cookie.split(';').forEach(cookie => {
+          cookie = cookie.trim();
+          if (cookie.startsWith(name + '=')) {
+            value = decodeURIComponent(cookie.substring(name.length + 1));
+          }
+        });
+      }
+      return value;
     }
-</script>
-JS para agregar la tarea nueva -->
-document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
+    const csrftoken = getCookie('csrftoken');
+    
+    // 2) Función cambiarEstado que usa session auth
+    async function cambiarEstado(btn) {
+      const tareaId = btn.getAttribute('data-tarea-id');
+      try {
+        const res = await fetch(`/pedidos/tareas/cambiar-estado/${tareaId}/`, {
+          method: 'POST',
+          credentials: 'same-origin',             // envía la cookie de sesión
+          headers: {
+            'X-CSRFToken': csrftoken              // token CSRF
+          }
+        });
+        if (!res.ok) throw new Error('Error al cambiar estado');
+        const data = await res.json();
+        // Actualiza UI
+        btn.classList.toggle('btn-success', data.realizada);
+        btn.classList.toggle('btn-warning', !data.realizada);
+        btn.textContent = data.realizada ? '✅ Realizada' : '⏳ Pendiente';
+      } catch (err) {
+        alert('❌ ' + err.message);
+      }
+    }
+    
+    // 3) Attacha el handler automáticamente
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
+        btn.addEventListener('click', () => cambiarEstado(btn));
+      });
+    });
+    </script>
+    
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script> document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     

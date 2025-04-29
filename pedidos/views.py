@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -45,14 +46,13 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def cambiar_estado_tarea(request, id):
-    tarea = get_object_or_404(Tarea, id=id)
+@login_required
+@require_POST
+def cambiar_estado_tarea(request, tarea_id):
+    tarea = get_object_or_404(Tarea, id=tarea_id)
     tarea.completada = not tarea.completada
     tarea.save()
-    return Response({'success': True, 'realizada': tarea.completada})
-
+    return JsonResponse({'realizada': tarea.completada})
 class TareaListView(StaffRequiredMixin,ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'
