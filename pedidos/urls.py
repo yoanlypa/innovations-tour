@@ -37,7 +37,7 @@ urlpatterns = [
     # Login y registro de la API en WordPress
     path('login/', auth_views.LoginView.as_view(template_name='pedidos/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
-    path('register/', views.register_view, name='register'),
+    path('register/', views.register, name='register'),
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='pedidos/password_reset_done.html'), name='password_reset_done'),
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='pedidos/password_reset_confirm.html'), name='password_reset_confirm'),
