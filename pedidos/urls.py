@@ -28,7 +28,7 @@ urlpatterns = [
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
     # Login y registro de la API en WordPress
-      path('api/login/',    LoginAPIView.as_view(),               name='api_login'),
+    path('api/login/',    LoginAPIView.as_view(),               name='api_login'),
     path('api/registro/', RegistroAPIView.as_view(),            name='api_registro'),
     path('api/password-reset/',        PasswordResetRequestAPIView.as_view(), name='api_password_reset'),
     path('api/password-reset-confirm/',PasswordResetConfirmAPIView.as_view(), name='api_password_reset_confirm'),
