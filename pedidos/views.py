@@ -11,7 +11,9 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -54,11 +56,14 @@ def cambiar_estado_tarea(request, tarea_id):
     tarea.save()
     return JsonResponse({'realizada': tarea.completada})
 
-class TareaListView(StaffRequiredMixin,ListView):
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class TareaListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'
     context_object_name = 'tareas'
-
+    
+    def test_func(self):
+        return self.request.user.is_staff
     def get_queryset(self):
         try:
             tareas = Tarea.objects.all().order_by('-fecha_creacion')

@@ -81,33 +81,51 @@
 
     
 <script>
-    function getCSRFToken() {
-      const el = document.querySelector('meta[name="csrf-token"]');
-      return el ? el.getAttribute('content') : '';
-    }
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let cookie of cookies) {
+            cookie = cookie.trim();
+            // Busca 'name=' al comienzo
+            if (cookie.startsWith(name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      
     
-    async function cambiarEstado(btn) {
-      const tareaId = btn.dataset.tareaId;
-      const csrftoken = getCSRFToken();
-    
-      try {
+      async function cambiarEstado(btn) {
+        const tareaId = btn.dataset.tareaId;
+        const csrftoken = getCookie('csrftoken');
+      
         const res = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
           method: 'POST',
-          credentials: 'same-origin',
+          credentials: 'same-origin',  // Envía cookies de sesión y csrf
           headers: {
-            'X-CSRFToken': csrftoken,
-            'Accept': 'application/json',
-          },
+            'X-CSRFToken': csrftoken,  // Nombre exacto
+            'Accept': 'application/json'
+          }
         });
-        if (!res.ok) throw new Error(`Error ${res.status}`);
+        if (!res.ok) {
+          throw new Error(`Error ${res.status}`);
+        }
         const data = await res.json();
-        btn.classList.toggle('btn-success', data.realizada);
-        btn.classList.toggle('btn-warning', !data.realizada);
-        btn.textContent = data.realizada ? '✅ Realizada' : '⏳ Pendiente';
-      } catch (err) {
-        alert('No se pudo cambiar el estado: ' + err.message);
+        // Actualiza UI...
       }
-    }
+        if (data.completada) {
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-success');
+          btn.innerHTML = '✅ Realizada';
+        } else {
+          btn.classList.remove('btn-success');
+          btn.classList.add('btn-warning');
+          btn.innerHTML = '⏳ Pendiente';
+        }
+      
     
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('button[data-tarea-id]').forEach(btn =>
