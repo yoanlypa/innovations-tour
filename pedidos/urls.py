@@ -10,13 +10,13 @@ from .views import (
 app_name = 'pedidos'
 urlpatterns = [
     # Tareas
-    path('tareas/', TareaListView, name='tareas'),
+    path('tareas/', TareaListView.as_view(), name='tareas'),
     path('tareas/nueva/', TareaCreateView.as_view(), name='tarea_nueva'),
     path('tareas/editar/<int:pk>/', TareaUpdateView.as_view(), name='tarea_editar'),
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
     path('api/tareas/cambiar-estado/<int:id>/', cambiar_estado_tarea, name='cambiar_estado_tarea'),
     # Pedidos
-    path('pedidos/', PedidoListView(), name='pedidos_lista'),
+    path('pedidos/', PedidoListView().as_view, name='pedidos_lista'),
     path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),
     
