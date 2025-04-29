@@ -26,11 +26,13 @@ from rest_framework import status, generics, serializers
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.authtoken.models import Token
-
-
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
 
 # ========== TAREAS ==========
+
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -39,6 +41,8 @@ def cambiar_estado_tarea(request, id):
     tarea.completada = not tarea.completada
     tarea.save()
     return Response({'success': True, 'realizada': tarea.completada})
+@login_required
+@staff_member_required
 class TareaListView(ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'
@@ -231,6 +235,8 @@ class PasswordResetConfirmAPIView(APIView):
         return Response({'detail':'Contraseña restablecida correctamente'}, status=status.HTTP_200_OK)
         
 # ========== PEDIDOS ==========
+@login_required
+@staff_member_required
 class PedidoListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
@@ -254,7 +260,8 @@ class PedidoListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         qs = Pedido.objects.all().order_by('-fecha_inicio')
         # Como solo entran staff o super, devolvemos todos
         return qs
-
+@login_required
+@staff_member_required
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all().order_by('-fecha_inicio')
     serializer_class = PedidoSerializer
@@ -287,6 +294,8 @@ class PedidoCreateView(generics.ListCreateAPIView):
         )
 
 # ========== PRODUCTOS ==========
+@login_required
+@staff_member_required
 class ProductoListView(ListView):
     model = Producto
     template_name = 'pedidos/productos_lista.html'
@@ -298,7 +307,8 @@ class ProductoUpdateView( UpdateView):
     success_url = reverse_lazy('productos_lista')
     
 # ========== Control de Stock ==========
-
+@login_required
+@staff_member_required
 def stock_control_view(request):
         stocks = StockControl.objects.all()  # o un filtrado específico
         return render(request, 'pedidos/stock_control.html', {'pedidos': stocks})

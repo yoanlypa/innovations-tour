@@ -12,7 +12,7 @@ urlpatterns = [
     path('tareas/nueva/', TareaCreateView.as_view(), name='tarea_nueva'),
     path('tareas/editar/<int:pk>/', TareaUpdateView.as_view(), name='tarea_editar'),
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
-path('api/tareas/cambiar-estado/<int:id>/', cambiar_estado_tarea, name='cambiar_estado_tarea'),
+    path('api/tareas/cambiar-estado/<int:id>/', cambiar_estado_tarea, name='cambiar_estado_tarea'),
     # Pedidos
     path('pedidos/', PedidoListView.as_view(), name='pedidos_lista'),
     path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
