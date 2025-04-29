@@ -117,16 +117,6 @@
         const data = await res.json();
         // Actualiza UI...
       }
-        if (data.completada) {
-          btn.classList.remove('btn-warning');
-          btn.classList.add('btn-success');
-          btn.innerHTML = '✅ Realizada';
-        } else {
-          btn.classList.remove('btn-success');
-          btn.classList.add('btn-warning');
-          btn.innerHTML = '⏳ Pendiente';
-        }
-      
     
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('button[data-tarea-id]').forEach(btn =>
