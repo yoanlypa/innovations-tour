@@ -80,51 +80,49 @@
     </div>
 {% endfor %}
 
+<script> 
+async function cambiarEstado(btn) {
+    const tareaId = btn.dataset.tareaId;
+    const csrftoken = getCookie('csrftoken');
     
-<script>
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let cookie of cookies) {
-            cookie = cookie.trim();
-            // Busca 'name=' al comienzo
-            if (cookie.startsWith(name + '=')) {
-              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-              break;
-            }
-          }
-        }
-        return cookieValue;
-      }
-      
-    
-      async function cambiarEstado(btn) {
-        const tareaId = btn.dataset.tareaId;
-        const csrftoken = getCookie('csrftoken');
-      
+    // Validación adicional de seguridad
+    if (!csrftoken) {
+        alert('Error de seguridad. Recargando página...');
+        window.location.reload();
+        return;
+    }
+
+    try {
         const res = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
-          method: 'POST',
-          credentials: 'same-origin',  // Envía cookies de sesión y csrf
-          headers: {
-            'X-CSRFToken': csrftoken,  // Nombre exacto
-            'Accept': 'application/json'
-          }
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json' // Nuevo header
+            },
+            body: JSON.stringify({}) // Body vacío pero necesario
         });
+
         if (!res.ok) {
-          throw new Error(`Error ${res.status}`);
+            const errorData = await res.json();
+            throw new Error(errorData.error || `Error ${res.status}`);
         }
-        const data = await res.json();
-        // Actualiza UI...
-      }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('button[data-tarea-id]').forEach(btn =>
-        btn.addEventListener('click', () => cambiarEstado(btn))
-      );
-    });
-    </script>
-    
+
+        // Actualizar interfaz
+        btn.classList.toggle('btn-success');
+        btn.classList.toggle('btn-warning');
+        btn.textContent = btn.textContent.includes('Realizada') 
+            ? '⏳ Pendiente' 
+            : '✅ Realizada';
+
+    } catch (err) {
+        console.error('Error:', err);
+        alert(`Error al actualizar: ${err.message}`);
+        if (err.message.includes('CSRF')) {
+            window.location.reload();
+        }
+    }
+}</script> 
 <script> 
     document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
     e.preventDefault();

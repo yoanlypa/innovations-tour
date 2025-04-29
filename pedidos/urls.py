@@ -1,5 +1,6 @@
 from django.urls import path, include 
 from . import views
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from django.contrib.auth import views as auth_views
 from rest_framework.routers import DefaultRouter
@@ -14,8 +15,8 @@ urlpatterns = [
     path('tareas/nueva/', TareaCreateView.as_view(), name='tarea_nueva'),
     path('tareas/editar/<int:pk>/', TareaUpdateView.as_view(), name='tarea_editar'),
     path('tareas/eliminar/<int:pk>/', TareaDeleteView.as_view(), name='tarea_eliminar'),
-    path('tareas/cambiar-estado/<int:tarea_id>/', cambiar_estado_tarea, name='cambiar_estado_tarea'),
-    # Pedidos
+path('tareas/cambiar-estado/<int:tarea_id>/', ensure_csrf_cookie(cambiar_estado_tarea), 
+         name='cambiar_estado_tarea'),    # Pedidos
     path('pedidos/', PedidoListView.as_view(),  name='pedidos_lista'),
     path('api/pedidos/', PedidoCreateView.as_view(), name='api_pedidos'),
     path('pedidos/nuevo/', PedidoCreateView.as_view(), name='pedido_nuevo'),

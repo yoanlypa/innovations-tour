@@ -49,12 +49,24 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 
 @login_required
-@require_POST
+@require_http_methods(["POST"])
 def cambiar_estado_tarea(request, tarea_id):
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        raise PermissionDenied("Solo permitido via AJAX")
+    
     tarea = get_object_or_404(Tarea, id=tarea_id)
+    
+    # Verificar permisos del usuario
+    if not request.user.is_staff and tarea.usuario != request.user:
+        return JsonResponse({'error': 'No tienes permisos'}, status=403)
+    
     tarea.completada = not tarea.completada
     tarea.save()
-    return JsonResponse({'realizada': tarea.completada})
+    
+    return JsonResponse({
+        'realizada': tarea.completada,
+        'tarea_id': tarea.id
+    })
 
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class TareaListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
