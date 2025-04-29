@@ -80,55 +80,50 @@
 {% endfor %}
 
     
-
 <script>
-    // 1) Función para leer la cookie CSRF
     function getCookie(name) {
-      let value = null;
+      let cookieValue = null;
       if (document.cookie && document.cookie !== '') {
         document.cookie.split(';').forEach(cookie => {
-          cookie = cookie.trim();
-          if (cookie.startsWith(name + '=')) {
-            value = decodeURIComponent(cookie.substring(name.length + 1));
-          }
+          const [key, val] = cookie.trim().split('=');
+          if (key === name) cookieValue = decodeURIComponent(val);
         });
       }
-      return value;
+      return cookieValue;
     }
-    const csrftoken = getCookie('csrftoken');
     
-    // 2) Función cambiarEstado que usa session auth
     async function cambiarEstado(btn) {
-      const tareaId = btn.getAttribute('data-tarea-id');
+      const tareaId = btn.dataset.tareaId;
+      const csrftoken = getCookie('csrftoken');
+    
       try {
         const res = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
           method: 'POST',
-          credentials: 'same-origin',             // envía la cookie de sesión
+          credentials: 'same-origin',
           headers: {
-            'X-CSRFToken': csrftoken              // token CSRF
+            'X-CSRFToken': csrftoken,
+            'Accept': 'application/json'
           }
         });
-        if (!res.ok) throw new Error('Error al cambiar estado');
+        if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
-        // Actualiza UI
         btn.classList.toggle('btn-success', data.realizada);
         btn.classList.toggle('btn-warning', !data.realizada);
         btn.textContent = data.realizada ? '✅ Realizada' : '⏳ Pendiente';
       } catch (err) {
-        alert('❌ ' + err.message);
+        alert('No se pudo cambiar el estado: ' + err.message);
       }
     }
     
-    // 3) Attacha el handler automáticamente
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
         btn.addEventListener('click', () => cambiarEstado(btn));
       });
     });
     </script>
-    
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script> document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
+
+<script> 
+    document.getElementById('formNuevaTarea').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     

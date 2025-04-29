@@ -53,6 +53,7 @@ def cambiar_estado_tarea(request, tarea_id):
     tarea.completada = not tarea.completada
     tarea.save()
     return JsonResponse({'realizada': tarea.completada})
+
 class TareaListView(StaffRequiredMixin,ListView):
     model = Tarea
     template_name = 'pedidos/tareas.html'
