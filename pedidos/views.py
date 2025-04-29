@@ -250,25 +250,7 @@ class PedidoListView(StaffRequiredMixin, ListView):
     model = Pedido
     template_name = 'pedidos/pedidos_lista.html'
     context_object_name = 'pedidos'
-    login_url = '/login/'  # o tu página de login
-
-    # Solo permitimos staff o superuser
-    def test_func(self):
-        return self.request.user.is_staff or self.request.user.is_superuser
-
-    # Si no pasa test_func, redirige aquí o lanza 403
-    def handle_no_permission(self):
-        if not self.request.user.is_authenticated:
-            return super().handle_no_permission()
-        # Para usuarios autenticados pero sin permiso, mostramos 403
-        from django.http import HttpResponseForbidden
-        return HttpResponseForbidden("No tienes permiso para ver esta página.")
-
-    # Filtrado de queryset
-    def get_queryset(self):
-        qs = Pedido.objects.all().order_by('-fecha_inicio')
-        # Como solo entran staff o super, devolvemos todos
-        return qs
+    ordering = ['-fecha_inicio']
 
 class PedidoCreateView(generics.ListCreateAPIView):
     queryset = Pedido.objects.all().order_by('-fecha_inicio')
