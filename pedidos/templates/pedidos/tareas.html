@@ -25,8 +25,8 @@
                 </div>
               
                 <form method="POST" id="formNuevaTarea" action="{% url 'pedidos:tarea_nueva' %}">
-
-                    {% csrf_token %}
+                    {% csrf_token %} 
+                    
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Título</label>
@@ -80,24 +80,31 @@
     </div>
 {% endfor %}
 
-    <script>
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    // 1. FUNCIÓN getCookie (DEBE IR PRIMERO)
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                cookie = cookie.trim();
-                if (cookie.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
+
+// Incluir en headers de AJAX
+const csrftoken = getCookie('csrftoken');
+fetch(/tareas/cambiar-estado/${tareaId}/`, {
+    method: 'POST',
+    headers: {
+        'X-CSRFToken': csrftoken,  // ¡Header personalizado!
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({...})
+});
     
     // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
     // 2. FUNCIÓN cambiarEstado (USA getCookie)
@@ -111,17 +118,8 @@
             if (!csrftoken) {
                 throw new Error('Error de seguridad: CSRF Token no encontrado');
             }
-    
-            // Hacer petición
-            const response = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Accept': 'application/json'
-                },
-                credentials: 'same-origin'
-            });
-    
+
+        
             // Manejar respuesta
             if (!response.ok) {
                 const error = await response.json();
