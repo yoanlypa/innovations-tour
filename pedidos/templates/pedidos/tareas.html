@@ -1,79 +1,156 @@
 {% extends 'pedidos/base.html' %}
 
 {% block content %}
-<!-- ... (tu contenido HTML existente) ... -->
+<form id="csrf-form">{% csrf_token %}</form>
 
-<script>
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-// 1. FUNCIÓN getCookie (DEBE IR PRIMERO)
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+        <button 
+            type="button" 
+            class="btn btn-primary btn-floating"
+            data-bs-toggle="modal" 
+            data-bs-target="#modalNuevaTarea"
+        >
+            ➕
+        </button>
+    </div>
+    <div class="container">
+        <h1>Tareas</h1>
+    
+    <!-- Modal -->
+    <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Tarea</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+              
+                <form method="POST" id="formNuevaTarea" action="{% url 'pedidos:tarea_nueva' %}">
+
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Título</label>
+                            <input type="text" class="form-control" name="titulo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" name="descripcion" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Fecha Específica</label>
+                            <input type="date" class="form-control" name="fecha_especifica">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas_agrupadas %}
+{% for grupo in tareas_agrupadas %}
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h4>📅 {{ grupo.grouper }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for tarea in grupo.list %}  <!-- Bucle de tareas por fecha -->
+                    <div class="list-group-item">
+                        <h5>{{ tarea.titulo }}</h5>
+                        <p>{{ tarea.descripcion }}</p>
+                        
+                        <!-- Botón para cambiar estado (¡Versión AJAX!) -->
+                        <button 
+                            type="button" 
+                            class="btn btn-sm {% if tarea.completada %}btn-success{% else %}btn-warning{% endif %}"
+                            data-tarea-id="{{ tarea.id }}"
+                            onclick="cambiarEstado(this)"
+                        >
+                            {% if tarea.completada %}✅ Realizada{% else %}⏳ Pendiente{% endif %}
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+    <script>
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    // 1. FUNCIÓN getCookie (DEBE IR PRIMERO)
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    // 2. FUNCIÓN cambiarEstado (USA getCookie)
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    async function cambiarEstado(btn) {
+        const tareaId = btn.dataset.tareaId;
+        try {
+            // Obtener CSRF Token
+            const csrftoken = getCookie('csrftoken');
+            
+            if (!csrftoken) {
+                throw new Error('Error de seguridad: CSRF Token no encontrado');
+            }
+    
+            // Hacer petición
+            const response = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            });
+    
+            // Manejar respuesta
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Error en el servidor');
+            }
+    
+            // Actualizar interfaz
+            const data = await response.json();
+            btn.classList.toggle('btn-success');
+            btn.classList.toggle('btn-warning');
+            btn.textContent = data.completada ? '✅ Realizada' : '⏳ Pendiente';
+    
+        } catch (error) {
+            console.error('Error:', error);
+            alert(error.message);
+            if (error.message.includes('CSRF')) {
+                window.location.reload();
             }
         }
     }
-    return cookieValue;
-}
-
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-// 2. FUNCIÓN cambiarEstado (USA getCookie)
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-async function cambiarEstado(btn) {
-    const tareaId = btn.dataset.tareaId;
-    try {
-        // Obtener CSRF Token
-        const csrftoken = getCookie('csrftoken');
-        
-        if (!csrftoken) {
-            throw new Error('Error de seguridad: CSRF Token no encontrado');
-        }
-
-        // Hacer petición
-        const response = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Accept': 'application/json'
-            },
-            credentials: 'same-origin'
+    
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    // 3. INICIALIZACIÓN (Después de definir las funciones)
+    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+    document.addEventListener('DOMContentLoaded', () => {
+        // Asignar eventos a todos los botones
+        document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
+            btn.addEventListener('click', () => cambiarEstado(btn));
         });
-
-        // Manejar respuesta
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Error en el servidor');
-        }
-
-        // Actualizar interfaz
-        const data = await response.json();
-        btn.classList.toggle('btn-success');
-        btn.classList.toggle('btn-warning');
-        btn.textContent = data.completada ? '✅ Realizada' : '⏳ Pendiente';
-
-    } catch (error) {
-        console.error('Error:', error);
-        alert(error.message);
-        if (error.message.includes('CSRF')) {
-            window.location.reload();
-        }
-    }
-}
-
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-// 3. INICIALIZACIÓN (Después de definir las funciones)
-// ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-document.addEventListener('DOMContentLoaded', () => {
-    // Asignar eventos a todos los botones
-    document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
-        btn.addEventListener('click', () => cambiarEstado(btn));
     });
-});
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}
