@@ -6,10 +6,10 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>📦 Control de Stock</h2>
         <div>
-            <a href="{% url 'stock:exportar_csv' %}" class="btn btn-secondary me-2">
+            <a href="{% url 'pedidos:exportar_csv' %}" class="btn btn-secondary me-2">
                 📥 Exportar CSV
             </a>
-            <a href="{% url 'stock:agregar' %}" class="btn btn-primary">
+            <a href="{% url 'pedidos:agregar' %}" class="btn btn-primary">
                 ➕ Nuevo Registro
             </a>
         </div>
@@ -40,16 +40,16 @@
                     <td>{{ registro.fecha_er|date:"d/m/Y" }}</td>
                     <td>
                         <button class="btn btn-sm {% if registro.entregado %}btn-success{% else %}btn-primary{% endif %} btn-estado"
-                                data-url="{% url 'stock:toggle_estado' pk=registro.pk %}">
+                                data-url="{% url 'pedidos:toggle_estado' pk=registro.pk %}">
                             {% if registro.entregado %}📤 Entregado{% else %}📥 Recogido{% endif %}
                         </button>
                     </td>
                     <td>
-                        <a href="{% url 'stock:editar' registro.pk %}" class="btn btn-sm btn-warning">
+                        <a href="{% url 'pedidos:editar' registro.pk %}" class="btn btn-sm btn-warning">
                             ✏️ Editar
                         </a>
                         <button class="btn btn-sm btn-danger btn-eliminar" 
-                                data-url="{% url 'stock:eliminar' registro.pk %}">
+                                data-url="{% url 'pedidos:eliminar' registro.pk %}">
                             🗑️ Eliminar
                         </button>
                     </td>

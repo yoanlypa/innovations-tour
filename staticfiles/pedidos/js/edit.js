@@ -1,19 +1,3 @@
-document.addEventListener("DOMContentLoaded", function() {
-  // Función para obtener la cookie CSRF
-  function getCookie(name) {
-      let cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          const cookies = document.cookie.split(';');
-          for (let cookie of cookies) {
-              cookie = cookie.trim();
-              if (cookie.startsWith(name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
-  }
 
   // 1. Actualizar checkboxes E y R vía AJAX
   const tableContainer = document.querySelector('.table-responsive');
@@ -146,4 +130,3 @@ document.addEventListener("DOMContentLoaded", function() {
   } else {
       console.error("No se encontró el contenedor '.table-responsive'");
   }
-});
