@@ -52,28 +52,20 @@
     </div>
 
 </div>
-    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas_agrupadas %}
+    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas %}
 {% for tarea in tareas %}
     <div class="card mb-4 shadow">
         <div class="card-header bg-primary text-white">
-            <h4>📅 {{ grupo.grouper }}</h4>
+            <h4>📅 <p>Fecha: {{ tarea.fecha_especifica|date:"d/m/Y" }}</p></h4>
         </div>
         <div class="card-body">
             <div class="list-group">
                     <div class="tarea-item">
                         <h5>{{ tarea.titulo }}</h5>
                         <p>{{ tarea.descripcion }}</p>
-                        <button 
-                            type="button" 
-                            class="btn btn-primary btn-sm float-end" 
-                            data-tarea-id="{{ tarea.id }}" 
-                            onclick="cambiarEstado(this)"
-                        >
-                            {% if tarea.completada %}✅ Realizada{% else %}⏳ Pendiente{% endif %}
+                        <p>Fecha: {{ tarea.fecha_especifica|date:"d/m/Y" }}</p>
                             {{ tarea.titulo }} - Estado: <span class="estado-texto">{% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}</span>
-
-                        </div>
-
+                    </div>
             </div>
         </div>
     </div>
@@ -86,7 +78,7 @@
             const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
     
             try {
-                const response = await fetch(url, {
+                const response = await fetch("/tareas/cambiar-estado/${tareaId}/", {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': csrftoken,
