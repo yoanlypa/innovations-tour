@@ -88,4 +88,19 @@ body {
     line-height: 50px;
     text-align: center;
   }
-  
+  /* Estilo base para tareas */
+.tarea-item {
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+/* Efecto hover */
+.tarea-item:hover {
+    background-color: #f0f0f0;
+}
+
+/* Estado "Completada" */
+.tarea-item.completada {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
