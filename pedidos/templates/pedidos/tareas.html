@@ -1,154 +1,61 @@
-{% extends 'pedidos/base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<form id="csrf-form">{% csrf_token %}</form>
+<h1>Tareas</h1>
 
-        <button 
-            type="button" 
-            class="btn btn-primary btn-floating"
-            data-bs-toggle="modal" 
-            data-bs-target="#modalNuevaTarea"
-        >
-            ➕
-        </button>
-    </div>
-    <div class="container">
-        <h1>Tareas</h1>
-    
-    <!-- Modal -->
-    <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nueva Tarea</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-              
-                <form method="POST" id="formNuevaTarea" action="{% url 'pedidos:tarea_nueva' %}">
-                    {% csrf_token %} 
-                    
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Título</label>
-                            <input type="text" class="form-control" name="titulo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea class="form-control" name="descripcion" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha Específica</label>
-                            <input type="date" class="form-control" name="fecha_especifica">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
+<!-- Lista de tareas (cada tarea es un elemento clickable) -->
+{% for tarea in tareas %}
+<div 
+    class="tarea-item {% if tarea.completada %}completada{% endif %}" 
+    data-tarea-id="{{ tarea.id }}"
+    style="cursor: pointer; padding: 10px; margin: 5px; border: 1px solid #ccc;"
+>
+    {{ tarea.titulo }} - Estado: <span class="estado-texto">{% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}</span>
 </div>
-    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas_agrupadas %}
-{% for grupo in tareas_agrupadas %}
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-primary text-white">
-            <h4>📅 {{ grupo.grouper }}</h4>
-        </div>
-        <div class="card-body">
-            <div class="list-group">
-                {% for tarea in grupo.list %}  <!-- Bucle de tareas por fecha -->
-                    <div class="list-group-item">
-                        <h5>{{ tarea.titulo }}</h5>
-                        <p>{{ tarea.descripcion }}</p>
-                        
-                        <!-- Botón para cambiar estado (¡Versión AJAX!) -->
-                        <button 
-                            type="button" 
-                            class="btn btn-sm {% if tarea.completada %}btn-success{% else %}btn-warning{% endif %}"
-                            data-tarea-id="{{ tarea.id }}"
-                            onclick="cambiarEstado(this)"
-                        >
-                            {% if tarea.completada %}✅ Realizada{% else %}⏳ Pendiente{% endif %}
-                        </button>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
 {% endfor %}
+
+<!-- Script integrado (cambia el estado al hacer clic en la tarea) -->
 <script>
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    // Función para cambiar el estado
+    const cambiarEstado = async (tareaId) => {
+        const url = `/tareas/cambiar-estado/${tareaId}/`;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-// Incluir en headers de AJAX
-const csrftoken = getCookie('csrftoken');
-fetch(/tareas/cambiar-estado/${tareaId}/`, {
-    method: 'POST',
-    headers: {
-        'X-CSRFToken': csrftoken,  // ¡Header personalizado!
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({...})
-});
-    
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    // 2. FUNCIÓN cambiarEstado (USA getCookie)
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    async function cambiarEstado(btn) {
-        const tareaId = btn.dataset.tareaId;
         try {
-            // Obtener CSRF Token
-            const csrftoken = getCookie('csrftoken');
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+            });
             
-            if (!csrftoken) {
-                throw new Error('Error de seguridad: CSRF Token no encontrado');
-            }
-
-        
-            // Manejar respuesta
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.detail || 'Error en el servidor');
-            }
-    
-            // Actualizar interfaz
             const data = await response.json();
-            btn.classList.toggle('btn-success');
-            btn.classList.toggle('btn-warning');
-            btn.textContent = data.completada ? '✅ Realizada' : '⏳ Pendiente';
-    
+            const tareaElement = document.querySelector(`[data-tarea-id="${tareaId}"]`);
+            const estadoTexto = tareaElement.querySelector('.estado-texto');
+
+            if (data.completada) {
+                tareaElement.classList.add('completada');
+                estadoTexto.innerHTML = 'Realizada ✅';
+            } else {
+                tareaElement.classList.remove('completada');
+                estadoTexto.innerHTML = 'Pendiente ⚪';
+            }
         } catch (error) {
             console.error('Error:', error);
-            alert(error.message);
-            if (error.message.includes('CSRF')) {
-                window.location.reload();
-            }
         }
-    }
-    
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    // 3. INICIALIZACIÓN (Después de definir las funciones)
-    // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-    document.addEventListener('DOMContentLoaded', () => {
-        // Asignar eventos a todos los botones
-        document.querySelectorAll('button[data-tarea-id]').forEach(btn => {
-            btn.addEventListener('click', () => cambiarEstado(btn));
+    };
+
+    // Evento click en las tareas
+    document.querySelectorAll('.tarea-item').forEach(tarea => {
+        tarea.addEventListener('click', (event) => {
+            const tareaId = event.currentTarget.dataset.tareaId;  // Usar currentTarget para obtener el div padre
+            cambiarEstado(tareaId);
         });
     });
-    </script>
-    {% endblock %}
+});
+</script>
+
+{% endblock %}

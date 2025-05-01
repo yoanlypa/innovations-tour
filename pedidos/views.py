@@ -49,30 +49,16 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 
 
-@login_required
 @require_http_methods(["POST"])
-@ensure_csrf_cookie  # ← Asegura que la cookie CSRF esté presente
+@login_required
 def cambiar_estado_tarea(request, tarea_id):
-    try:
-        tarea = Tarea.objects.get(id=tarea_id)
-        # Verificar permisos del usuario
-        if not request.user.is_staff and tarea.responsable != request.user:
-            return JsonResponse(
-                {'error': 'No tienes permiso para esta acción'}, 
-                status=403
-            )
-        
-        # Cambiar estado
-        tarea.completada = not tarea.completada
-        tarea.save()
-        
-        return JsonResponse({
-            'completada': tarea.completada,
-            'tarea_id': tarea_id
-        })
-        
-    except Tarea.DoesNotExist:
-        return JsonResponse({'error': 'Tarea no encontrada'}, status=404)
+    tarea = Tarea.objects.get(id=tarea_id)
+    tarea.completada = not tarea.completada
+    tarea.save()
+    return JsonResponse({
+        'completada': tarea.completada,
+        'tarea_id': tarea_id
+    })
 @method_decorator(ensure_csrf_cookie, name='dispatch')
 class TareaListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Tarea
