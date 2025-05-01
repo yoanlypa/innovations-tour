@@ -50,65 +50,65 @@
             </div>
         </div>
     </div>
-
+  <!-- Lista de tareas agrupadas (CORRECCIÓN CLAVE) -->
+  {% regroup tareas by fecha_especifica|date:"d/m/Y" as grouped_tareas %}
+  {% for group in grouped_tareas %}
+  <div class="card mb-4 shadow">
+      <div class="card-header bg-primary text-white">
+          <h4>📅 Fecha: {{ group.grouper }}</h4>
+      </div>
+      <div class="card-body">
+          <div class="list-group">
+              {% for tarea in group.list %}  <!-- Acceder a group.list -->
+              <div 
+                  class="tarea-item list-group-item {% if tarea.completada %}completada{% endif %}" 
+                  data-tarea-id="{{ tarea.id }}" 
+                  style="cursor: pointer;"
+              >
+                  <h5>{{ tarea.titulo }}</h5>
+                  <p>{{ tarea.descripcion }}</p>
+                  Estado: <span class="estado-texto">{% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}</span>
+              </div>
+              {% endfor %}
+          </div>
+      </div>
+  </div>
+  {% endfor %}
 </div>
-    {% load fechas %}{% regroup tareas by fecha_especifica|date:"d/m/Y" as tareas %}
-{% for tarea in tareas %}
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-primary text-white">
-            <h4>📅 <p>Fecha: {{ tarea.fecha_especifica|date:"d/m/Y" }}</p></h4>
-        </div>
-        <div class="card-body">
-            <div class="list-group">
-                    <div class="tarea-item">
-                        <h5>{{ tarea.titulo }}</h5>
-                        <p>{{ tarea.descripcion }}</p>
-                        <p>Fecha: {{ tarea.fecha_especifica|date:"d/m/Y" }}</p>
-                            {{ tarea.titulo }} - Estado: <span class="estado-texto">{% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}</span>
-                    </div>
-            </div>
-        </div>
-    </div>
-{% endfor %}
+
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Función para cambiar el estado
-        const cambiarEstado = async (tareaId) => {
-            const url = `/tareas/cambiar-estado/${tareaId}/`;
-            const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    
-            try {
-                const response = await fetch("/tareas/cambiar-estado/${tareaId}/", {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json',
-                    },
-                });
-                
-                const data = await response.json();
-                const tareaElement = document.querySelector(`[data-tarea-id="${tareaId}"]`);
-                const estadoTexto = tareaElement.querySelector('.estado-texto');
-    
-                if (data.completada) {
-                    tareaElement.classList.add('completada');
-                    estadoTexto.innerHTML = 'Realizada ✅';
-                } else {
-                    tareaElement.classList.remove('completada');
-                    estadoTexto.innerHTML = 'Pendiente ⚪';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-    
-// Evento click en las tareas
-document.querySelectorAll('.tarea-item').forEach(tarea => {
-    tarea.addEventListener('click', (event) => {
-        const tareaId = event.currentTarget.dataset.tareaId;  // Usar currentTarget para obtener el div padre
-        cambiarEstado(tareaId);
-    });
-});
+document.addEventListener('DOMContentLoaded', () => {
+  const cambiarEstado = async (tareaId) => {
+      const url = `/tareas/cambiar-estado/${tareaId}/`;  // Usar backticks correctamente
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      try {
+          const response = await fetch(url, {
+              method: 'POST',
+              headers: {
+                  'X-CSRFToken': csrftoken,
+                  'Content-Type': 'application/json',
+              },
+          });
+          
+          const data = await response.json();
+          const tareaElement = document.querySelector(`[data-tarea-id="${tareaId}"]`);
+          const estadoTexto = tareaElement.querySelector('.estado-texto');
+
+          tareaElement.classList.toggle('completada', data.completada);
+          estadoTexto.innerHTML = data.completada ? 'Realizada ✅' : 'Pendiente ⚪';
+          
+      } catch (error) {
+          console.error('Error:', error);
+      }
+  };
+
+  document.querySelectorAll('.tarea-item').forEach(tarea => {
+      tarea.addEventListener('click', (event) => {
+          const tareaId = event.currentTarget.dataset.tareaId;
+          cambiarEstado(tareaId);
+      });
+  });
 });
 </script>
 
