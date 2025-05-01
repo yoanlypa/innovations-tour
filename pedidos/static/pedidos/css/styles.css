@@ -114,6 +114,7 @@ body {
     transition: all 0.3s ease;
     min-width: 120px;  /* Ancho mínimo igual para ambos estados */
     max-width: 120px;  /* Ancho máximo fijo */
+    max-height: 40px;  /* Altura fija */
     white-space: nowrap;
     padding: 8px 12px; /* Padding fijo */
     box-sizing: border-box; /* Incluye bordes en el ancho total */
