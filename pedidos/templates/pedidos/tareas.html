@@ -1,9 +1,12 @@
 {% extends 'pedidos/base.html' %}
 {% load static %}
-
+{% load fechas %}
 
 {% block content %}
 
+<div class="container">
+    <!-- Botón para nueva tarea -->
+    <div class="text-end mb-4">
         <button 
             type="button" 
             class="btn btn-primary btn-floating"
@@ -13,10 +16,10 @@
             ➕
         </button>
     </div>
-    <div class="container">
-        <h1>Tareas</h1>
-    
-    <!-- Modal -->
+
+    <h1>Tareas</h1>
+
+    <!-- Modal (sin cambios) -->
     <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -50,66 +53,85 @@
             </div>
         </div>
     </div>
-  <!-- Lista de tareas agrupadas (CORRECCIÓN CLAVE) -->
-  {% regroup tareas by fecha_especifica|date:"d/m/Y" as grouped_tareas %}
-  {% for group in grouped_tareas %}
-  <div class="card mb-4 shadow">
-      <div class="card-header bg-primary text-white">
-          <h4>📅 Fecha: {{ group.grouper }}</h4>
-      </div>
-      <div class="card-body">
-          <div class="list-group">
-              {% for tarea in group.list %}  <!-- Acceder a group.list -->
-              <div 
-                  class="tarea-item list-group-item {% if tarea.completada %}completada{% endif %}" 
-                  data-tarea-id="{{ tarea.id }}" 
-                  style="cursor: pointer;"
-              >
-                  <h5>{{ tarea.titulo }}</h5>
-                  <p>{{ tarea.descripcion }}</p>
-                  Estado: <span class="estado-texto">{% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}</span>
-              </div>
-              {% endfor %}
-          </div>
-      </div>
-  </div>
-  {% endfor %}
+    </div>
+
+    <!-- Lista de tareas agrupadas -->
+    {% regroup tareas by fecha_especifica|date:"d/m/Y" as grouped_tareas %}
+    {% for group in grouped_tareas %}
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h4>📅 Fecha: {{ group.grouper }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                {% for tarea in group.list %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5>{{ tarea.titulo }}</h5>
+                        <p class="mb-0">{{ tarea.descripcion }}</p>
+                    </div>
+                    <button 
+                        class="btn {% if tarea.completada %}btn-success{% else %}btn-outline-secondary{% endif %} btn-estado"
+                        data-tarea-id="{{ tarea.id }}"
+                    >
+                        {% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const cambiarEstado = async (tareaId) => {
-      const url = `/tareas/cambiar-estado/${tareaId}/`;  // Usar backticks correctamente
-      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const cambiarEstado = async (tareaId) => {
+        const url = `/tareas/cambiar-estado/${tareaId}/`;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const boton = document.querySelector(`[data-tarea-id="${tareaId}"]`);
 
-      try {
-          const response = await fetch(url, {
-              method: 'POST',
-              headers: {
-                  'X-CSRFToken': csrftoken,
-                  'Content-Type': 'application/json',
-              },
-          });
-          
-          const data = await response.json();
-          const tareaElement = document.querySelector(`[data-tarea-id="${tareaId}"]`);
-          const estadoTexto = tareaElement.querySelector('.estado-texto');
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            const data = await response.json();
+            
+            // Actualizar botón
+            if (data.completada) {
+                boton.classList.replace('btn-outline-secondary', 'btn-success');
+                boton.innerHTML = 'Realizada ✅';
+            } else {
+                boton.classList.replace('btn-success', 'btn-outline-secondary');
+                boton.innerHTML = 'Pendiente ⚪';
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
 
-          tareaElement.classList.toggle('completada', data.completada);
-          estadoTexto.innerHTML = data.completada ? 'Realizada ✅' : 'Pendiente ⚪';
-          
-      } catch (error) {
-          console.error('Error:', error);
-      }
-  };
-
-  document.querySelectorAll('.tarea-item').forEach(tarea => {
-      tarea.addEventListener('click', (event) => {
-          const tareaId = event.currentTarget.dataset.tareaId;
-          cambiarEstado(tareaId);
-      });
-  });
+    // Evento click en los botones
+    document.querySelectorAll('.btn-estado').forEach(boton => {
+        boton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const tareaId = event.currentTarget.dataset.tareaId;
+            cambiarEstado(tareaId);
+        });
+    });
 });
 </script>
+
+<style>
+.btn-estado {
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+</style>
 
 {% endblock %}
