@@ -112,8 +112,11 @@ body {
 /* Estilo para el botón de pendiente */
 .btn-estado {
     transition: all 0.3s ease;
-    min-width: 120px;
+    min-width: 120px;  /* Ancho mínimo igual para ambos estados */
+    max-width: 120px;  /* Ancho máximo fijo */
     white-space: nowrap;
+    padding: 8px 12px; /* Padding fijo */
+    box-sizing: border-box; /* Incluye bordes en el ancho total */
 }
 
 @media (max-width: 767.98px) {
@@ -130,4 +133,14 @@ body {
         width: 100%;
         margin-top: 0.5rem !important;
     }
+}
+
+
+/* Para mantener el borde consistente en ambos estados */
+.btn-outline-secondary {
+    border: 2px solid #6c757d !important; /* Grosor igual al estado activo */
+}
+
+.btn-success {
+    border: 2px solid transparent !important; /* Mismo grosor pero transparente */
 }
