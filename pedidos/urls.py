@@ -27,14 +27,13 @@ urlpatterns = [
     # Calendario
     #path('calendario/', CalendarioView.as_view(), name='calendario'),
     
-    # Login y registro de la API en WordPress
     path('api/login/',    LoginAPIView.as_view(),               name='api_login'),
     path('api/registro/', RegistroAPIView.as_view(),            name='api_registro'),
     path('api/password-reset/',        PasswordResetRequestAPIView.as_view(), name='api_password_reset'),
     path('api/password-reset-confirm/',PasswordResetConfirmAPIView.as_view(), name='api_password_reset_confirm'),
     path('api/logout/', views.logout_view, name='logout_view'),
     
-    # Login y registro de la API en WordPress
+
     path('login/', auth_views.LoginView.as_view(template_name='pedidos/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
@@ -46,11 +45,10 @@ urlpatterns = [
     #Usuario
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
-    path('stock/', views.stock_control_view, name='stock_control'),
-    path('stock/agregar/', agregar_stock, name='agregar_stock'),
-    path('editar_stock/<int:pk>/', views.editar_stock, name='editar_stock'),
-    path('eliminar_stock/<int:pk>/', views.eliminar_stock, name='eliminar_stock'),
-    
-    path("ajax_update_checklist/", views.ajax_update_checklist, name="ajax_update_checklist"),
-
+    path('stock/', views.stock_control_view, name='control'),
+    path('stock/agregar/', views.agregar_stock, name='agregar'),
+    path('stock/editar/<int:pk>/', views.editar_stock, name='editar'),
+    path('stock/eliminar/<int:pk>/', views.eliminar_stock, name='eliminar'),
+    path('stock/toggle-estado/<int:pk>/', views.toggle_estado, name='toggle_estado'),
+    path('stock/exportar-csv/', views.exportar_csv, name='exportar_csv'),
 ]

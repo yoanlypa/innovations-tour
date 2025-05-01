@@ -30,21 +30,26 @@ class ProductoForm(forms.ModelForm):
         
 
 class StockControlForm(forms.ModelForm):
-    class Meta:
-        model = StockControl
-        fields = ['pax', 'lugar_er', 'excursion', 'guia', 'fecha_er', 'entregado', 'recogido']
+    fecha_creacion = forms.DateTimeField(
+        widget=forms.DateTimeInput(
+            attrs={
+                'type': 'datetime-local',
+                'class': 'form-control',
+                'max': timezone.localtime().strftime('%Y-%m-%dT%H:%M')
+            }
+        ),
+        initial=timezone.now
+    )
 
-# Formset para edición múltiple
-StockControlFormSet = forms.modelformset_factory(
-    StockControl,
-    fields=('pax', 'lugar_er', 'excursion', 'guia', 'fecha_er', 'entregado', 'recogido'),
-    extra=0,
-    widgets={
-        'entregado': forms.CheckboxInput(),
-        'recogido': forms.CheckboxInput(),
-    }
-)
-class StockERForm(forms.ModelForm):
     class Meta:
         model = StockControl
-        fields = ['entregado', 'recogido']
+        fields = '__all__'
+        widgets = {
+            'fecha_er': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        }
+
+    def clean_fecha_creacion(self):
+        fecha = self.cleaned_data['fecha_creacion']
+        if fecha > timezone.now():
+            raise forms.ValidationError("¡No se permiten fechas futuras!")
+        return fecha

@@ -24,7 +24,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlFormSet, StockERForm
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -35,6 +35,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
+import csv
+
 
 
 
@@ -306,73 +308,82 @@ class ProductoUpdateView( UpdateView):
     
 # ========== Control de Stock ==========
 @staff_member_required
+
 def stock_control_view(request):
-        stocks = StockControl.objects.all()  # o un filtrado específico
-        return render(request, 'pedidos/stock_control.html', {'pedidos': stocks})
+    registros = StockControl.objects.all().order_by('-fecha_creacion')
+    return render(request, 'stock/stock_control.html', {'registros': registros})
 
-def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['formset'] = StockControlFormSet(queryset=StockControl.objects.all())
-        return context
-
-def post(self, request, *args, **kwargs):
-        formset = StockControlFormSet(request.POST)
-        if formset.is_valid():
-            formset.save()
-        return self.get(request, *args, **kwargs)
-    
 def agregar_stock(request):
-        if request.method == 'POST':
-            StockControl.objects.create(
-                pax=request.POST['pax'],
-                lugar_er=request.POST['lugar_er'],
-                excursion=request.POST['excursion'],
-                guia=request.POST['guia'],
-                fecha_er=request.POST['fecha_er'],
-            )
-        return redirect('pedidos:stock_control')
+    if request.method == 'POST':
+        form = StockControlForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('stock:control')
+    else:
+        form = StockControlForm()
+    return render(request, 'stock/stock_form.html', {'form': form})
 
 def editar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
-    if request.method == "POST":
-        form = StockERForm(request.POST, instance=registro)
+    if request.method == 'POST':
+        form = StockControlForm(request.POST, instance=registro)
         if form.is_valid():
             form.save()
-            return redirect('pedidos:stock_control')
+            return redirect('stock:control')
     else:
-        form = StockERForm(instance=registro)
-    return render(request, 'pedidos/editar_stock.html', {'form': form, 'registro': registro})
+        form = StockControlForm(instance=registro)
+    return render(request, 'stock/stock_form.html', {'form': form})
 
-@csrf_exempt
-def ajax_update_checklist(request):
-    if request.method == "POST":
-        record_id = request.POST.get("id")
-        field = request.POST.get("field")
-        value = request.POST.get("value") == "true"
-
-        registro = get_object_or_404(StockControl, id=record_id)
-        if field == "entregado":
-            registro.entregado = value
-        elif field == "recogido":
-            registro.recogido = value
-        else:
-            return JsonResponse({"success": False, "error": "Campo no válido"})
-
-        registro.save()
-        return JsonResponse({"success": True})
-    return JsonResponse({"success": False, "error": "Método no permitido"})
-
-@csrf_exempt
+@require_POST
 def eliminar_stock(request, pk):
-    if request.method == "POST":
-        registro = get_object_or_404(StockControl, pk=pk)
-        try:
-            registro.delete()
-            return JsonResponse({"success": True})
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)})
-    return JsonResponse({"success": False, "error": "Método no permitido"})
+    registro = get_object_or_404(StockControl, pk=pk)
+    registro.delete()
+    return redirect('stock:control')
 
+@require_POST
+def toggle_estado(request, pk):
+    registro = get_object_or_404(StockControl, pk=pk)
+    
+    # Alternar estados
+    registro.entregado = not registro.entregado
+    registro.recogido = not registro.recogido
+    
+    try:
+        registro.save()
+        return JsonResponse({
+            'success': True,
+            'entregado': registro.entregado,
+            'recogido': registro.recogido
+        })
+    except ValidationError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+def exportar_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="stock_control.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow([
+        'Fecha Creación', 'PAX', 'Lugar E/R', 
+        'Excursión', 'Guía', 'Fecha E/R', 
+        'Entregado', 'Recogido'
+    ])
+    
+    registros = StockControl.objects.all().order_by('-fecha_creacion')
+    
+    for r in registros:
+        writer.writerow([
+            timezone.localtime(r.fecha_creacion).strftime('%Y-%m-%d %H:%M'),
+            r.pax,
+            r.lugar_er,
+            r.excursion,
+            r.guia,
+            r.fecha_er.strftime('%Y-%m-%d'),
+            'Sí' if r.entregado else 'No',
+            'Sí' if r.recogido else 'No'
+        ])
+    
+    return response
 
 
 class SincronizarUsuarioAPIView(APIView):

@@ -1,15 +1,3 @@
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      document.cookie.split(';').forEach(cookie => {
-        const [key, val] = cookie.trim().split('=');
-        if (key === name) cookieValue = decodeURIComponent(val);
-      });
-    }
-    return cookieValue;
-  }
-  
-  const csrftoken = getCookie('csrftoken');
 
   // 1. Actualizar checkboxes E y R vía AJAX
   const tableContainer = document.querySelector('.table-responsive');

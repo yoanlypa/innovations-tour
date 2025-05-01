@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.utils import timezone
 class Producto(models.Model):
@@ -47,17 +48,39 @@ class Tarea(models.Model):
     def __str__(self):
         return self.titulo
 class StockControl(models.Model):
-    pax = models.IntegerField()
-    lugar_er = models.CharField(max_length=255)
-    excursion = models.CharField(max_length=255)
-    guia = models.CharField(max_length=255)
-    fecha_er = models.DateField()
-    entregado = models.BooleanField(default=False)
-    recogido = models.BooleanField(default=False)
+    pax = models.IntegerField(verbose_name="PAX")
+    lugar_er = models.CharField(verbose_name="Lugar E/R", max_length=100)
+    excursion = models.CharField(verbose_name="Excursión", max_length=100)
+    guia = models.CharField(verbose_name="Guía", max_length=100)
+    fecha_er = models.DateField(verbose_name="Fecha E/R")
+    fecha_creacion = models.DateTimeField(
+        verbose_name="Fecha de Creación",
+        default=timezone.now,
+        help_text="Fecha de registro (modificable)"
+    )
+    entregado = models.BooleanField(verbose_name="Entregado", default=True)
+    recogido = models.BooleanField(verbose_name="Recogido", default=False)
+
+    def clean(self):
+        # Validar que no tenga ambos estados activos
+        if self.entregado and self.recogido:
+            raise ValidationError("Un registro no puede estar entregado y recogido simultáneamente")
+        
+        # Validar fecha de creación no futura
+        if self.fecha_creacion > timezone.now():
+            raise ValidationError("La fecha de creación no puede ser futura")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.pax} - {self.excursion}"
-    
+        return f"{self.excursion} - {self.fecha_er}"
+
+    class Meta:
+        verbose_name = "Control de Stock"
+        verbose_name_plural = "Controles de Stock"
+        ordering = ['-fecha_creacion']
 
 class RegistroCliente(models.Model):
     nombre_usuario = models.CharField(max_length=150)
