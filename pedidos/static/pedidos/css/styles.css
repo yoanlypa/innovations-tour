@@ -113,7 +113,7 @@ body {
 .btn-estado {
     transition: all 0.3s ease;
     min-width: 120px;  /* Ancho mínimo igual para ambos estados */
-    max-height: 40px;  /* Altura fija */
+    min-height: 40px;  /* Altura fija */
     padding: 8px 12px; /* Padding fijo */
     box-sizing: border-box; /* Incluye bordes en el ancho total */
 }
@@ -142,4 +142,8 @@ body {
 
 .btn-success {
     border: 2px solid transparent !important; /* Mismo grosor pero transparente */
+}
+.btn{
+    --bs-btn-padding-y: 0rem !important;
+
 }
