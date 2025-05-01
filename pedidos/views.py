@@ -305,8 +305,8 @@ class ProductoUpdateView( UpdateView):
     success_url = reverse_lazy('productos_lista')
     
 # ========== Control de Stock ==========
-
-def stock_control_view(StaffRequiredMixin,request):
+@staff_member_required
+def stock_control_view(request):
         stocks = StockControl.objects.all()  # o un filtrado específico
         return render(request, 'pedidos/stock_control.html', {'pedidos': stocks})
 
