@@ -109,3 +109,25 @@ body {
     text-decoration: line-through;
     background-color: #f0f0f0;
 }
+/* Estilo para el botón de pendiente */
+.btn-estado {
+    transition: all 0.3s ease;
+    min-width: 120px;
+    white-space: nowrap;
+}
+
+@media (max-width: 767.98px) {
+    .list-group-item {
+        padding: 1rem !important;
+    }
+    
+    .text-break {
+        word-break: break-word;
+        hyphens: auto;
+    }
+    
+    .btn-estado {
+        width: 100%;
+        margin-top: 0.5rem !important;
+    }
+}
