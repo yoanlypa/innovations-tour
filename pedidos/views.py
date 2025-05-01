@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -311,17 +311,17 @@ class ProductoUpdateView( UpdateView):
 
 def stock_control_view(request):
     registros = StockControl.objects.all().order_by('-fecha_creacion')
-    return render(request, 'stock/stock_control.html', {'registros': registros})
+    return render(request, 'pedidos/stock_control.html', {'registros': registros})
 
 def agregar_stock(request):
     if request.method == 'POST':
         form = StockControlForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('stock:control')
+            return redirect('pedidos:stock_control')
     else:
         form = StockControlForm()
-    return render(request, 'stock/stock_form.html', {'form': form})
+    return render(request, 'pedidos/stock_form.html', {'form': form})
 
 def editar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
@@ -329,16 +329,16 @@ def editar_stock(request, pk):
         form = StockControlForm(request.POST, instance=registro)
         if form.is_valid():
             form.save()
-            return redirect('stock:control')
+            return redirect('pedidos:stock_control')
     else:
         form = StockControlForm(instance=registro)
-    return render(request, 'stock/stock_form.html', {'form': form})
+    return render(request, 'pedidos/stock_form.html', {'form': form})
 
 @require_POST
 def eliminar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
     registro.delete()
-    return redirect('stock:control')
+    return redirect('pedidos:stock_control')
 
 @require_POST
 def toggle_estado(request, pk):
