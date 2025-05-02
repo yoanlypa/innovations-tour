@@ -13,10 +13,10 @@ class TareaAdmin(admin.ModelAdmin):
     
 @admin.register(StockControl)
 class StockControlAdmin(admin.ModelAdmin):
-    list_display = ('pax', 'lugar_er', 'excursion', 'guia', 'fecha_er', 'entregado', 'recogido')
-    list_filter = ('fecha_er', 'entregado', 'recogido')
+    list_display = ('fecha_inicio', 'fecha_fin', 'excursion', 'empresa','lugar_entrega','lugar_recogida','estado','guia', 'fecha_creacion', 'entregado', 'recogido','maletas','notas')
+    list_filter = ('fecha_creacion', 'entregado', 'recogido')
     search_fields = ('excursion', 'guia')
-    ordering = ('fecha_er',)
+    ordering = ('fecha_creacion',)
     
     
     
