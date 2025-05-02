@@ -80,7 +80,7 @@ class StockControl(models.Model):
     estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
     notas = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_entrega = models.DateTimeField(auto_now_add=True)
+    fecha_entrega = models.DateTimeField()
     entregado = models.BooleanField(verbose_name="Entregado", default=True)
     recogido = models.BooleanField(verbose_name="Recogido", default=False)
     
