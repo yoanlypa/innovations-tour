@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, logout, get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.tokens import default_token_generator
+from django.utils.timezone import make_aware, localtime
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.db import IntegrityError
 from django.utils.encoding import force_bytes, force_str
@@ -36,6 +37,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
 import csv
+from datetime import datetime
 
 
 
@@ -308,7 +310,6 @@ class ProductoUpdateView( UpdateView):
     
 # ========== Control de Stock ==========
 @staff_member_required
-
 def stock_control_view(request):
     registros = StockControl.objects.all().order_by('-fecha_creacion')
     return render(request, 'pedidos/stock_control.html', {'registros': registros})
@@ -316,10 +317,12 @@ def stock_control_view(request):
 def agregar_stock(request):
     if request.method == 'POST':
         form = StockControlForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('pedidos:stock_control')
-    else:
+        # Convertir fecha española a datetime aware
+        fecha_str = request.POST.get('fecha_creacion')
+        fecha_madrid = make_aware(
+            datetime.strptime(fecha_str, '%d/%m/%Y %H:%M'),
+            timezone.get_current_timezone()
+        )
         form = StockControlForm()
     return render(request, 'pedidos/stock_form.html', {'form': form})
 
@@ -333,6 +336,9 @@ def editar_stock(request, pk):
     else:
         form = StockControlForm(instance=registro)
     return render(request, 'pedidos/stock_form.html', {'form': form})
+
+
+
 
 @require_POST
 def eliminar_stock(request, pk):
@@ -366,7 +372,8 @@ def exportar_csv(request):
     writer.writerow([
         'Fecha Creación', 'PAX', 'Lugar E/R', 
         'Excursión', 'Guía', 'Fecha E/R', 
-        'Entregado', 'Recogido'
+        'Entregado', 'Recogido',
+        localtime(r.fecha_creacion).strftime('%d/%m/%Y %H:%M'),
     ])
     
     registros = StockControl.objects.all().order_by('-fecha_creacion')

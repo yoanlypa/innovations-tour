@@ -48,11 +48,19 @@ class Tarea(models.Model):
     def __str__(self):
         return self.titulo
 class StockControl(models.Model):
+    fecha_creacion = models.DateTimeField(
+        verbose_name="Fecha y Hora",
+        default=timezone.localtime,  # Fecha/hora local de Madrid
+        help_text="Fecha y hora en formato local (Madrid)"
+    )
     pax = models.IntegerField(verbose_name="PAX")
-    lugar_er = models.CharField(verbose_name="Lugar E/R", max_length=100)
+    lugar_entreg = models.CharField(verbose_name="Lugar entrega", max_length=100)
+    lugar_recog = models.CharField(verbose_name="Lugar recogida", max_length=100)   
+    empresa = models.CharField(verbose_name="Empresa", max_length=100)
     excursion = models.CharField(verbose_name="Excursión", max_length=100)
     guia = models.CharField(verbose_name="Guía", max_length=100)
-    fecha_er = models.DateField(verbose_name="Fecha E/R")
+    fecha_inicio = models.DateField(verbose_name="Fecha inicio", max_length=100)
+    fecha_fin = models.DateField(verbose_name="Fecha fin", max_length=100)
     fecha_creacion = models.DateTimeField(
         verbose_name="Fecha de Creación",
         default=timezone.now,
@@ -65,10 +73,6 @@ class StockControl(models.Model):
         # Validar que no tenga ambos estados activos
         if self.entregado and self.recogido:
             raise ValidationError("Un registro no puede estar entregado y recogido simultáneamente")
-        
-        # Validar fecha de creación no futura
-        if self.fecha_creacion > timezone.now():
-            raise ValidationError("La fecha de creación no puede ser futura")
 
     def save(self, *args, **kwargs):
         self.full_clean()

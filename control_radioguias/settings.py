@@ -145,7 +145,8 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/pedidos'
-
+TIME_ZONE = 'Europe/Madrid'
+USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 

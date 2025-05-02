@@ -30,16 +30,19 @@ class ProductoForm(forms.ModelForm):
         
 
 class StockControlForm(forms.ModelForm):
-    fecha_creacion = forms.DateTimeField(
-        widget=forms.DateTimeInput(
-            attrs={
-                'type': 'datetime-local',
-                'class': 'form-control',
-                'max': timezone.localtime().strftime('%Y-%m-%dT%H:%M')
-            }
-        ),
-        initial=timezone.now
-    )
+    class Meta:
+        model = StockControl
+        fields = '__all__'
+        widgets = {
+            'fecha_creacion': forms.DateTimeInput(
+                attrs={
+                    'type': 'datetime-local',
+                    'class': 'form-control',
+                    'step': '300'  # Intervalos de 5 minutos
+                },
+                format='%d/%m/%Y %H:%M'  # Formato español
+            )
+        }
 
     class Meta:
         model = StockControl
@@ -47,9 +50,3 @@ class StockControlForm(forms.ModelForm):
         widgets = {
             'fecha_er': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
-
-    def clean_fecha_creacion(self):
-        fecha = self.cleaned_data['fecha_creacion']
-        if fecha > timezone.now():
-            raise forms.ValidationError("¡No se permiten fechas futuras!")
-        return fecha

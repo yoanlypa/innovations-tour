@@ -45,4 +45,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const fechaInput = document.getElementById('id_fecha_creacion');
+        
+        // Obtener fecha/hora actual en Madrid
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Europe/Madrid'
+        };
+        
+        const localDate = new Intl.DateTimeFormat('es-ES', options).format(now)
+            .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2})/, '$3-$2-$1T$4');
+        
+        if (!fechaInput.value) {
+            fechaInput.value = localDate;
+        }
+        
+        // Forzar formato español en todos los navegadores
+        fechaInput.addEventListener('input', function(e) {
+            const [date, time] = e.target.value.split('T');
+            const [year, month, day] = date.split('-');
+            e.target.value = `${day}/${month}/${year} ${time}`;
+        });
+    });
+    </script>
 {% endblock %}
