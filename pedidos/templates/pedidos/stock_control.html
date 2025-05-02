@@ -1,12 +1,19 @@
 {% extends 'pedidos/base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="d-flex justify-content-between mb-4">
-        <h2>📦 Controles de Stock</h2>
-        <a href="{% url 'crear_stock' %}" class="btn btn-primary">➕ Nuevo</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📦 Control de Stock</h2>
+        <div>
+            <a href="{% url 'pedidos:exportar_csv' %}" class="btn btn-secondary me-2">
+                📥 Exportar CSV
+            </a>
+            <a href="{% url 'pedidos:agregar_stock' %}" class="btn btn-primary">
+                ➕ Nuevo Registro
+            </a>
+        </div>
     </div>
-
     <div class="table-responsive">
         <table class="table table-hover">
             <thead class="table-dark">
@@ -29,6 +36,11 @@
                         {% for maleta in stock.maletas.all %}
                         <span class="badge bg-secondary">🎒 {{ maleta.guia }} ({{ maleta.pax }} pax)</span>
                         {% endfor %}
+                    </td>
+                        <button class="btn btn-sm {% if registro.entregado %}btn-success{% else %}btn-primary{% endif %} btn-estado"
+                                data-url="{% url 'pedidos:toggle_estado' pk=registro.pk %}">
+                            {% if registro.entregado %}📤 Entregado{% else %}📥 Recogido{% endif %}
+                        </button>
                     </td>
                     <td>
                         <a href="{% url 'pedidos:editar_stock' registro.pk %}" class="btn btn-sm btn-warning">
