@@ -79,11 +79,16 @@ class StockControl(models.Model):
     empresa = models.CharField(max_length=100)
     lugar_entrega = models.CharField(max_length=200)
     lugar_recogida = models.CharField(max_length=200)
+    guia = models.CharField(max_length=255)
     estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
     notas = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     maletas = models.ManyToManyField('Maleta', through='StockMaleta')
+    entregado = models.BooleanField(default=False)
+    recogido = models.BooleanField(default=False)
 
+def __str__(self):
+        return f"Excursión: {self.excursion} ({self.fecha_inicio} - {self.fecha_fin})"
 class StockMaleta(models.Model):
     stock = models.ForeignKey(StockControl, on_delete=models.CASCADE)
     maleta = models.ForeignKey(Maleta, on_delete=models.CASCADE)
