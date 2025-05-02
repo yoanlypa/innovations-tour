@@ -40,6 +40,8 @@ class Pedido(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pedidos')
     productos = models.ManyToManyField(Producto, blank=True, related_name='pedidos')
 class Maleta(models.Model):
+    stock_control = models.ForeignKey(StockControl, on_delete=models.CASCADE)
+
     pedido = models.ForeignKey(Pedido, related_name='maletas', on_delete=models.CASCADE)
     cantidad_pax = models.IntegerField()
     guia = models.CharField(max_length=255)
