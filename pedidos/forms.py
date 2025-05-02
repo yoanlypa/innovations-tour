@@ -54,7 +54,7 @@ class StockControlForm(forms.ModelForm):
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta
-        fields = ['guia', 'pax']
+        fields = ['guia', 'cantidad_pax']
 
 MaletaFormSet = forms.inlineformset_factory(
     StockControl,
