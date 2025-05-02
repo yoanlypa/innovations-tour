@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.contrib import admin
 from .utils import convertir_fecha
 
 class Producto(models.Model):
@@ -81,33 +82,23 @@ class StockControl(models.Model):
     estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
     notas = models.TextField(blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
-    maletas = models.ManyToManyField(Maleta, through='StockMaleta')
+    maletas = models.ManyToManyField('Maleta', through='StockMaleta')
 
 class StockMaleta(models.Model):
     stock = models.ForeignKey(StockControl, on_delete=models.CASCADE)
     maleta = models.ForeignKey(Maleta, on_delete=models.CASCADE)
     guia = models.CharField(max_length=100)
     pax = models.PositiveIntegerField()
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('stock', 'maleta')
-    def clean(self):
-        # Validar que no tenga ambos estados activos
-        if self.entregado and self.recogido:
-            raise ValidationError("Un registro no puede estar entregado y recogido simultáneamente")
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
+class StockMaletaAdmin(admin.ModelAdmin):
+    ordering = ['fecha_creacion']
+    list_display = ('stock', 'maleta', 'guia', 'pax')
 
-    def __str__(self):
-        return f"{self.excursion} - {self.fecha_entrega}"
-
-    class Meta:
-        verbose_name = "Control de Stock"
-        verbose_name_plural = "Controles de Stock"
-        ordering = ['-fecha_creacion']
-
+admin.site.register(StockMaleta, StockMaletaAdmin)
 class RegistroCliente(models.Model):
     nombre_usuario = models.CharField(max_length=150)
     email = models.EmailField()
