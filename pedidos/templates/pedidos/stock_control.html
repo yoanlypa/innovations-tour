@@ -45,11 +45,11 @@
                         </button>
                     </td>
                     <td>
-                        <a href="{% url 'pedidos:editar' registro.pk %}" class="btn btn-sm btn-warning">
+                        <a href="{% url 'pedidos:editar_stock' registro.pk %}" class="btn btn-sm btn-warning">
                             ✏️ Editar
                         </a>
                         <button class="btn btn-sm btn-danger btn-eliminar" 
-                                data-url="{% url 'pedidos:eliminar' registro.pk %}">
+                                data-url="{% url 'pedidos:eliminar_stock' registro.pk %}">
                             🗑️ Eliminar
                         </button>
                     </td>
