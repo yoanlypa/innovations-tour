@@ -43,8 +43,7 @@ class StockControlForm(forms.ModelForm):
         model = StockControl
         fields = [
             'fecha_inicio', 'fecha_fin', 'excursion', 
-            'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_entrega',
-            'entregado', 'recogido', 'usuario', 
+            'empresa', 'lugar_entrega', 'lugar_recogida', 
             'estado', 'notas'
         ]
         widgets = {
@@ -52,7 +51,6 @@ class StockControlForm(forms.ModelForm):
             'fecha_fin': forms.DateInput(attrs={'type': 'date'}),
             'notas': forms.Textarea(attrs={'rows': 3}),
         }
-
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta
@@ -64,4 +62,12 @@ MaletaFormSet = forms.inlineformset_factory(
     form=MaletaForm,
     extra=1,  # 1 maleta por defecto
     can_delete=True
+)
+StockMaletaFormSet = forms.inlineformset_factory(
+    StockControl,
+    StockControl.maletas.through,
+    form=MaletaForm,
+    extra=1,
+    can_delete=True,
+    fields=('maleta', 'guia', 'pax')
 )

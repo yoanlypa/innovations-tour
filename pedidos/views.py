@@ -25,7 +25,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm,MaletaFormSet
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm, MaletaFormSet, StockMaletaFormSet
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -315,38 +315,30 @@ def stock_control_view(request):
 
 def agregar_stock(request):
     if request.method == 'POST':
-        form = StockControlForm(request.POST)
         # Convertir fecha española a datetime aware
         fecha_str = request.POST.get('fecha_creacion')
         fecha_madrid = make_aware(
             datetime.strptime(fecha_str, '%d/%m/%Y %H:%M'),
             timezone.get_current_timezone()
         )
-        form = StockControlForm()
-    return render(request, 'pedidos/stock_form.html', {'form': form})
-def crear_stock(request):
-    if request.method == 'POST':
         form = StockControlForm(request.POST)
-          
-        formset = MaletaFormSet(request.POST)
+        formset = StockMaletaFormSet(request.POST, instance=StockControl())
         
         if form.is_valid() and formset.is_valid():
             stock = form.save(commit=False)
             stock.usuario = request.user
             stock.save()
-            
             formset.instance = stock
             formset.save()
-            
             return redirect('lista_stock')
-    
     else:
         form = StockControlForm()
-        formset = MaletaFormSet()
-    
+        formset = StockMaletaFormSet(instance=StockControl())
+        
     return render(request, 'pedidos/stock_form.html', {
         'form': form,
-        'formset': formset
+        'formset': formset,
+        'form_title': 'Nuevo Control de Stock'
     })
 
 def toggle_estado(request, pk):
