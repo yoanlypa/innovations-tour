@@ -366,7 +366,7 @@ def eliminar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
     registro.delete()
     return redirect('pedidos:stock_control')
-
+@staff_member_required
 @require_POST
 def toggle_estado(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
