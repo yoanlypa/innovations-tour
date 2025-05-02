@@ -25,7 +25,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm,MaletaFormSet
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -38,7 +38,6 @@ from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
 import csv
 from datetime import datetime
-
 
 
 
@@ -325,6 +324,36 @@ def agregar_stock(request):
         )
         form = StockControlForm()
     return render(request, 'pedidos/stock_form.html', {'form': form})
+def crear_stock(request):
+    if request.method == 'POST':
+        form = StockControlForm(request.POST)
+          
+        formset = MaletaFormSet(request.POST)
+        
+        if form.is_valid() and formset.is_valid():
+            stock = form.save(commit=False)
+            stock.usuario = request.user
+            stock.save()
+            
+            formset.instance = stock
+            formset.save()
+            
+            return redirect('lista_stock')
+    
+    else:
+        form = StockControlForm()
+        formset = MaletaFormSet()
+    
+    return render(request, 'pedidos/stock_form.html', {
+        'form': form,
+        'formset': formset
+    })
+
+def toggle_estado(request, pk):
+    stock = get_object_or_404(StockControl, pk=pk)
+    stock.estado = 'G' if stock.estado == 'P' else 'P'
+    stock.save()
+    return redirect('lista_stock')
 
 def editar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)

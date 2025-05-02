@@ -3,48 +3,95 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>{% if object %}✏️ Editar Registro{% else %}➕ Nuevo Registro{% endif %}</h2>
-    
-    <form method="post" class="mt-3">
-        {% csrf_token %}
-        <div class="row g-3">
-            {% for field in form %}
-            <div class="col-md-6">
-                <label class="form-label">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                <small class="form-text text-muted">{{ field.help_text }}</small>
-                {% endif %}
-                {% if field.errors %}
-                <div class="text-danger">{{ field.errors }}</div>
-                {% endif %}
-            </div>
-            {% endfor %}
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+            <h3>➕ Nuevo Control de Stock</h3>
         </div>
         
-        <div class="mt-4">
-            <button type="submit" class="btn btn-success">
-                💾 Guardar
-            </button>
-            <a href="{% url 'pedidos:stock_control' %}" class="btn btn-secondary">
-                ↩️ Cancelar
-            </a>
+        <div class="card-body">
+            <form method="post" id="main-form">
+                {% csrf_token %}
+                
+                <!-- Sección Principal -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        {{ form.fecha_inicio.label_tag }}
+                        {{ form.fecha_inicio }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.fecha_fin.label_tag }}
+                        {{ form.fecha_fin }}
+                    </div>
+                    
+                    <!-- Resto de campos principales -->
+                    {{ form.excursion|as_crispy_field }}
+                    {{ form.empresa|as_crispy_field }}
+                    {{ form.lugar_entrega|as_crispy_field }}
+                    {{ form.lugar_recogida|as_crispy_field }}
+                </div>
+
+                <!-- Sección Dinámica de Maletas -->
+                <div class="border p-3 mb-4 rounded">
+                    <h4 class="mb-3">🎒 Gestión de Maletas</h4>
+                    
+                    {{ formset.management_form }}
+                    <div id="maletas-container">
+                        {% for form in formset %}
+                        <div class="maleta-form mb-3 p-2 border rounded">
+                            {{ form.id }}
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    {{ form.guia.label_tag }}
+                                    {{ form.guia }}
+                                </div>
+                                <div class="col-md-5">
+                                    {{ form.pax.label_tag }}
+                                    {{ form.pax }}
+                                </div>
+                                <div class="col-md-1">
+                                    {{ form.DELETE.label_tag }}
+                                    {{ form.DELETE }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="button" class="btn btn-secondary mt-2" id="add-maleta">
+                        ➕ Añadir Maleta
+                    </button>
+                </div>
+
+                <!-- Botones Finales -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        💾 Guardar Todo
+                    </button>
+                </div>
+            </form>
         </div>
-    </form>
+    </div>
 </div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Setear fecha actual si está vacío
-    const fechaInput = document.getElementById('id_fecha_creacion');
-    if (fechaInput && !fechaInput.value) {
-        const now = new Date();
-        const tzOffset = now.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(now - tzOffset).toISOString().slice(0, 16);
-        fechaInput.value = localISOTime;
-    }
+$(document).ready(function() {
+    $('#add-maleta').click(function() {
+        const totalForms = $('#id_maletas-TOTAL_FORMS');
+        const formIdx = parseInt(totalForms.val());
+        const newForm = $('.maleta-form:last').clone(true);
+        
+        // Actualizar índices
+        newForm.html(newForm.html().replace(/maletas-(\d+)-/g, `maletas-${formIdx}-`));
+        newForm.find('input').val('');
+        newForm.find('.delete-checkbox').prop('checked', false);
+        
+        $('#maletas-container').append(newForm);
+        totalForms.val(formIdx + 1);
+    });
 });
 </script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const fechaInput = document.getElementById('id_fecha_creacion');

@@ -61,27 +61,33 @@ class Tarea(models.Model):
 
     def __str__(self):
         return self.titulo
+
+
 class StockControl(models.Model):
-    fecha_creacion = models.DateTimeField(
-        verbose_name="Fecha y Hora",
-        default=timezone.localtime,  # Fecha/hora local de Madrid
-        help_text="Fecha y hora en formato local (Madrid)"
+    ESTADOS = (
+        ('Entregado', 'Entregado'),
+        ('Recogido', 'Recogido'),
+        
     )
-    pax = models.IntegerField(verbose_name="PAX")
-    lugar_entreg = models.CharField(verbose_name="Lugar entrega", max_length=100)
-    lugar_recog = models.CharField(verbose_name="Lugar recogida", max_length=100)   
-    empresa = models.CharField(verbose_name="Empresa", max_length=100)
-    excursion = models.CharField(verbose_name="Excursión", max_length=100)
-    guia = models.CharField(verbose_name="Guía", max_length=100)
-    fecha_inicio = models.DateField(verbose_name="Fecha inicio", max_length=100)
-    fecha_fin = models.DateField(verbose_name="Fecha fin", max_length=100)
-    fecha_creacion = models.DateTimeField(
-        verbose_name="Fecha de Creación",
-        default=timezone.now,
-        help_text="Fecha de registro (modificable)"
-    )
+    
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    excursion = models.CharField(max_length=100)
+    empresa = models.CharField(max_length=100)
+    lugar_entrega = models.CharField(max_length=200)
+    lugar_recogida = models.CharField(max_length=200)
+    estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
+    notas = models.TextField(blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_entrega = models.DateTimeField(auto_now_add=True)
     entregado = models.BooleanField(verbose_name="Entregado", default=True)
     recogido = models.BooleanField(verbose_name="Recogido", default=False)
+    
+    class Maleta(models.Model):
+        stock = models.ForeignKey('StockControl', on_delete=models.CASCADE, related_name='maletas')
+        guia = models.CharField(max_length=100)
+        pax = models.PositiveIntegerField()
 
     def clean(self):
         # Validar que no tenga ambos estados activos
@@ -93,7 +99,7 @@ class StockControl(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.excursion} - {self.fecha_er}"
+        return f"{self.excursion} - {self.fecha_entrega}"
 
     class Meta:
         verbose_name = "Control de Stock"
