@@ -40,6 +40,25 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formatear todos los inputs de fecha
+            document.querySelectorAll('input[type="date"], input[type="datetime-local"]').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.type = 'text';
+                    this.placeholder = 'dd/mm/aaaa';
+                });
+                
+                input.addEventListener('blur', function() {
+                    const value = this.value;
+                    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                        const [day, month, year] = value.split('/');
+                        this.value = `${year}-${month}-${day}`;
+                    }
+                    this.type = 'date';
+                });
+            });
+        });
+        </script>
 </body>
 </html>

@@ -145,10 +145,19 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 LOGIN_URL = '/admin/login/'
 LOGIN_REDIRECT_URL = '/pedidos'
-TIME_ZONE = 'Europe/Madrid'
-USE_TZ = True
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
+
+# Formato de fechas para toda la app
+USE_L10N = False
+DATE_INPUT_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
+DATETIME_INPUT_FORMATS = ['%d/%m/%Y %H:%M']
+DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
+SHORT_DATE_FORMAT = 'd/m/Y'
+SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
+TIME_ZONE = 'Europe/Madrid'
+USE_TZ = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

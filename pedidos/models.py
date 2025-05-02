@@ -2,6 +2,8 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.utils import timezone
+from .utils import convertir_fecha
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     cantidad = models.IntegerField(default=0)
@@ -25,7 +27,12 @@ class Pedido(models.Model):
     empresa = models.CharField(max_length=100)
     cantidad = models.IntegerField(default=0, help_text="Cantidad de productos a entregar")
     guia = models.CharField(max_length=100, default='Sin asignar')  # 🛠 Valor por defecto para migrar
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    fecha_creacion = models.DateField()
+    def __init__(self, *args, **kwargs):
+        # Convertir fechas en formato string
+        if 'fecha_creacion' in kwargs and isinstance(kwargs['fecha_creacion'], str):
+            kwargs['fecha_creacion'] = convertir_fecha(kwargs['fecha_creacion'])
+        super().__init__(*args, **kwargs)
     fecha_modificacion = models.DateTimeField(auto_now=True)
     estado = models.CharField(max_length=20, choices=ESTADOS)
     notas = models.TextField(blank=True)
@@ -42,8 +49,15 @@ class Tarea(models.Model):
     descripcion = models.TextField()
     prioridad = models.CharField(max_length=20, choices=[('alta', 'Alta'), ('media', 'Media'), ('baja', 'Baja')])
     completada = models.BooleanField(default=False)
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    fecha_especifica = models.DateField(null=True, blank=True)
+    fecha_creacion = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha creación"
+    )
+    fecha_especifica = models.DateTimeField(
+        default=timezone.localtime,  # Fecha local
+        verbose_name="Fecha programada"
+    )
+
 
     def __str__(self):
         return self.titulo

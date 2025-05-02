@@ -5,6 +5,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
+from .utils import convertir_fecha
 
 
 
@@ -15,13 +16,21 @@ class TareaForm(forms.ModelForm):
         fields = ['titulo', 'descripcion', 'prioridad', 'completada']  # ✅ Campos existentes
 
 class PedidoForm(forms.ModelForm):
+    fecha_creacion = forms.CharField(
+        label="Fecha (dd/mm/aaaa)",
+        widget=forms.DateInput(attrs={
+            'placeholder': 'dd/mm/aaaa',
+            'pattern': '\d{2}/\d{2}/\d{4}'
+        })
+    )
 
     class Meta:
         model = Pedido
-        fields = [
-            'fecha_inicio', 'fecha_fin', 'lugar_entrega', 'lugar_recogida',
-            'empresa', 'cantidad', 'guia', 'usuario', 'productos', 'estado', 'notas'
-        ]
+        fields = '__all__'
+
+    def clean_fecha_creacion(self):
+        fecha_str = self.cleaned_data['fecha_creacion']
+        return convertir_fecha(fecha_str)
 
 class ProductoForm(forms.ModelForm):
     class Meta:
