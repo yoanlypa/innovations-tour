@@ -8,9 +8,16 @@
             <h3>➕ Nuevo Control de Stock</h3>
         </div>
         
-        <div class="card-body">
-            <form method="post" id="main-form" action="{% url 'pedidos:agregar_stock' %}">
-                {% csrf_token %}
+        {% block content %}
+                    <div class="container mt-4">
+    <               h2>Agregar Stock</h2>
+                    <form method="post">
+                       % csrf_token %}
+                {{ form|crispy }}
+                 <button type="submit" class="btn btn-primary mt-2">Guardar</button>
+                         </form>
+                    </div>
+                {%endblock %}
                 
                 <!-- Sección Principal -->
                 <div class="row g-3 mb-4">
