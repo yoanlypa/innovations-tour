@@ -9,7 +9,7 @@
         </div>
         
         <div class="card-body">
-            <form method="post" id="main-form">
+            <form method="post" id="main-form" action="{% url 'pedidos:agregar_stock' %}">
                 {% csrf_token %}
                 
                 <!-- Sección Principal -->
