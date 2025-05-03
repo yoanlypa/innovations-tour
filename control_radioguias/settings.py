@@ -48,9 +48,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',  # ← Añadido para CORS
+    'crispy_forms',
        
          
 ]
+CRISPY_TEMPLATE_PACK = 'bootstrap5'  
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
