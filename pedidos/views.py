@@ -330,7 +330,7 @@ def agregar_stock(request):
             stock.save()
             formset.instance = stock
             formset.save()
-            return redirect('lista_stock')
+            return redirect('pedidos:stock_control')
     else:
         form = StockControlForm()
         formset = StockMaletaFormSet(instance=StockControl())
@@ -345,7 +345,7 @@ def toggle_estado(request, pk):
     stock = get_object_or_404(StockControl, pk=pk)
     stock.estado = 'G' if stock.estado == 'P' else 'P'
     stock.save()
-    return redirect('lista_stock')
+    return redirect('stock_control')
 
 def editar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
