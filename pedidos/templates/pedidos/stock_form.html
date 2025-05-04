@@ -1,24 +1,18 @@
 {% extends 'pedidos/base.html' %}
 {% load static %}
 {% load crispy_forms_tags %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="card shadow-lg">
         <div class="card-header bg-primary text-white">
             <h3>➕ Nuevo Control de Stock</h3>
         </div>
-        
-        {% block content %}
-                    <div class="container mt-4">
-    <               h2>Agregar Stock</h2>
-                    <form method="post">
-                       % csrf_token %}
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
                 {{ form|crispy }}
-                 <button type="submit" class="btn btn-primary mt-2">Guardar</button>
-                         </form>
-                    </div>
-                
-                <!-- Sección Principal -->
+
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
                         {{ form.fecha_inicio.label_tag }}
@@ -28,104 +22,34 @@
                         {{ form.fecha_fin.label_tag }}
                         {{ form.fecha_fin }}
                     </div>
-                    
-                    <!-- Resto de campos principales -->
                     {{ form.excursion|as_crispy_field }}
                     {{ form.empresa|as_crispy_field }}
                     {{ form.lugar_entrega|as_crispy_field }}
                     {{ form.lugar_recogida|as_crispy_field }}
                 </div>
 
-                <!-- Sección Dinámica de Maletas -->
                 <div class="border p-3 mb-4 rounded">
                     <h4 class="mb-3">🎒 Gestión de Maletas</h4>
-                    
                     {{ formset.management_form }}
                     <div id="maletas-container">
                         {% for form in formset %}
                         <div class="maleta-form mb-3 p-2 border rounded">
                             {{ form.id }}
                             <div class="row g-2">
-                                <div class="col-md-6">
-                                    {{ form.guia.label_tag }}
-                                    {{ form.guia }}
-                                </div>
-                                <div class="col-md-5">
-                                    {{ form.pax.label_tag }}
-                                    {{ form.pax }}
-                                </div>
-                                <div class="col-md-1">
-                                    {{ form.DELETE.label_tag }}
-                                    {{ form.DELETE }}
-                                </div>
+                                <div class="col-md-6">{{ form.guia.label_tag }} {{ form.guia }}</div>
+                                <div class="col-md-5">{{ form.pax.label_tag }} {{ form.pax }}</div>
+                                <div class="col-md-1">{{ form.DELETE.label_tag }} {{ form.DELETE }}</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
-                    
-                    <button type="button" class="btn btn-secondary mt-2" id="add-maleta">
-                        ➕ Añadir Maleta
-                    </button>
+                    <button type="button" class="btn btn-secondary mt-2" id="add-maleta">➕ Añadir Maleta</button>
                 </div>
 
-                <!-- Botones Finales -->
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-success">
-                        💾 Guardar Todo
-                    </button>
+                    <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(document).ready(function() {
-    $('#add-maleta').click(function() {
-        const totalForms = $('#id_maletas-TOTAL_FORMS');
-        const formIdx = parseInt(totalForms.val());
-        const newForm = $('.maleta-form:last').clone(true);
-        
-        // Actualizar índices
-        newForm.html(newForm.html().replace(/maletas-(\d+)-/g, `maletas-${formIdx}-`));
-        newForm.find('input').val('');
-        newForm.find('.delete-checkbox').prop('checked', false);
-        
-        $('#maletas-container').append(newForm);
-        totalForms.val(formIdx + 1);
-    });
-});
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const fechaInput = document.getElementById('id_fecha_creacion');
-        
-        // Obtener fecha/hora actual en Madrid
-        const now = new Date();
-        const options = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZone: 'Europe/Madrid'
-        };
-        
-        const localDate = new Intl.DateTimeFormat('es-ES', options).format(now)
-            .replace(/(\d{2})\/(\d{2})\/(\d{4}), (\d{2}:\d{2})/, '$3-$2-$1T$4');
-        
-        if (!fechaInput.value) {
-            fechaInput.value = localDate;
-        }
-        
-        // Forzar formato español en todos los navegadores
-        fechaInput.addEventListener('input', function(e) {
-            const [date, time] = e.target.value.split('T');
-            const [year, month, day] = date.split('-');
-            e.target.value = `${day}/${month}/${year} ${time}`;
-        });
-    });
-    </script>
-{% endblock %}
