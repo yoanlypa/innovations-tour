@@ -84,7 +84,7 @@ class StockControl(models.Model):
     notas = models.TextField(blank=True,null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     maletas = models.ManyToManyField('Maleta', through='StockMaleta')
-    entregado = models.BooleanField(default=False)
+    entregado = models.BooleanField(default=True)
     recogido = models.BooleanField(default=False)
 
 def __str__(self):

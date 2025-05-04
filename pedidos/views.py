@@ -340,13 +340,22 @@ def agregar_stock(request):
         'formset': formset,
         'form_title': 'Nuevo Control de Stock'
     })
-
-def toggle_estado(request, pk):
-    stock = get_object_or_404(StockControl, pk=pk)
-    stock.estado = 'G' if stock.estado == 'P' else 'P'
-    stock.save()
-    return redirect('stock_control')
-
+@staff_member_required
+@require_POST
+def toggle_estado_stock(request, pk):
+    registro = get_object_or_404(StockControl, pk=pk)
+    # Si estaba entregado, marcamos recogido; sino lo contrario
+    if registro.entregado and not registro.recogido:
+        registro.entregado = False
+        registro.recogido  = True
+    else:
+        registro.entregado = True
+        registro.recogido  = False
+    registro.save()
+    return JsonResponse({
+        'entregado': registro.entregado,
+        'recogido':  registro.recogido,
+    })
 def editar_stock(request, pk):
     registro = get_object_or_404(StockControl, pk=pk)
     if request.method == 'POST':
