@@ -21,21 +21,52 @@
   <div class="table-responsive">
     <table class="table table-hover align-middle">
       <thead class="table-dark">
-        <tr>
-          <th>Excursión</th><th>Empresa</th><th>Fechas</th>
-          <th>Maletas</th><th>Estado</th><th>Acciones</th>
-        </tr>
+        <thead class="table-dark">
+            <tr>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Excursión</th>
+              <th>Empresa</th>
+              <th>Lugar E</th>
+              <th>Lugar R</th>
+              <th>Estado</th>
+              <th>Guía</th>
+              <th>Creación</th>
+              <th>Maletas</th>
+              <th>Notas</th>
+              <th>Entrega</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          
       </thead>
       <tbody>
         {% for stock in registros %}
         <tr>
+          <td>{{ stock.fecha_inicio|date:"d/m/Y" }}</td>
+          <td>{{ stock.fecha_fin|date:"d/m/Y" }}</td>
           <td>{{ stock.excursion }}</td>
           <td>{{ stock.empresa }}</td>
-          <td>{{ stock.fecha_inicio|date:"d/m/Y" }} – {{ stock.fecha_fin|date:"d/m/Y" }}</td>
+          <td>{{ stock.lugar_entrega }}</td>
+          <td>{{ stock.lugar_recogida }}</td>
+          <td>{{ stock.estado }}</td>
+          <td>{{ stock.guia }}</td>
+          <td>{{ stock.fecha_creacion|date:"d/m/Y H:i" }}</td>
           <td>
             {% for maleta in stock.maletas.all %}
               <span class="badge bg-secondary">🎒 {{ maleta.guia }} ({{ maleta.cantidad_pax }})</span>
+            {% empty %}
+              —
             {% endfor %}
+          </td>
+          <td>
+            {% if stock.notas %}
+              <button class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="{{ stock.notas }}">
+                📝
+              </button>
+            {% else %}
+              —
+            {% endif %}
           </td>
           <td>
             <button class="btn btn-sm btn-estado"
@@ -49,8 +80,9 @@
           </td>
           <td>
             <a href="{% url 'pedidos:editar_stock' stock.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
-            <button class="btn btn-sm btn-danger btn-eliminar" data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">
-              🗑️ Eliminar
+            <button class="btn btn-sm btn-danger btn-eliminar"
+                    data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">
+              🗑️
             </button>
           </td>
         </tr>
@@ -60,28 +92,42 @@
   </div>
 
   <!-- ─── Modal para "Nuevo registro" ─────────────────────────────────── -->
-  <div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <form id="form-nuevo-stock" method="post" action="{% url 'pedidos:agregar_stock' %}">
-          {% csrf_token %}
-          <div class="modal-header bg-primary text-white">
-            <h5 class="modal-title">➕ Nuevo Control de Stock</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            {{ form|crispy }}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
+ <!-- Botón para abrir el modal -->
+<button class="btn btn-primary mb-3"
+data-bs-toggle="modal"
+data-bs-target="#nuevoRegistroModal">
+➕ Nuevo registro
+</button>
 
-</div>  {# /container #}
+<!-- Modal -->
+<div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-content">
+<form id="form-nuevo-stock"
+    method="post"
+    action="{% url 'pedidos:agregar_stock' %}">
+{% csrf_token %}
+<div class="modal-header bg-primary text-white">
+  <h5 class="modal-title">➕ Nuevo Control de Stock</h5>
+  <button type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Cerrar"></button>
+</div>
+<div class="modal-body">
+  {{ form|crispy }}
+</div>
+<div class="modal-footer">
+  <button type="button"
+          class="btn btn-secondary"
+          data-bs-dismiss="modal">Cancelar</button>
+  <button type="submit"
+          class="btn btn-success">Guardar</button>
+</div>
+</form>
+</div>
+</div>
+</div>
 
 <!-- ─── Scripts AJAX y Bootstrap ──────────────────────────────────────── -->
 <script>
@@ -102,7 +148,12 @@
       }
     });
   });
-
+  
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    tooltipTriggerList.forEach(function (el) {
+      new bootstrap.Tooltip(el)
+    })
+  
   // Envío AJAX del formulario del modal
   document.getElementById('form-nuevo-stock').addEventListener('submit', async function(e) {
     e.preventDefault();

@@ -22,6 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('pedidos/', include('pedidos.urls', namespace='pedidos')),    
     path('api-auth/', include('rest_framework.urls')),
-    path('', RedirectView.as_view(url='pedidos/')),
+    path('', RedirectView.as_view(url='pedidos/pedidos/')),
     
 ]

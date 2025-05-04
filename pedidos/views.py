@@ -309,24 +309,24 @@ class ProductoUpdateView( UpdateView):
     
 # ========== Control de Stock ==========
 @staff_member_required
-def stock_control_view(request):
-    registros = StockControl.objects.all().order_by('-fecha_creacion')
-    return render(request, 'pedidos/stock_control.html', {'registros': registros})
-
-@staff_member_required
 def agregar_stock(request):
     if request.method == 'POST':
         form = StockControlForm(request.POST)
         if form.is_valid():
             form.save()
+            # Tras guardar, redirigimos para evitar reposts en reload
             return redirect('pedidos:stock_control')
     else:
         form = StockControlForm()
-    # Si quieres ver errores, podrías renderizar un template de “nuevo”,
-    # pero como abrimos en modal, redirigimos siempre al listado.
-    return redirect('pedidos:stock_control')
 
-
+    # Si es GET o el POST no fue válido, renderizamos el listado + formulario
+    registros = StockControl.objects.all().order_by('-fecha_creacion')
+    return render(request, 'pedidos/stock_control.html', {
+        'registros': registros,
+        'form': form,
+    })
+    
+    
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
