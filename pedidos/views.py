@@ -309,6 +309,16 @@ class ProductoUpdateView( UpdateView):
     
 # ========== Control de Stock ==========
 @staff_member_required
+def stock_control_view(request):
+    registros = StockControl.objects.all().order_by('-fecha_creacion')
+    form = StockControlForm()
+    return render(request, 'pedidos/stock_control.html', {
+        'registros': registros,
+        'form': form,
+    })
+
+
+@staff_member_required
 def agregar_stock(request):
     if request.method == 'POST':
         form = StockControlForm(request.POST)
