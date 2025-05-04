@@ -80,7 +80,7 @@ class StockControl(models.Model):
     lugar_entrega = models.CharField(max_length=200,null=True, blank=True)
     lugar_recogida = models.CharField(max_length=200,null=True, blank=True)
     guia = models.CharField(max_length=255,null=True, blank=True)
-    estado = models.CharField(max_length=1, choices=ESTADOS, default='P')
+    estado = models.CharField(max_length=1, choices=ESTADOS, default='G')
     notas = models.TextField(blank=True,null=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     maletas = models.ManyToManyField('Maleta', through='StockMaleta')

@@ -24,7 +24,7 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.utils import timezone
-from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente
+from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente, StockMaleta, Maleta
 from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm, MaletaFormSet, StockMaletaFormSet
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -320,23 +320,40 @@ def stock_control_view(request):
 
 @staff_member_required
 def agregar_stock(request):
-    if request.method == 'POST':
-        form = StockControlForm(request.POST)
-        if form.is_valid():
-            form.save()
-            # Tras guardar, redirigimos para evitar reposts en reload
-            return redirect('pedidos:stock_control')
-    else:
-        form = StockControlForm()
+    if request.method=='POST':
+        # Crea el StockControl
+        sc = StockControl.objects.create(
+          usuario=request.user,
+          fecha_inicio=request.POST['fecha_inicio'],
+          fecha_fin=request.POST.get('fecha_fin') or None,
+          excursion=request.POST.get('excursion',''),
+          empresa = request.POST.get('empresa',''),
+          lugar_entrega=request.POST.get('lugar_entrega',''),
+          lugar_recogida=request.POST.get('lugar_recogida',''),
+          guia=request.POST.get('guia',''),
+          estado=request.POST['estado'],
+          notas=request.POST.get('notas',''),
+          # entregado / recogido llegan como 'on' o nada
+          entregado = bool(request.POST.get('entregado', True)),
+          recogido = bool(request.POST.get('recogido', False)),
+        )
+        # Maletas
+        total = int(request.POST.get('nroMaletas',0));
+        for i in range(total):
+            StockMaleta.objects.create(
+              stock = sc,
+              maleta = Maleta.objects.create(
+                pedido = None,  # si lo asocias a Pedido, ajústalo
+                cantidad_pax = request.POST[f'maletas-{i}-cantidad_pax'],
+                guia = request.POST[f'maletas-{i}-guia'],
+                stock_control = sc
+              ),
+              guia = request.POST[f'maletas-{i}-guia'],
+              pax = request.POST[f'maletas-{i}-cantidad_pax']
+            )
+        return redirect('pedidos:stock_control')
+    return redirect('pedidos:stock_control')
 
-    # Si es GET o el POST no fue válido, renderizamos el listado + formulario
-    registros = StockControl.objects.all().order_by('-fecha_creacion')
-    return render(request, 'pedidos/stock_control.html', {
-        'registros': registros,
-        'form': form,
-    })
-    
-    
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
