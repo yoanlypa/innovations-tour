@@ -50,5 +50,6 @@ urlpatterns = [
     path('stock/editar/<int:pk>/', views.editar_stock, name='editar_stock'),
     path('stock/eliminar/<int:pk>/', views.eliminar_stock, name='eliminar_stock'),
     path('stock/toggle-estado/<int:pk>/', views.toggle_estado_stock, name='toggle_estado'),
+    path('stock/exportar-csv/',        views.exportar_csv,     name='exportar_csv'),
 
 ]
