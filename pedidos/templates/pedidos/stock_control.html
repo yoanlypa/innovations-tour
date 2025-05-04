@@ -1,258 +1,128 @@
 {% extends 'pedidos/base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>📦 Control de Stock</h2>
-        <div>
-            <a href="{% url 'pedidos:exportar_csv' %}" class="btn btn-secondary me-2">
-                📥 Exportar CSV
-            </a>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
-                ➕ Nuevo registro
-              </button>
-              
-              <div class="modal fade" id="nuevoRegistroModal" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <form id="form-nuevo-stock" method="post" action="{% url 'pedidos:agregar_stock' %}">
-                      {% csrf_token %}
-                      <div class="modal-header">
-                        <h5 class="modal-title">Nuevo Control de Stock</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body">
-                        {{ form.fecha_inicio }}       <!-- ya incluye type="datetime-local" -->
-                        {{ form.fecha_fin }}
-                        {{ form.excursion }}
-                        {{ form.empresa }}
-                        {{ form.lugar_entrega }}
-                        {{ form.lugar_recogida }}
-                        {{ form.guia }}
-                        {{ form.estado }}
-                        {{ form.notas }}
-                        {{ form.entregado }}
-                        {{ form.recogido }}
-                        <!-- Aquí los campos name deben coincidir con tu StockControlForm 
-                        <div class="mb-3">
-                          <label>Fecha inicio</label>
-                          <input type="date" name="fecha_inicio" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                          <label>Fecha fin</label>
-                          <input type="date" name="fecha_fin" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Excursión</label>
-                          <input type="text" name="excursion" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Empresa</label>
-                          <input type="text" name="empresa" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Lugar entrega</label>
-                          <input type="text" name="lugar_entrega" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Lugar recogida</label>
-                          <input type="text" name="lugar_recogida" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Guía</label>
-                          <input type="text" name="guia" class="form-control">
-                        </div>
-                        <div class="mb-3">
-                          <label>Estado</label>
-                          <select name="estado" class="form-select">
-                            <option value="P">Pendiente</option>
-                            <option value="G">Pagado</option>
-                          </select>
-                        </div>
-                        <div class="form-check mb-2">
-                          <input class="form-check-input" type="checkbox" name="entregado" id="entregado" checked>
-                          <label class="form-check-label" for="entregado">Entregado</label>
-                        </div>
-                        <div class="form-check mb-3">
-                          <input class="form-check-input" type="checkbox" name="recogido" id="recogido">
-                          <label class="form-check-label" for="recogido">Recogido</label>
-                        </div>
-                        <div class="mb-3">
-                          <label>Notas</label>
-                          <textarea name="notas" class="form-control"></textarea>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success">Guardar</button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-              -->
-        </div>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Excursión</th>
-                    <th>Empresa</th>
-                    <th>Fechas</th>
-                    <th>Maletas</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for stock in registros %}
-                <tr>
-                    <td>{{ stock.excursion }}</td>
-                    <td>{{ stock.empresa }}</td>
-                    <td>{{ stock.fecha_inicio|date:"d/m/Y" }} - {{ stock.fecha_fin|date:"d/m/Y" }}</td>
-                    <td>
-                        {% for maleta in stock.maletas.all %}
-                        <span class="badge bg-secondary">🎒 {{ maleta.guia }} ({{ maleta.pax }} pax)</span>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        <button
-                          class="btn btn-sm btn-estado"
-                          data-url="{% url 'pedidos:toggle_estado' stock.pk %}">
-                          {% if stock.entregado %}
-                            <span class="badge bg-success">Entregado</span>
-                          {% else %}
-                            <span class="badge bg-primary">Recogido</span>
-                          {% endif %}
-                        </button>
-                      </td>
-                        <a href="{% url 'pedidos:editar_stock' stock.pk %}" class="btn btn-sm btn-warning">
-                            ✏️ Editar
-                        </a>
-                        <button class="btn btn-sm btn-danger btn-eliminar" 
-                                data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">
-                            🗑️ Eliminar
-                        </button>
-                    </td>
-                </tr>
-                {% endfor %}
-                <script>
-                    document.querySelectorAll('.btn-estado').forEach(btn => {
-                      btn.addEventListener('click', async () => {
-                        try {
-                          const resp = await fetch(btn.dataset.url, {
-                            method: 'POST',
-                            headers: {
-                              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                            }
-                          });
-                          const data = await resp.json();
-                          btn.innerHTML = data.entregado
-                            ? '<span class="badge bg-success">Entregado</span>'
-                            : '<span class="badge bg-primary">Recogido</span>';
-                        } catch (e) {
-                          alert('No se pudo cambiar el estado.');
-                        }
-                      });
-                    });
-                  </script>
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- ─── Encabezado con botón de nuevo registro ─────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>📦 Control de Stock</h2>
+    <div>
+      <!-- Botón que abre el modal -->
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
+        ➕ Nuevo registro
+      </button>
+      <a href="{% url 'pedidos:exportar_csv' %}" class="btn btn-secondary ms-2">📥 Exportar CSV</a>
+    </div>
+  </div>
+
+  <!-- ─── Aquí va *solo* la tabla de registros ───────────────────────── -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Excursión</th><th>Empresa</th><th>Fechas</th>
+          <th>Maletas</th><th>Estado</th><th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for stock in registros %}
+        <tr>
+          <td>{{ stock.excursion }}</td>
+          <td>{{ stock.empresa }}</td>
+          <td>{{ stock.fecha_inicio|date:"d/m/Y" }} – {{ stock.fecha_fin|date:"d/m/Y" }}</td>
+          <td>
+            {% for maleta in stock.maletas.all %}
+              <span class="badge bg-secondary">🎒 {{ maleta.guia }} ({{ maleta.cantidad_pax }})</span>
+            {% endfor %}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-estado"
+                    data-url="{% url 'pedidos:toggle_estado' stock.pk %}">
+              {% if stock.entregado %}
+                <span class="badge bg-success">Entregado</span>
+              {% else %}
+                <span class="badge bg-primary">Recogido</span>
+              {% endif %}
+            </button>
+          </td>
+          <td>
+            <a href="{% url 'pedidos:editar_stock' stock.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
+            <button class="btn btn-sm btn-danger btn-eliminar" data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">
+              🗑️ Eliminar
+            </button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Modal para "Nuevo registro" ─────────────────────────────────── -->
+  <div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form id="form-nuevo-stock" method="post" action="{% url 'pedidos:agregar_stock' %}">
+          {% csrf_token %}
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">➕ Nuevo Control de Stock</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            {{ form|crispy }}
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>  {# /container #}
+
+<!-- ─── Scripts AJAX y Bootstrap ──────────────────────────────────────── -->
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    // Toggle Estado
-    document.querySelectorAll('.btn-estado').forEach(button => {
-        button.addEventListener('click', async function() {
-            const confirmacion = await Swal.fire({
-                title: '¿Cambiar estado?',
-                text: 'Esta acción modificará el registro',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Confirmar',
-                cancelButtonText: 'Cancelar'
-            });
-            
-            if (!confirmacion.isConfirmed) return;
-
-            try {
-                const response = await fetch(this.dataset.url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    }
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    this.classList.toggle('btn-success');
-                    this.classList.toggle('btn-primary');
-                    this.textContent = data.entregado ? '📤 Entregado' : '📥 Recogido';
-                }
-            } catch (error) {
-                Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
-            }
+  // Toggle estado
+  document.querySelectorAll('.btn-estado').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        const resp = await fetch(btn.dataset.url, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
         });
+        const data = await resp.json();
+        btn.innerHTML = data.entregado
+          ? '<span class="badge bg-success">Entregado</span>'
+          : '<span class="badge bg-primary">Recogido</span>';
+      } catch {
+        alert('No se pudo cambiar estado');
+      }
     });
-    
-        document.getElementById('form-nuevo-stock').addEventListener('submit', async function(e) {
-          e.preventDefault();
-          const form = this;
-          const data = new FormData(form);
-      
-          try {
-            const resp = await fetch(form.action, {
-              method: 'POST',
-              headers: { 'X-CSRFToken': data.get('csrfmiddlewaretoken') },
-              body: data
-            });
-            if (!resp.ok) throw new Error();
-            // cierra el modal
-            bootstrap.Modal.getInstance(document.getElementById('nuevoRegistroModal')).hide();
-            form.reset();
-            // recarga los datos
-            location.reload();
-          } catch {
-            alert('Error al guardar el registro.');
-          }
-        });
-      
-      
+  });
 
-    // Eliminar Registro
-    document.querySelectorAll('.btn-eliminar').forEach(button => {
-        button.addEventListener('click', async function() {
-            const confirmacion = await Swal.fire({
-                title: '¿Eliminar registro?',
-                text: 'Esta acción no se puede deshacer',
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonText: 'Eliminar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: '#dc3545'
-            });
-            
-            if (confirmacion.isConfirmed) {
-                try {
-                    await fetch(this.dataset.url, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                        }
-                    });
-                    window.location.reload();
-                } catch (error) {
-                    Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
-                }
-            }
-        });
-    });
-});
+  // Envío AJAX del formulario del modal
+  document.getElementById('form-nuevo-stock').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = this, data = new FormData(form);
+    try {
+      const resp = await fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': data.get('csrfmiddlewaretoken') },
+        body: data
+      });
+      if (!resp.ok) throw new Error();
+      bootstrap.Modal.getInstance(document.getElementById('nuevoRegistroModal')).hide();
+      form.reset();
+      location.reload();   // recarga la tabla
+    } catch {
+      alert('Error al guardar');
+    }
+  });
 </script>
+
+<!-- Bootstrap JS (si aún no lo has cargado) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
