@@ -313,33 +313,20 @@ def stock_control_view(request):
     registros = StockControl.objects.all().order_by('-fecha_creacion')
     return render(request, 'pedidos/stock_control.html', {'registros': registros})
 
+@staff_member_required
 def agregar_stock(request):
     if request.method == 'POST':
-        # Convertir fecha española a datetime aware
-        fecha_str = request.POST.get('fecha_creacion')
-        fecha_madrid = make_aware(
-            datetime.strptime(fecha_str, '%d/%m/%Y %H:%M'),
-            timezone.get_current_timezone()
-        )
         form = StockControlForm(request.POST)
-        formset = StockMaletaFormSet(request.POST, instance=StockControl())
-        
-        if form.is_valid() and formset.is_valid():
-            stock = form.save(commit=False)
-            stock.usuario = request.user
-            stock.save()
-            formset.instance = stock
-            formset.save()
+        if form.is_valid():
+            form.save()
             return redirect('pedidos:stock_control')
     else:
         form = StockControlForm()
-        formset = StockMaletaFormSet(instance=StockControl())
-        
-    return render(request, 'pedidos/stock_form.html', {
-        'form': form,
-        'formset': formset,
-        'form_title': 'Nuevo Control de Stock'
-    })
+    # Si quieres ver errores, podrías renderizar un template de “nuevo”,
+    # pero como abrimos en modal, redirigimos siempre al listado.
+    return redirect('pedidos:stock_control')
+
+
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):

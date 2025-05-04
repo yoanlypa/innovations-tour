@@ -23,7 +23,18 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body">
-                        <!-- Aquí los campos name deben coincidir con tu StockControlForm -->
+                        {{ form.fecha_inicio }}       <!-- ya incluye type="datetime-local" -->
+                        {{ form.fecha_fin }}
+                        {{ form.excursion }}
+                        {{ form.empresa }}
+                        {{ form.lugar_entrega }}
+                        {{ form.lugar_recogida }}
+                        {{ form.guia }}
+                        {{ form.estado }}
+                        {{ form.notas }}
+                        {{ form.entregado }}
+                        {{ form.recogido }}
+                        <!-- Aquí los campos name deben coincidir con tu StockControlForm 
                         <div class="mb-3">
                           <label>Fecha inicio</label>
                           <input type="date" name="fecha_inicio" class="form-control" required>
@@ -80,7 +91,7 @@
                   </div>
                 </div>
               </div>
-              
+              -->
         </div>
     </div>
     <div class="table-responsive">
