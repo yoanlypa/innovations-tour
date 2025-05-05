@@ -330,7 +330,7 @@ def agregar_stock(request, pedido_id=None):
     else:
         initial_data = {}
         if pedido_id:
-            pedido = get_object_or_404(Pedido, id=pedido_id, estado='pagado')
+            pedido = get_object_or_404(Pedido, id=pedido_id, estado='confirmado')
             initial_data = {
                 'pedido': pedido,
                 'empresa': pedido.empresa,

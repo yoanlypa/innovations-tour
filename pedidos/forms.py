@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
 from .utils import convertir_fecha
-
+from pedidos.models import Pedido 
 
 
 
@@ -45,8 +45,7 @@ class StockControlForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        from pedidos.models import Pedido  # ajusta si tu modelo Pedido está en otra app
-        self.fields['pedido'].queryset = Pedido.objects.filter(pagado=True)
+        self.fields['pedido'].queryset = Pedido.objects.filter(estado='confirmado')
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta
