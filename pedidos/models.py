@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.contrib import admin
+from django import forms
 from .utils import convertir_fecha
 
 class Producto(models.Model):
@@ -71,7 +72,7 @@ class StockControl(models.Model):
         ('P', 'Pendiente'),
         ('G', 'Pagado'),
     )
-    
+    pedido = models.ForeignKey('Pedido', on_delete=models.CASCADE)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
     fecha_inicio = models.DateField( blank=True, null=True)
     fecha_fin = models.DateField(null=True, blank=True)
@@ -113,3 +114,8 @@ class RegistroCliente(models.Model):
 
     def __str__(self):
         return f"{self.nombre_usuario} -  {self.empresa}"
+    
+class StockControlForm(forms.ModelForm):
+    class Meta:
+        model = StockControl
+        fields = ['pedido', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas']

@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.http import require_POST, require_http_methods, require_GET
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
@@ -310,49 +310,71 @@ class ProductoUpdateView( UpdateView):
 # ========== Control de Stock ==========
 @staff_member_required
 def stock_control_view(request):
+    pedidos_pagados = Pedido.objects.filter(pagado=True).order_by('-fecha_inicio')
     registros = StockControl.objects.all().order_by('-fecha_creacion')
-    form = StockControlForm()
     return render(request, 'pedidos/stock_control.html', {
         'registros': registros,
-        'form': form,
+        'form': StockControlForm(),
+        'pedidos_pagados': pedidos_pagados
     })
 
-
 @staff_member_required
-def agregar_stock(request):
-    if request.method=='POST':
-        # Crea el StockControl
-        sc = StockControl.objects.create(
-          usuario=request.user,
-          fecha_inicio=request.POST['fecha_inicio'],
-          fecha_fin=request.POST.get('fecha_fin') or None,
-          excursion=request.POST.get('excursion',''),
-          empresa = request.POST.get('empresa',''),
-          lugar_entrega=request.POST.get('lugar_entrega',''),
-          lugar_recogida=request.POST.get('lugar_recogida',''),
-          guia=request.POST.get('guia',''),
-          estado=request.POST['estado'],
-          notas=request.POST.get('notas',''),
-          # entregado / recogido llegan como 'on' o nada
-          entregado = bool(request.POST.get('entregado', True)),
-          recogido = bool(request.POST.get('recogido', False)),
-        )
-        # Maletas
-        total = int(request.POST.get('nroMaletas',0));
-        for i in range(total):
-            StockMaleta.objects.create(
-              stock = sc,
-              maleta = Maleta.objects.create(
-                pedido = None,  # si lo asocias a Pedido, ajústalo
-                cantidad_pax = request.POST[f'maletas-{i}-cantidad_pax'],
-                guia = request.POST[f'maletas-{i}-guia'],
-                stock_control = sc
-              ),
-              guia = request.POST[f'maletas-{i}-guia'],
-              pax = request.POST[f'maletas-{i}-cantidad_pax']
-            )
-        return redirect('pedidos:stock_control')
-    return redirect('pedidos:stock_control')
+def agregar_stock(request, pedido_id=None):
+    if request.method == 'POST':
+        form = StockControlForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('nombre_de_la_vista_deseada')  # Reemplaza con la vista a la que deseas redirigir
+    else:
+        initial_data = {}
+        if pedido_id:
+            pedido = get_object_or_404(Pedido, id=pedido_id, estado='pagado')
+            initial_data = {
+                'pedido': pedido,
+                'empresa': pedido.empresa,
+                'lugar_entrega': pedido.lugar_entrega,
+                'lugar_recogida': pedido.lugar_recogida,
+                'fecha_inicio': pedido.fecha_inicio,
+                'fecha_fin': pedido.fecha_fin,
+                'estado': 'pagado',
+                'notas': pedido.notas,
+            }
+        form = StockControlForm(initial=initial_data)
+    return render(request, 'pedidos/stock_control_form.html', {'form': form})
+ #def agregar_stock(request):
+ #/    if request.method=='POST':
+ #        # Crea el StockControl
+ #        sc = StockControl.objects.create(
+ #          usuario=request.user,
+ #          fecha_inicio=request.POST['fecha_inicio'],
+ #          fecha_fin=request.POST.get('fecha_fin') or None,
+ #          excursion=request.POST.get('excursion',''),
+ #          empresa = request.POST.get('empresa',''),
+ #          lugar_entrega=request.POST.get('lugar_entrega',''),
+  #         lugar_recogida=request.POST.get('lugar_recogida',''),
+ #          guia=request.POST.get('guia',''),
+ #          estado=request.POST['estado'],
+ #          notas=request.POST.get('notas',''),
+ #          # entregado / recogido llegan como 'on' o nada
+ #          entregado = bool(request.POST.get('entregado', True)),
+  #         recogido = bool(request.POST.get('recogido', False)),
+ #          Maletas
+ #        total = int(request.POST.get('nroMaletas',0));
+ #        for i in range(total):
+ #            StockMaleta.objects.create(
+ #              stock = sc,
+ #              maleta = Maleta.objects.create(
+ #                pedido = None,  # si lo asocias a Pedido, ajústalo
+ #                cantidad_pax = request.POST[f'maletas-{i}-cantidad_pax'],
+ #                guia = request.POST[f'maletas-{i}-guia'],
+ #                stock_control = sc
+ #  
+ #         ),
+#               guia = request.POST[f'maletas-{i}-guia'],
+#               pax = request.POST[f'maletas-{i}-cantidad_pax']
+#             )
+#         return redirect('pedidos:stock_control')
+#     return redirect('pedidos:stock_control')
 
 @staff_member_required
 @require_POST
@@ -380,7 +402,7 @@ def editar_stock(request, pk):
     else:
         form = StockControlForm(instance=registro)
     return render(request, 'pedidos/stock_form.html', {'form': form})
-
+ 
 
 
 
@@ -435,7 +457,23 @@ def exportar_csv(request):
         ])
     
     return response
-
+@require_GET
+@staff_member_required
+def datos_pedido_api(request, pedido_id):
+    try:
+        pedido = Pedido.objects.get(id=pedido_id, pagado=True)
+        maletas = Maleta.objects.filter(pedido=pedido)
+        data = {
+            'empresa': pedido.empresa,
+            'lugar_entrega': pedido.lugar_entrega,
+            'lugar_recogida': pedido.lugar_recogida,
+            'fecha_inicio': pedido.fecha_inicio,
+            'fecha_fin': pedido.fecha_fin,
+            'maletas': [{'cantidad_pax': m.cantidad_pax, 'guia': m.guia} for m in maletas]
+        }
+        return JsonResponse(data)
+    except Pedido.DoesNotExist:
+        return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
 
 class SincronizarUsuarioAPIView(APIView):
     permission_classes = [AllowAny]

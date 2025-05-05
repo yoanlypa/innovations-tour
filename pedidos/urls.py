@@ -45,6 +45,8 @@ urlpatterns = [
     #Usuario
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
+    path('api/pedido/<int:pedido_id>/datos/', views.datos_pedido_api, name='datos_pedido_api'),
+
     path('stock/', stock_control_view, name='stock_control'),
     path('stock/nuevo/', agregar_stock, name='agregar_stock'),
     path('stock/editar/<int:pk>/', views.editar_stock, name='editar_stock'),

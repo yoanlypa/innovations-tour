@@ -100,13 +100,23 @@ data-bs-target="#nuevoRegistroModal">
 </button>
 
 <div class="modal-header bg-primary text-white">
-    <h5 class="modal-title">➕ Nuevo Control de Stock</h5>
+    <h3 class="modal-title">➕ Nuevo Registro de Control de Stock</h3>
     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
   </div>
-  <form id="form-nuevo-stock" method="post" action="{% url 'pedidos:agregar_stock' %}">
+  <form id="formStockControl" method="post" action="{% url 'pedidos:agregar_stock' %}">
     {% csrf_token %}
     <div class="modal-body">
       <!-- Campos principales -->
+      <div class="form-group">
+        <label>Selecciona Pedido Pagado</label>
+        <select id="pedidoSelector" class="form-control" required>
+          <option value="">-- Selecciona --</option>
+          {% for pedido in pedidos_pagados %}
+          <option value="{{ pedido.id }}">{{ pedido.empresa }} - {{ pedido.fecha_inicio }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    
       <div class="row g-3">
         <div class="col-md-6">
           <label>Fecha inicio*</label>
@@ -269,7 +279,41 @@ data-bs-target="#nuevoRegistroModal">
       });
     });
     </script>
-    
+    <script>
+      document.getElementById('pedidoSelector').addEventListener('change', function () {
+          const pedidoId = this.value;
+          if (!pedidoId) return;
+      
+          fetch(`/api/pedido/${pedidoId}/datos/`)
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById('empresa').value = data.empresa;
+                  document.getElementById('lugar_entrega').value = data.lugar_entrega;
+                  document.getElementById('lugar_recogida').value = data.lugar_recogida || '';
+                  document.getElementById('fecha_inicio').value = data.fecha_inicio;
+                  document.getElementById('fecha_fin').value = data.fecha_fin || '';
+      
+                  const container = document.getElementById('maletas-container');
+                  container.innerHTML = '';
+                  data.maletas.forEach((maleta, index) => {
+                      container.innerHTML += `
+                          <div class="maleta-group">
+                              <h5>Maleta ${index + 1}</h5>
+                              <div class="form-group">
+                                  <label>Cantidad Pax</label>
+                                  <input type="number" name="maletas-${index}-cantidad" value="${maleta.cantidad_pax}" class="form-control" required>
+                              </div>
+                              <div class="form-group">
+                                  <label>Guía</label>
+                                  <input type="text" name="maletas-${index}-guia" value="${maleta.guia}" class="form-control" required>
+                              </div>
+                          </div>`;
+                  });
+              })
+              .catch(error => alert('Error cargando datos del pedido'));
+      });
+      </script>
+      
 
 <!-- Bootstrap JS (si aún no lo has cargado) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
