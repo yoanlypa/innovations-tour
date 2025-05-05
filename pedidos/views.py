@@ -310,13 +310,15 @@ class ProductoUpdateView( UpdateView):
 # ========== Control de Stock ==========
 @staff_member_required
 def stock_control_view(request):
-    pedidos_pagados = Pedido.objects.filter(pagado=True).order_by('-fecha_inicio')
-    registros = StockControl.objects.all().order_by('-fecha_creacion')
+    # Sólo los pedidos cuyo estado indica “pagado”
+    pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
+    registros       = StockControl.objects.all().order_by('-fecha_creacion')
     return render(request, 'pedidos/stock_control.html', {
         'registros': registros,
-        'form': StockControlForm(),
+        'form':      StockControlForm(),
         'pedidos_pagados': pedidos_pagados
     })
+
 
 @staff_member_required
 def agregar_stock(request, pedido_id=None):
