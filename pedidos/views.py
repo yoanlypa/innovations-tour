@@ -463,7 +463,8 @@ def exportar_csv(request):
 @staff_member_required
 def datos_pedido_api(request, pedido_id):
     try:
-        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')        maletas = Maleta.objects.filter(pedido=pedido)
+        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')        
+        maletas = Maleta.objects.filter(pedido=pedido)
         data = {
             'empresa': pedido.empresa,
             'lugar_entrega': pedido.lugar_entrega,
