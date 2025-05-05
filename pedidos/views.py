@@ -310,7 +310,7 @@ class ProductoUpdateView( UpdateView):
 # ========== Control de Stock ==========
 @staff_member_required
 def stock_control_view(request):
-    # Sólo los pedidos cuyo estado indica “pagado”
+    
     pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
     registros       = StockControl.objects.all().order_by('-fecha_creacion')
     return render(request, 'pedidos/stock_control.html', {
@@ -326,7 +326,7 @@ def agregar_stock(request, pedido_id=None):
         form = StockControlForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('nombre_de_la_vista_deseada')  # Reemplaza con la vista a la que deseas redirigir
+            return redirect('pedidos:stock_control')  # Reemplaza con la vista a la que deseas redirigir
     else:
         initial_data = {}
         if pedido_id:
@@ -463,8 +463,7 @@ def exportar_csv(request):
 @staff_member_required
 def datos_pedido_api(request, pedido_id):
     try:
-        pedido = Pedido.objects.get(id=pedido_id, pagado=True)
-        maletas = Maleta.objects.filter(pedido=pedido)
+        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')        maletas = Maleta.objects.filter(pedido=pedido)
         data = {
             'empresa': pedido.empresa,
             'lugar_entrega': pedido.lugar_entrega,
