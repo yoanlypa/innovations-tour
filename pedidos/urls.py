@@ -32,7 +32,8 @@ urlpatterns = [
     path('api/password-reset/',        PasswordResetRequestAPIView.as_view(), name='api_password_reset'),
     path('api/password-reset-confirm/',PasswordResetConfirmAPIView.as_view(), name='api_password_reset_confirm'),
     path('api/logout/', views.logout_view, name='logout_view'),
-    
+    path('api/pedidos/<int:pedido_id>/', views.datos_pedido_api, name='datos_pedido_api'),
+
 
     path('login/', auth_views.LoginView.as_view(template_name='pedidos/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
@@ -46,6 +47,7 @@ urlpatterns = [
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
     path('api/pedido/<int:pedido_id>/datos/', views.datos_pedido_api, name='datos_pedido_api'),
+    path('stock/cargar_datos_pedido/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
 
     path('stock/', stock_control_view, name='stock_control'),
     path('stock/nuevo/', agregar_stock, name='agregar_stock'),

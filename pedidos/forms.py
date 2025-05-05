@@ -41,17 +41,12 @@ class ProductoForm(forms.ModelForm):
 class StockControlForm(forms.ModelForm):
     class Meta:
         model = StockControl
-        fields = [
-            'fecha_inicio', 'fecha_fin', 'excursion', 'empresa',
-            'lugar_entrega', 'lugar_recogida', 'estado', 'guia',
-            'notas', 'entregado', 'recogido'
-        ]
-        widgets = {
-            'fecha_inicio': forms.DateTimeInput(format='%Y-%m-%dT%H:%M',
-                                                attrs={'type': 'datetime-local'}),
-            'fecha_fin':    forms.DateInput(format='%Y-%m-%d',
-                                            attrs={'type': 'date'}),
-        }
+        fields = ['pedido', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from pedidos.models import Pedido  # ajusta si tu modelo Pedido está en otra app
+        self.fields['pedido'].queryset = Pedido.objects.filter(pagado=True)
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta

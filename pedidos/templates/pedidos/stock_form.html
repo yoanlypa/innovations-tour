@@ -1,55 +1,159 @@
 {% extends 'pedidos/base.html' %}
-{% load static %}
 {% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="card shadow-lg">
-        <div class="card-header bg-primary text-white">
-            <h3>➕ Nuevo Control de Stock</h3>
-        </div>
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                {{ form|crispy }}
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        {{ form.fecha_inicio.label_tag }}
-                        {{ form.fecha_inicio }}
-                    </div>
-                    <div class="col-md-6">
-                        {{ form.fecha_fin.label_tag }}
-                        {{ form.fecha_fin }}
-                    </div>
-                    {{ form.excursion|as_crispy_field }}
-                    {{ form.empresa|as_crispy_field }}
-                    {{ form.lugar_entrega|as_crispy_field }}
-                    {{ form.lugar_recogida|as_crispy_field }}
-                </div>
-
-                <div class="border p-3 mb-4 rounded">
-                    <h4 class="mb-3">🎒 Gestión de Maletas</h4>
-                    {{ formset.management_form }}
-                    <div id="maletas-container">
-                        {% for form in formset %}
-                        <div class="maleta-form mb-3 p-2 border rounded">
-                            {{ form.id }}
-                            <div class="row g-2">
-                                <div class="col-md-6">{{ form.guia.label_tag }} {{ form.guia }}</div>
-                                <div class="col-md-5">{{ form.pax.label_tag }} {{ form.pax }}</div>
-                                <div class="col-md-1">{{ form.DELETE.label_tag }} {{ form.DELETE }}</div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="btn btn-secondary mt-2" id="add-maleta">➕ Añadir Maleta</button>
-                </div>
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
-                </div>
-            </form>
-        </div>
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white">
+      <h3>➕ Nuevo Control de Stock</h3>
     </div>
+    <div class="card-body">
+      <form id="stock-form" method="post">
+        {% csrf_token %}
+
+        <!-- 1) Selección de Pedido Pagado -->
+        <div class="mb-3">
+          {{ form.pedido.label_tag }}
+          {{ form.pedido }}
+        </div>
+
+        <!-- 2) Campos principales pre–crispy -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            {{ form.fecha_inicio.label_tag }} {{ form.fecha_inicio }}
+          </div>
+          <div class="col-md-6">
+            {{ form.fecha_fin.label_tag }}    {{ form.fecha_fin }}
+          </div>
+          <div class="col-md-6">
+            {{ form.empresa.label_tag }}      {{ form.empresa }}
+          </div>
+          <div class="col-md-6">
+            {{ form.estado.label_tag }}       {{ form.estado }}
+          </div>
+          <div class="col-md-6">
+            {{ form.lugar_entrega.label_tag }}{{ form.lugar_entrega }}
+          </div>
+          <div class="col-md-6">
+            {{ form.lugar_recogida.label_tag }}{{ form.lugar_recogida }}
+          </div>
+          <div class="col-12">
+            {{ form.notas.label_tag }}        {{ form.notas }}
+          </div>
+        </div>
+
+        <!-- 3) Formset de Maletas -->
+        <div class="border p-3 mb-4 rounded">
+          <h4 class="mb-3">🎒 Gestión de Maletas</h4>
+          {{ formset.management_form }}
+          <div id="maletas-container">
+            {% for mform in formset %}
+            <div class="maleta-form mb-3 p-2 border rounded">
+              {{ mform.id }}
+              <div class="row g-2">
+                <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
+                <div class="col-md-5">{{ mform.pax.label_tag }}  {{ mform.pax  }}</div>
+                <div class="col-md-1">{{ mform.DELETE.label_tag }}{{ mform.DELETE }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <button type="button" class="btn btn-secondary mt-2" id="add-maleta">
+            ➕ Añadir Maleta
+          </button>
+        </div>
+
+        <!-- 4) Botón Guardar -->
+        <div class="mt-4">
+          <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
+
+<!-- jQuery (necesario para el script) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+  $(function() {
+    // Índice inicial según TOTAL_FORMS
+    let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
+
+    // Función para renderizar N maletas (usada al cargar pedido)
+    function renderMaletas(maletas) {
+      const container = $('#maletas-container');
+      container.empty();
+      formIndex = 0;
+      maletas.forEach(m => {
+        const html = `
+          <div class="maleta-form mb-3 p-2 border rounded">
+            <input type="hidden" name="form-${formIndex}-id" />
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label>Guía:</label>
+                <input type="text" name="form-${formIndex}-guia" class="form-control" value="${m.guia}" />
+              </div>
+              <div class="col-md-5">
+                <label>PAX:</label>
+                <input type="number" name="form-${formIndex}-pax" class="form-control" value="${m.pax}" />
+              </div>
+              <div class="col-md-1">
+                <label>Eliminar</label>
+                <input type="checkbox" name="form-${formIndex}-DELETE" />
+              </div>
+            </div>
+          </div>`;
+        container.append(html);
+        formIndex++;
+      });
+      $('#id_form-TOTAL_FORMS').val(formIndex);
+    }
+
+    // 1) Precarga campos al cambiar de pedido
+    $('#id_pedido').change(function() {
+      const pedidoId = $(this).val();
+      if (!pedidoId) return;
+      $.getJSON("{% url 'cargar_datos_pedido' %}", { pedido_id: pedidoId })
+        .done(function(data) {
+          $('#id_empresa').val(data.empresa);
+          $('#id_lugar_entrega').val(data.lugar_entrega);
+          $('#id_lugar_recogida').val(data.lugar_recogida);
+          $('#id_fecha_inicio').val(data.fecha_inicio);
+          $('#id_fecha_fin').val(data.fecha_fin);
+          // Estado y notas ya vienen en form
+          renderMaletas(data.maletas);
+        })
+        .fail(function() {
+          alert('Error al cargar los datos del pedido.');
+        });
+    });
+
+    // 2) “➕ Añadir Maleta” dinámico
+    $('#add-maleta').click(function() {
+      const html = `
+        <div class="maleta-form mb-3 p-2 border rounded">
+          <input type="hidden" name="form-${formIndex}-id" />
+          <div class="row g-2">
+            <div class="col-md-6">
+              <label>Guía:</label>
+              <input type="text" name="form-${formIndex}-guia" class="form-control" />
+            </div>
+            <div class="col-md-5">
+              <label>PAX:</label>
+              <input type="number" name="form-${formIndex}-pax" class="form-control" />
+            </div>
+            <div class="col-md-1">
+              <label>Eliminar</label>
+              <input type="checkbox" name="form-${formIndex}-DELETE" />
+            </div>
+          </div>
+        </div>`;
+      $('#maletas-container').append(html);
+      formIndex++;
+      $('#id_form-TOTAL_FORMS').val(formIndex);
+    });
+  });
+</script>
+
+{% endblock %}

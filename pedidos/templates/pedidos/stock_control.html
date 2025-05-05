@@ -103,7 +103,7 @@ data-bs-target="#nuevoRegistroModal">
     <h3 class="modal-title">➕ Nuevo Registro de Control de Stock</h3>
     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
   </div>
-  <form id="formStockControl" method="post" action="{% url 'pedidos:agregar_stock' %}">
+  <form method="post" id="stock-form" action="{% url 'pedidos:agregar_stock' %}">
     {% csrf_token %}
     <div class="modal-body">
       <!-- Campos principales -->
@@ -116,6 +116,10 @@ data-bs-target="#nuevoRegistroModal">
           {% endfor %}
         </select>
       </div>
+      <div class="mb-3">
+        {{ form.pedido.label_tag }}
+        {{ form.pedido }}
+    </div>
     
       <div class="row g-3">
         <div class="col-md-6">
@@ -200,7 +204,7 @@ data-bs-target="#nuevoRegistroModal">
     })
   
   // Envío AJAX del formulario del modal
-  document.getElementById('form-nuevo-stock').addEventListener('submit', async function(e) {
+  document.getElementById('formStockControl').addEventListener('submit', async function(e) {
     e.preventDefault();
     const form = this, data = new FormData(form);
     try {
@@ -220,7 +224,7 @@ data-bs-target="#nuevoRegistroModal">
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('form-nuevo-stock');
+      const form = document.getElementById('formStockControl');
       const nroMaletas = document.getElementById('nroMaletas');
       const container  = document.getElementById('maletas-container');
     
@@ -231,18 +235,18 @@ data-bs-target="#nuevoRegistroModal">
           const div = document.createElement('div');
           div.className = 'maleta-group border p-3 mb-2 rounded';
           div.innerHTML = `
-            <h6>Maleta ${i+1}</h6>
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label>Cantidad pax*</label>
-                <input type="number" name="maletas-${i}-cantidad_pax" min="1" required class="form-control">
+              <h6>Maleta ${i+1}</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label>Cantidad pax*</label>
+                  <input type="number" name="maletas-${i}-cantidad_pax" min="1" required class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label>Guía*</label>
+                  <input type="text" name="maletas-${i}-guia" required class="form-control">
+                </div>
               </div>
-              <div class="col-md-6">
-                <label>Guía*</label>
-                <input type="text" name="maletas-${i}-guia" required class="form-control">
-              </div>
-            </div>
-          `;
+            `;
           container.appendChild(div);
         }
       }
@@ -312,9 +316,117 @@ data-bs-target="#nuevoRegistroModal">
               })
               .catch(error => alert('Error cargando datos del pedido'));
       });
+
+      document.getElementById('pedidoSelector').addEventListener('change', async function () {
+        const pedidoId = this.value;
+        if (!pedidoId) return;
+      
+        try {
+          const resp = await fetch(`/api/pedidos/${pedidoId}/`);
+          if (!resp.ok) throw new Error('No se pudo cargar el pedido');
+          const data = await resp.json();
+      
+          document.querySelector('[name="empresa"]').value = data.empresa;
+          document.querySelector('[name="lugar_entrega"]').value = data.lugar_entrega;
+          document.querySelector('[name="lugar_recogida"]').value = data.lugar_recogida;
+          document.querySelector('[name="fecha_inicio"]').value = data.fecha_inicio;
+          document.querySelector('[name="fecha_fin"]').value = data.fecha_fin;
+      
+          // Rellenar maletas
+          const nro = data.maletas.length;
+          document.getElementById('nroMaletas').value = nro;
+          renderMaletas(nro);
+          data.maletas.forEach((m, i) => {
+            document.querySelector(`[name="maletas-${i}-cantidad_pax"]`).value = m.cantidad_pax;
+            document.querySelector(`[name="maletas-${i}-guia"]`).value = m.guia;
+          });
+      
+        } catch (e) {
+          alert('Error al precargar los datos del pedido.');
+        }
+      });
+      
       </script>
       
 
+      <script>
+        // 1) Inicializa el índice del formset según el management_form
+        let formIndex = parseInt($('#id_form-TOTAL_FORMS').val());
+      
+        // 2) Botón ➕ Añadir Maleta (dinámico)
+        $('#add-maleta').click(function () {
+          const newForm = `
+            <div class="maleta-form mb-3 p-2 border rounded">
+              <input type="hidden" name="form-${formIndex}-id" />
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <label for="id_form-${formIndex}-guia">Guía:</label>
+                  <input type="text" name="form-${formIndex}-guia" class="form-control" />
+                </div>
+                <div class="col-md-5">
+                  <label for="id_form-${formIndex}-pax">PAX:</label>
+                  <input type="number" name="form-${formIndex}-pax" class="form-control" />
+                </div>
+                <div class="col-md-1">
+                  <label for="id_form-${formIndex}-DELETE">Eliminar</label>
+                  <input type="checkbox" name="form-${formIndex}-DELETE" />
+                </div>
+              </div>
+            </div>`;
+          $('#maletas-container').append(newForm);
+          formIndex++;
+          $('#id_form-TOTAL_FORMS').val(formIndex);
+        });
+      
+        // 3) Precarga datos del pedido pagado al cambiar el <select>
+        $('#id_pedido').change(function () {
+          const pedidoId = $(this).val();
+          if (!pedidoId) return;
+      
+          $.ajax({
+            url: "{% url 'cargar_datos_pedido' %}",
+            data: { pedido_id: pedidoId },
+            success: function (data) {
+              // Rellenar campos principales
+              $('#id_empresa').val(data.empresa);
+              $('#id_lugar_entrega').val(data.lugar_entrega);
+              $('#id_lugar_recogida').val(data.lugar_recogida);
+              $('#id_fecha_inicio').val(data.fecha_inicio);
+              $('#id_fecha_fin').val(data.fecha_fin);
+      
+              // Vaciar formset de maletas y volver a crear según response
+              $('#maletas-container').empty();
+              formIndex = 0;
+              data.maletas.forEach(function(maleta) {
+                const formHtml = `
+                  <div class="maleta-form mb-3 p-2 border rounded">
+                    <input type="hidden" name="form-${formIndex}-id" />
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label for="id_form-${formIndex}-guia">Guía:</label>
+                        <input type="text" name="form-${formIndex}-guia" class="form-control" value="${maleta.guia}" />
+                      </div>
+                      <div class="col-md-5">
+                        <label for="id_form-${formIndex}-pax">PAX:</label>
+                        <input type="number" name="form-${formIndex}-pax" class="form-control" value="${maleta.pax}" />
+                      </div>
+                      <div class="col-md-1">
+                        <label for="id_form-${formIndex}-DELETE">Eliminar</label>
+                        <input type="checkbox" name="form-${formIndex}-DELETE" />
+                      </div>
+                    </div>
+                  </div>`;
+                $('#maletas-container').append(formHtml);
+                formIndex++;
+              });
+              $('#id_form-TOTAL_FORMS').val(formIndex);
+            },
+            error: function () {
+              alert('No se pudieron cargar los datos del pedido.');
+            }
+          });
+        });
+      </script>
 <!-- Bootstrap JS (si aún no lo has cargado) -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

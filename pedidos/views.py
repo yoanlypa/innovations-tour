@@ -475,6 +475,24 @@ def datos_pedido_api(request, pedido_id):
     except Pedido.DoesNotExist:
         return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
 
+def cargar_datos_pedido(request):
+    pedido_id = request.GET.get('pedido_id')
+    pedido = Pedido.objects.get(id=pedido_id)
+    maletas = pedido.maletas.all()
+    data = {
+        'empresa': pedido.empresa,
+        'lugar_entrega': pedido.lugar_entrega,
+        'lugar_recogida': pedido.lugar_recogida,
+        'fecha_inicio': pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
+        'fecha_fin': pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
+        'maletas': [
+            {
+                'guia': maleta.guia,
+                'pax': maleta.pax
+            } for maleta in maletas
+        ]
+    }
+    return JsonResponse(data)
 class SincronizarUsuarioAPIView(APIView):
     permission_classes = [AllowAny]
 
