@@ -72,8 +72,13 @@ class StockControl(models.Model):
         ('P', 'Pendiente'),
         ('G', 'Pagado'),
     )
-    pedido = models.ForeignKey('Pedido', on_delete=models.CASCADE)
-    usuario = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
+    pedido = models.ForeignKey(
+        'Pedido',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     fecha_inicio = models.DateField( blank=True, null=True)
     fecha_fin = models.DateField(null=True, blank=True)
     excursion = models.CharField(max_length=100,null=True, blank=True)
