@@ -170,19 +170,20 @@ $(function() {
     });
     $('#id_form-TOTAL_FORMS').val(formIndex);
   }
+  $(function() {
+    // Índice inicial
+    let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
+  
+
 
   // Precarga datos al cambiar de pedido
   $('#pedidoSelector').change(function() {
     const id = $(this).val();
     if (!id) return;
-    $.getJSON("{% url 'cargar_datos_pedido' %}", { pedido_id: id })
+    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
       .done(data => {
         $('#id_empresa').val(data.empresa);
-        $('#id_lugar_entrega').val(data.lugar_entrega);
-        $('#id_lugar_recogida').val(data.lugar_recogida);
-        $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
-        $('#id_fecha_fin').val(data.fecha_fin?.split('T')[0] || '');
-        renderMaletas(data.maletas);
+        // … resto de relleno …
       })
       .fail(() => alert('Error cargando datos del pedido'));
   });
