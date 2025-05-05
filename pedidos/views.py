@@ -326,58 +326,24 @@ def agregar_stock(request, pedido_id=None):
         form = StockControlForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('pedidos:stock_control')  # Reemplaza con la vista a la que deseas redirigir
+            return redirect('pedidos:stock_control')
     else:
         initial_data = {}
         if pedido_id:
             pedido = get_object_or_404(Pedido, id=pedido_id, estado='confirmado')
             initial_data = {
-                'pedido': pedido,
+                'pedido': pedido if 'pedido' in locals() else None,
                 'empresa': pedido.empresa,
                 'lugar_entrega': pedido.lugar_entrega,
                 'lugar_recogida': pedido.lugar_recogida,
                 'fecha_inicio': pedido.fecha_inicio,
                 'fecha_fin': pedido.fecha_fin,
-                'estado': 'pagado',
+                'estado': 'G',  # o el valor por defecto en tu StockControlForm
                 'notas': pedido.notas,
             }
         form = StockControlForm(initial=initial_data)
-    return render(request, 'pedidos/stock_control_form.html', {'form': form})
- #def agregar_stock(request):
- #/    if request.method=='POST':
- #        # Crea el StockControl
- #        sc = StockControl.objects.create(
- #          usuario=request.user,
- #          fecha_inicio=request.POST['fecha_inicio'],
- #          fecha_fin=request.POST.get('fecha_fin') or None,
- #          excursion=request.POST.get('excursion',''),
- #          empresa = request.POST.get('empresa',''),
- #          lugar_entrega=request.POST.get('lugar_entrega',''),
-  #         lugar_recogida=request.POST.get('lugar_recogida',''),
- #          guia=request.POST.get('guia',''),
- #          estado=request.POST['estado'],
- #          notas=request.POST.get('notas',''),
- #          # entregado / recogido llegan como 'on' o nada
- #          entregado = bool(request.POST.get('entregado', True)),
-  #         recogido = bool(request.POST.get('recogido', False)),
- #          Maletas
- #        total = int(request.POST.get('nroMaletas',0));
- #        for i in range(total):
- #            StockMaleta.objects.create(
- #              stock = sc,
- #              maleta = Maleta.objects.create(
- #                pedido = None,  # si lo asocias a Pedido, ajústalo
- #                cantidad_pax = request.POST[f'maletas-{i}-cantidad_pax'],
- #                guia = request.POST[f'maletas-{i}-guia'],
- #                stock_control = sc
- #  
- #         ),
-#               guia = request.POST[f'maletas-{i}-guia'],
-#               pax = request.POST[f'maletas-{i}-cantidad_pax']
-#             )
-#         return redirect('pedidos:stock_control')
-#     return redirect('pedidos:stock_control')
-
+        return render(request, 'pedidos/stock_form.html', {'form': form})
+ 
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
@@ -463,7 +429,7 @@ def exportar_csv(request):
 @staff_member_required
 def datos_pedido_api(request, pedido_id):
     try:
-        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')        
+        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')
         maletas = Maleta.objects.filter(pedido=pedido)
         data = {
             'empresa': pedido.empresa,

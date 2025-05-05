@@ -47,13 +47,16 @@ urlpatterns = [
      path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
     path('api/pedido/<int:pedido_id>/datos/', views.datos_pedido_api, name='datos_pedido_api'),
-    path('stock/cargar_datos_pedido/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
-
-    path('stock/', stock_control_view, name='stock_control'),
-    path('stock/nuevo/', agregar_stock, name='agregar_stock'),
+    path(
+        'stock/cargar_datos_pedido/',
+        views.cargar_datos_pedido,
+        name='cargar_datos_pedido'
+    ),
+    path('stock/', views.stock_control_view, name='stock_control'),
+    path('stock/agregar/', views.agregar_stock, name='agregar_stock'),
     path('stock/editar/<int:pk>/', views.editar_stock, name='editar_stock'),
     path('stock/eliminar/<int:pk>/', views.eliminar_stock, name='eliminar_stock'),
-    path('stock/toggle-estado/<int:pk>/', views.toggle_estado_stock, name='toggle_estado'),
+    path('stock/toggle-estado/<int:pk>/', views.toggle_estado_stock, name='toggle_estado_stock'),
     path('stock/exportar-csv/',        views.exportar_csv,     name='exportar_csv'),
 
 ]
