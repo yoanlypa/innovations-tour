@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 style="color:#005dab;">📦 Control de Stock</h2>
+    <h2>📦 Control de Stock</h2>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
       ➕ Nuevo Registro
     </button>
@@ -79,10 +79,10 @@
       <div class="modal-body">
         <form id="stock-form" method="post" action="{% url 'pedidos:agregar_stock' %}">
           {% csrf_token %}
-          
+
           <!-- 1) Selector de Pedido -->
           <div class="mb-3">
-            <label for="pedidoSelector" class="form-label">Selecciona pedido pagado</label>
+            <label class="form-label">Pedido pagado*</label>
             <select id="pedidoSelector" name="pedido" class="form-select" required>
               <option value="">-- Selecciona --</option>
               {% for pedido in pedidos_pagados %}
@@ -145,9 +145,15 @@
                 <div class="maleta-form mb-3 p-2 border rounded">
                   {{ mform.id }}
                   <div class="row g-2">
-                    <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
-                    <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
-                    <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
+                    <div class="col-md-6">
+                      {{ mform.guia.label_tag }} {{ mform.guia }}
+                    </div>
+                    <div class="col-md-5">
+                      {{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}
+                    </div>
+                    <div class="col-md-1">
+                      {{ mform.DELETE.label_tag }} {{ mform.DELETE }}
+                    </div>
                   </div>
                 </div>
               {% endfor %}
@@ -171,43 +177,47 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function(){
-  // toggle entregado/recogido
+  // Toggle Entregado/Recogido
   $('.btn-estado').click(async function(){
     const btn = $(this),
           url = btn.data('url');
-    const resp = await fetch(url, { method:'POST', headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() } });
-    const d = await resp.json();
-    btn.html( d.entregado
-      ? '<span class="badge bg-success">Entregado</span>'
-      : '<span class="badge bg-primary">Recogido</span>'
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
+    });
+    const d = await res.json();
+    btn.html(
+      d.entregado
+        ? '<span class="badge bg-success">Entregado</span>'
+        : '<span class="badge bg-primary">Recogido</span>'
     );
   });
 
-  // precarga pedido → campos + maletas
+  // Precarga de pedido
   $('#pedidoSelector').change(function(){
     const id = $(this).val();
     if(!id) return;
-    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}",{pedido_id:id})
-     .done(data=>{
-       $('[name="fecha_inicio"]').val(data.fecha_inicio.split('T')[0]);
-       $('[name="fecha_fin"]').val(data.fecha_fin?.split('T')[0]||'');
-       $('[name="excursion"]').val(data.excursion);
-       $('[name="empresa"]').val(data.empresa);
-       $('[name="lugar_entrega"]').val(data.lugar_entrega);
-       $('[name="lugar_recogida"]').val(data.lugar_recogida);
-       $('[name="guia"]').val(data.guia);
-       $('[name="estado"]').val(data.estado);
-       $('[name="notas"]').val(data.notas);
-       renderMaletas(data.maletas);
-     })
-     .fail(()=>alert('Error cargando pedido'));
+    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", {pedido_id:id})
+      .done(data=>{
+        $('[name="fecha_inicio"]').val(data.fecha_inicio.split('T')[0]);
+        $('[name="fecha_fin"]').val(data.fecha_fin?.split('T')[0]||'');
+        $('[name="excursion"]').val(data.excursion);
+        $('[name="empresa"]').val(data.empresa);
+        $('[name="lugar_entrega"]').val(data.lugar_entrega);
+        $('[name="lugar_recogida"]').val(data.lugar_recogida);
+        $('[name="guia"]').val(data.guia);
+        $('[name="estado"]').val(data.estado);
+        $('[name="notas"]').val(data.notas);
+        renderMaletas(data.maletas);
+      })
+      .fail(()=>alert('Error cargando datos del pedido'));
   });
 
-  // formset dinámico
-  let idx = parseInt($('#id_form-TOTAL_FORMS').val(),10);
+  // Formset dinámico
+  let idx = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
   function renderMaletas(arr){
     const $c = $('#maletas-container').empty();
-    idx=0;
+    idx = 0;
     arr.forEach(m=>{
       $c.append(`
         <div class="maleta-form mb-3 p-2 border rounded">
@@ -231,23 +241,26 @@ $(function(){
     });
     $('#id_form-TOTAL_FORMS').val(idx);
   }
+
   $('#add-maleta').click(()=>{
     renderMaletas([ ...Array(idx+1).keys() ].map(i=>({guia:'',cantidad_pax:''})));
   });
 
-  // AJAX submit modal
-  $('#stock-form').submit(async e=>{
+  // Submit AJAX
+  $('#stock-form').submit(async function(e){
     e.preventDefault();
-    const fd=new FormData(e.target);
-    const resp=await fetch(e.target.action,{
+    const fd = new FormData(this);
+    const res = await fetch(this.action, {
       method:'POST',
-      headers:{ 'X-CSRFToken':fd.get('csrfmiddlewaretoken') },
-      body:fd
+      headers:{ 'X-CSRFToken': fd.get('csrfmiddlewaretoken') },
+      body: fd
     });
-    if(resp.ok){
+    if(res.ok){
       bootstrap.Modal.getInstance($('#nuevoRegistroModal')[0]).hide();
       location.reload();
-    } else alert('Error al guardar');
+    } else {
+      alert('Error al guardar.');
+    }
   });
 
   $('[data-bs-toggle="tooltip"]').tooltip();
