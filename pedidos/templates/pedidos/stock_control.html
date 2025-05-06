@@ -140,8 +140,8 @@
           <div class="border p-3 mb-4 rounded">
             <h6>🎒 Gestión de Maletas</h6>
             {{ formset.management_form }}
-            <div id="maletas-container">
-              {% for mform in formset %}
+                <div id="maletas-container">
+                {% for mform in formset %}
                 <div class="maleta-form mb-3 p-2 border rounded">
                   {{ mform.id }}
                   <div class="row g-2">

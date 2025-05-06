@@ -310,20 +310,23 @@ class ProductoUpdateView( UpdateView):
 # ========== Control de Stock ==========
 @staff_member_required
 def stock_control_view(request):
-    
     pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
     registros       = StockControl.objects.all().order_by('-fecha_creacion')
-    return render(request, 'pedidos/stock_control.html', {
-        'registros': registros,
-        'form':      StockControlForm(),
-        'pedidos_pagados': pedidos_pagados
-    })
 
+    form    = StockControlForm()
+    # <- Le ponemos el mismo prefix que en el POST
+    formset = MaletaFormSet(prefix='form')
+
+    return render(request, 'pedidos/stock_control.html', {
+        'registros':       registros,
+        'pedidos_pagados': pedidos_pagados,
+        'form':            form,
+        'formset':         formset,
+    })
 
 @staff_member_required
 @require_POST
 def agregar_stock(request):
-    # aquí usamos prefix="form"
     form    = StockControlForm(request.POST)
     formset = MaletaFormSet(request.POST, prefix='form')
 
@@ -333,12 +336,12 @@ def agregar_stock(request):
         formset.save()
         return JsonResponse({'success': True})
 
-    # devolvemos los errores para debug
     return JsonResponse({
         'success': False,
-        'errors': form.errors,
-        'formset_errors': formset.errors,
+        'errors':        form.errors,
+        'formset_errors': formset.non_form_errors(),  # aquí salen los errores del management_form
     }, status=400)
+    
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
