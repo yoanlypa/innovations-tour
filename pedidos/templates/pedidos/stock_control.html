@@ -3,16 +3,15 @@
 
 {% block content %}
 <div class="container mt-4">
+  <!-- ─── Cabecera con botón Nuevo Registro ──────────────────── -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 style="color:#005dab;">📦 Control de Stock</h2>
-    <div>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
-        ➕ Nuevo Registro
-      </button>
-    </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
+      ➕ Nuevo Registro
+    </button>
   </div>
 
-  <!-- ─── Tabla de registros ─────────────────────────────────────────── -->
+  <!-- ─── Tabla de registros ─────────────────────────────────── -->
   <div class="table-responsive mb-5">
     <table class="table table-hover align-middle">
       <thead class="table-dark">
@@ -74,7 +73,7 @@
   </div>
 </div>
 
-<!-- ─── Modal Nuevo Registro ───────────────────────────────────────── -->
+<!-- ─── Modal “Nuevo Registro” ───────────────────────────────── -->
 <div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
@@ -173,21 +172,22 @@
 </div>
 {% endblock %}
 
+
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function() {
-  // --- Toggle Entregado / Recogido ---
+  // ——— Toggle Entregado / Recogido ———
   $('.btn-estado').click(async function() {
     const url = $(this).data('url');
     try {
       const resp = await fetch(url, {
         method: 'POST',
-        headers: {'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()}
+        headers: { 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
       });
       const d = await resp.json();
       $(this).html(
-        d.entregado 
+        d.entregado
           ? '<span class="badge bg-success">Entregado</span>'
           : '<span class="badge bg-primary">Recogido</span>'
       );
@@ -196,37 +196,27 @@ $(function() {
     }
   });
 
-  // --- Precarga de campos al cambiar pedido ---
-  
-    $(function() {
-      $('#pedidoSelector').on('change', function() {
-        const id = $(this).val();
-        if (!id) return;
-    
-        $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
-          .done(data => {
-            // Rellena cada campo con el id correcto:
-            $('#id_empresa').val(data.empresa);
-            $('#id_lugar_entrega').val(data.lugar_entrega);
-            $('#id_lugar_recogida').val(data.lugar_recogida);
-            $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
-            $('#id_fecha_fin').val(data.fecha_fin.split('T')[0] || '');
-            $('#id_excursion').val(data.excursion);
-            $('#id_guia').val(data.guia);
-            $('#id_estado').val(data.estado);
-            $('#id_notas').val(data.notas);
-    
-            // Formset de maletas:
-            renderMaletas(data.maletas);
-          })
-          .fail(() => {
-            alert('Error cargando datos del pedido');
-          });
-      });
-    });
-    
-    
-  // --- Gestión dinámica de maletas ---
+  // ——— Precarga de campos al cambiar Pedido ———
+  $('#pedidoSelector').change(function() {
+    const id = $(this).val();
+    if (!id) return;
+    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
+      .done(data => {
+        $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
+        $('#id_fecha_fin').val(data.fecha_fin.split('T')[0] || '');
+        $('#id_excursion').val(data.excursion);
+        $('#id_empresa').val(data.empresa);
+        $('#id_lugar_entrega').val(data.lugar_entrega);
+        $('#id_lugar_recogida').val(data.lugar_recogida);
+        $('#id_guia').val(data.guia);
+        $('#id_estado').val(data.estado);
+        $('#id_notas').val(data.notas);
+        renderMaletas(data.maletas);
+      })
+      .fail(() => alert('Error cargando datos del pedido'));
+  });
+
+  // ——— Gestión dinámica de maletas ———
   let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
   function renderMaletas(maletas) {
     const $c = $('#maletas-container').empty();
@@ -254,21 +244,21 @@ $(function() {
     });
     $('#id_form-TOTAL_FORMS').val(formIndex);
   }
-  $('#add-maleta').click(()=>{
-    renderMaletas([ ...Array(formIndex+1).keys() ].map(i=>({guia:'',pax:''})));
+  $('#add-maleta').click(()=> {
+    renderMaletas([ ...Array(formIndex+1).keys() ].map(i=> ({guia:'',pax:''})));
   });
 
-  // --- Envío AJAX del modal ---
+  // ——— Envío AJAX del modal ———
   $('#stock-form').submit(async function(e) {
     e.preventDefault();
     const fd = new FormData(this);
     try {
       const resp = await fetch(this.action, {
-        method:'POST',
-        headers:{'X-CSRFToken':fd.get('csrfmiddlewaretoken')},
-        body:fd
+        method: 'POST',
+        headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken') },
+        body: fd
       });
-      if(!resp.ok) throw '';
+      if (!resp.ok) throw '';
       bootstrap.Modal.getInstance($('#nuevoRegistroModal')[0]).hide();
       location.reload();
     } catch {
