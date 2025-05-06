@@ -214,56 +214,55 @@ $(function(){
   });
 
   // Formset dinámico
-  let idx = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
-  function renderMaletas(arr){
-    const $c = $('#maletas-container').empty();
-    idx = 0;
-    arr.forEach(m=>{
-      $c.append(`
-        <div class="maleta-form mb-3 p-2 border rounded">
-          <input type="hidden" name="form-${idx}-id"/>
-          <div class="row g-2">
-            <div class="col-md-6">
-              <label>Guía:</label>
-              <input name="form-${idx}-guia" class="form-control" value="${m.guia}">
+  <script>
+    $(function(){
+      // lectura inicial del TOTAL_FORMS con prefix="form"
+      let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(),10);
+    
+      // añadir maleta nueva
+      $('#add-maleta').click(function(){
+        const html = `
+          <div class="maleta-form mb-3 p-2 border rounded">
+            <input type="hidden" name="form-${formIndex}-id" id="id_form-${formIndex}-id"/>
+            <div class="row g-2">
+              <div class="col-md-6">
+                <label>Guía:</label>
+                <input type="text" name="form-${formIndex}-guia" class="form-control" id="id_form-${formIndex}-guia"/>
+              </div>
+              <div class="col-md-5">
+                <label>PAX:</label>
+                <input type="number" name="form-${formIndex}-cantidad_pax" class="form-control" id="id_form-${formIndex}-cantidad_pax"/>
+              </div>
+              <div class="col-md-1">
+                <label>Eliminar</label>
+                <input type="checkbox" name="form-${formIndex}-DELETE" id="id_form-${formIndex}-DELETE"/>
+              </div>
             </div>
-            <div class="col-md-5">
-              <label>PAX:</label>
-              <input name="form-${idx}-cantidad_pax" type="number" class="form-control" value="${m.cantidad_pax}">
-            </div>
-            <div class="col-md-1">
-              <label>Eliminar</label>
-              <input name="form-${idx}-DELETE" type="checkbox">
-            </div>
-          </div>
-        </div>`);
-      idx++;
+          </div>`;
+        $('#maletas-container').append(html);
+        formIndex++;
+        $('#id_form-TOTAL_FORMS').val(formIndex);
+      });
+    
+      // submit AJAX
+      $('#stock-form').submit(async function(e){
+        e.preventDefault();
+        const fd = new FormData(this);
+        const resp = await fetch(this.action, {
+          method: 'POST',
+          headers: {'X-CSRFToken': fd.get('csrfmiddlewaretoken')},
+          body: fd
+        });
+        if(resp.ok){
+          bootstrap.Modal.getInstance($('#nuevoRegistroModal')[0]).hide();
+          location.reload();
+        } else {
+          const err = await resp.json();
+          console.error(err);
+          alert('Error al guardar. Mira la consola.');
+        }
+      });
     });
-    $('#id_form-TOTAL_FORMS').val(idx);
-  }
-
-  $('#add-maleta').click(()=>{
-    renderMaletas([ ...Array(idx+1).keys() ].map(i=>({guia:'',cantidad_pax:''})));
-  });
-
-  // Submit AJAX
-  $('#stock-form').submit(async function(e){
-    e.preventDefault();
-    const fd = new FormData(this);
-    const res = await fetch(this.action, {
-      method:'POST',
-      headers:{ 'X-CSRFToken': fd.get('csrfmiddlewaretoken') },
-      body: fd
-    });
-    if(res.ok){
-      bootstrap.Modal.getInstance($('#nuevoRegistroModal')[0]).hide();
-      location.reload();
-    } else {
-      alert('Error al guardar.');
-    }
-  });
-
-  $('[data-bs-toggle="tooltip"]').tooltip();
-});
+    </script>
 </script>
 {% endblock %}

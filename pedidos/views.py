@@ -323,20 +323,22 @@ def stock_control_view(request):
 @staff_member_required
 @require_POST
 def agregar_stock(request):
+    # aquí usamos prefix="form"
     form    = StockControlForm(request.POST)
-    formset = MaletaFormSet(request.POST)
+    formset = MaletaFormSet(request.POST, prefix='form')
+
     if form.is_valid() and formset.is_valid():
         sc = form.save()
         formset.instance = sc
         formset.save()
         return JsonResponse({'success': True})
-    # devolvemos los errores para debugging si quieres:
+
+    # devolvemos los errores para debug
     return JsonResponse({
         'success': False,
         'errors': form.errors,
         'formset_errors': formset.errors,
     }, status=400)
-
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
