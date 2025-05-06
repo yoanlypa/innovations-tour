@@ -4,12 +4,13 @@
 {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>📦 Control de Stock</h2>
+    <h2 style="color:#005dab;">📦 Control de Stock</h2>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
       ➕ Nuevo Registro
     </button>
   </div>
 
+  <!-- Tabla de registros -->
   <div class="table-responsive mb-5">
     <table class="table table-hover align-middle">
       <thead class="table-dark">
@@ -34,16 +35,12 @@
           <td>
             {% for m in stock.maletas.all %}
               <span class="badge bg-secondary">🎒 {{ m.guia }} ({{ m.cantidad_pax }})</span>
-            {% empty %}—
-            {% endfor %}
+            {% empty %}—{% endfor %}
           </td>
           <td>
             {% if stock.notas %}
-              <button class="btn btn-sm btn-info"
-                      data-bs-toggle="tooltip"
-                      title="{{ stock.notas }}">📝</button>
-            {% else %}—
-            {% endif %}
+            <button class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="{{ stock.notas }}">📝</button>
+            {% else %}—{% endif %}
           </td>
           <td>
             <button class="btn btn-sm btn-estado"
@@ -56,8 +53,7 @@
             </button>
           </td>
           <td>
-            <a href="{% url 'pedidos:editar_stock' stock.pk %}"
-               class="btn btn-sm btn-warning">✏️</a>
+            <a href="{% url 'pedidos:editar_stock' stock.pk %}" class="btn btn-sm btn-warning">✏️</a>
             <button class="btn btn-sm btn-danger btn-eliminar"
                     data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">🗑️</button>
           </td>
@@ -78,10 +74,11 @@
       </div>
       <div class="modal-body">
         <form id="stock-form" method="post" action="{% url 'pedidos:agregar_stock' %}">
-            {% csrf_token %}
-          <!-- 1) Selector de Pedido -->
+          {% csrf_token %}
+
+          <!-- Selector de Pedido -->
           <div class="mb-3">
-            <label class="form-label">Pedido pagado*</label>
+            <label class="form-label">Selecciona pedido pagado</label>
             <select id="pedidoSelector" name="pedido" class="form-select" required>
               <option value="">-- Selecciona --</option>
               {% for pedido in pedidos_pagados %}
@@ -92,75 +89,72 @@
             </select>
           </div>
 
-          <!-- 2) Campos principales -->
+          <!-- Campos principales -->
           <div class="row g-3 mb-4">
             <div class="col-md-6">
               <label>Fecha inicio*</label>
-              <input type="date" name="fecha_inicio" class="form-control" required>
+              <input type="date" name="fecha_inicio" id="id_fecha_inicio" class="form-control" required>
             </div>
             <div class="col-md-6">
               <label>Fecha fin</label>
-              <input type="date" name="fecha_fin" class="form-control">
+              <input type="date" name="fecha_fin" id="id_fecha_fin" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Excursión</label>
-              <input type="text" name="excursion" class="form-control">
+              <input type="text" name="excursion" id="id_excursion" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Empresa</label>
-              <input type="text" name="empresa" class="form-control">
+              <input type="text" name="empresa" id="id_empresa" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Lugar de entrega</label>
-              <input type="text" name="lugar_entrega" class="form-control">
+              <input type="text" name="lugar_entrega" id="id_lugar_entrega" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Lugar de recogida</label>
-              <input type="text" name="lugar_recogida" class="form-control">
+              <input type="text" name="lugar_recogida" id="id_lugar_recogida" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Guía</label>
-              <input type="text" name="guia" class="form-control">
+              <input type="text" name="guia" id="id_guia" class="form-control">
             </div>
             <div class="col-md-6">
               <label>Estado</label>
-              <select name="estado" class="form-select">
+              <select name="estado" id="id_estado" class="form-select">
                 <option value="G" selected>Pagado</option>
                 <option value="P">Pendiente</option>
               </select>
             </div>
             <div class="col-12">
               <label>Notas</label>
-              <textarea name="notas" class="form-control"></textarea>
+              <textarea name="notas" id="id_notas" class="form-control"></textarea>
             </div>
           </div>
 
-          <!-- 3) Gestión de maletas -->
+          <!-- Gestión de Maletas -->
           <div class="border p-3 mb-4 rounded">
             <h6>🎒 Gestión de Maletas</h6>
             {{ formset.management_form }}
-                
             <div id="maletas-container">
-                {% for mform in formset %}
-                  <div class="maleta-form mb-3 p-2 border rounded">
-                    {{ mform.id }}
-                    <div class="row g-2">
-                      <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
-                      <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
-                      <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
-                    </div>
-                  </div>
-                {% endfor %}
+              {% for mform in formset %}
+              <div class="maleta-form mb-3 p-2 border rounded">
+                {{ mform.id }}
+                <div class="row g-2">
+                  <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
+                  <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
+                  <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
+                </div>
               </div>
-              <button type="button" id="add-maleta" class="btn btn-secondary mt-2">
-                ➕ Añadir Maleta
-              </button>
+              {% endfor %}
             </div>
+            <button type="button" id="add-maleta" class="btn btn-secondary mt-2">➕ Añadir Maleta</button>
+          </div>
 
-            <div class="text-end">
-                <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
-              </div>
-            </form>
+          <div class="text-end">
+            <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -171,104 +165,94 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function(){
-  // Toggle Entregado/Recogido
-  $('.btn-estado').click(async function(){
-    const btn = $(this),
-          url = btn.data('url');
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
-    });
-    const d = await res.json();
-    btn.html(
-      d.entregado
-        ? '<span class="badge bg-success">Entregado</span>'
-        : '<span class="badge bg-primary">Recogido</span>'
-    );
-  });
+  // 1) Inicializar formIndex
+  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(),10);
 
-  // Precarga de pedido
-  $('#pedidoSelector').change(function(){
-    const id = $(this).val();
-    if(!id) return;
-    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", {pedido_id:id})
-      .done(data=>{
-        $('[name="fecha_inicio"]').val(data.fecha_inicio.split('T')[0]);
-        $('[name="fecha_fin"]').val(data.fecha_fin?.split('T')[0]||'');
-        $('[name="excursion"]').val(data.excursion);
-        $('[name="empresa"]').val(data.empresa);
-        $('[name="lugar_entrega"]').val(data.lugar_entrega);
-        $('[name="lugar_recogida"]').val(data.lugar_recogida);
-        $('[name="guia"]').val(data.guia);
-        $('[name="estado"]').val(data.estado);
-        $('[name="notas"]').val(data.notas);
-        renderMaletas(data.maletas);
-      })
-      .fail(()=>alert('Error cargando datos del pedido'));
-  });
-
-  // Formset dinámico
-   $(function(){
-  // Arrancamos formIndex desde el management_form
-  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
-
-  // Clon de la primera fila para usarla como plantilla
+  // 2) Guardamos la primera fila como plantilla
   const $template = $('.maleta-form').first().clone();
-  
+
+  // 3) Añadir Maleta
   $('#add-maleta').click(function(){
-    // Creamos un nuevo contenedor a partir de la plantilla
     const $nuevo = $template.clone();
-    
-    // Reemplazamos todos los índices viejos por formIndex
+    // Reindexar inputs
     $nuevo.find(':input').each(function(){
       const name = $(this).attr('name');
-      if (!name) return;
-      // name="form-0-guia" → "form-{formIndex}-guia"
+      if(!name) return;
       const nuevoName = name.replace(/form-\d+-/, `form-${formIndex}-`);
       $(this).attr('name', nuevoName).attr('id', nuevoName);
-      // si es checkbox DELETE, desmarcamos
-      if ($(this).is(':checkbox')) $(this).prop('checked', false);
-      else $(this).val('');  // limpiamos valores
+      if($(this).is(':checkbox')) $(this).prop('checked',false);
+      else $(this).val('');
     });
-    // Insertamos al final
     $('#maletas-container').append($nuevo);
     formIndex++;
     $('#id_form-TOTAL_FORMS').val(formIndex);
   });
-});
-     // Al cambiar el selector de pedido precargamos
-  $('#pedidoSelector').change(function() {
-    const id = $(this).val();
-    if (!id) return;
-    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
-      .done(data => {
-        $('#id_excursion').val(data.excursion);
-        /* … rellena resto de campos … */
-        renderMaletas(data.maletas);
+
+  // 4) Toggle Entregado / Recogido
+  $('.btn-estado').click(async function(){
+    try{
+      const resp = await fetch($(this).data('url'),{
+        method:'POST',
+        headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
       });
+      const d = await resp.json();
+      $(this).html(d.entregado
+        ? '<span class="badge bg-success">Entregado</span>'
+        : '<span class="badge bg-primary">Recogido</span>');
   });
 
-  // Añadir una nueva fila vacía
-  $('#add-maleta').click(()=> renderMaletas([{},]));
+  // 5) Precargar datos del pedido
+  $('#pedidoSelector').change(function(){
+    const id = $(this).val();
+    if(!id) return;
+    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", {pedido_id: id})
+      .done(data=>{
+        $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
+        $('#id_fecha_fin').val(data.fecha_fin?.split('T')[0]||'');
+        $('#id_excursion').val(data.excursion);
+        $('#id_empresa').val(data.empresa);
+        $('#id_lugar_entrega').val(data.lugar_entrega);
+        $('#id_lugar_recogida').val(data.lugar_recogida);
+        $('#id_guia').val(data.guia);
+        $('#id_estado').val(data.estado);
+        $('#id_notas').val(data.notas);
+        // render maletas
+        // usar la misma lógica de cloning:
+        $('#maletas-container').empty();
+        formIndex = 0;
+        (data.maletas||[]).forEach(m=>{
+          $('#add-maleta').click();          // añade nueva fila limpia
+          $(`#form-${formIndex-1}-guia`).val(m.guia);
+          $(`#form-${formIndex-1}-cantidad_pax`).val(m.cantidad_pax);
+        });
+      })
+      .fail(()=>alert('Error cargando datos del pedido.'));
+  });
 
-  // Envío AJAX
-  $('#stock-form').submit(async function(e) {
+  // 6) Envío AJAX del formulario
+  $('#stock-form').submit(async function(e){
     e.preventDefault();
     const fd = new FormData(this);
     try {
-      const resp = await fetch(this.action, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
-                   'X-Requested-With': 'XMLHttpRequest' },
+      const resp = await fetch(this.action,{
+        method:'POST',
+        headers:{ 
+          'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
+          'X-Requested-With':'XMLHttpRequest'
+        },
         body: fd
       });
-      if (!resp.ok) throw '';
-      location.href = "{% url 'pedidos:stock_control' %}";
+      if(!resp.ok) throw '';
+      // redirigir en lugar de JSON
+      window.location.href = "{% url 'pedidos:stock_control' %}";
     } catch {
-      alert('Error al guardar, revisa errores en consola.');
+      alert('Error al guardar. Revisa consola.');
       console.error(await resp.json());
     }
   });
+
+  // Inicializar tooltips
+  $('[data-bs-toggle="tooltip"]').tooltip();
 });
 </script>
 {% endblock %}
