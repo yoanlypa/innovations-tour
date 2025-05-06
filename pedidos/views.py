@@ -25,7 +25,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente, StockMaleta, Maleta
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm, MaletaFormSet, StockMaletaFormSet
+from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm, MaletaFormSet
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
