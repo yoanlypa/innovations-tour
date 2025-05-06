@@ -310,7 +310,6 @@ class ProductoUpdateView( UpdateView):
 # ========== Control de Stock ==========
 @staff_member_required
 def stock_control_view(request):
-    # Pedidos confirmados para el selector
     pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
     registros       = StockControl.objects.all().order_by('-fecha_creacion')
 
@@ -331,16 +330,20 @@ def agregar_stock(request):
     formset = MaletaFormSet(request.POST, prefix='form')
 
     if form.is_valid() and formset.is_valid():
-        sc = form.save()             # guarda StockControl con .pedido
-        formset.instance = sc        # ligamos las Maletas a este StockControl
-        formset.save()               # BaseMaletaFormSet se encarga de .pedido
-        return JsonResponse({'success': True})
+        sc = form.save()             # guarda StockControl (incluye excursion)
+        formset.instance = sc
+        formset.save()               # BaseMaletaFormSet asigna pedido a cada Maleta
+        # Si no es AJAX, redirigimos; si es AJAX, devolvemos JSON
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True})
+        return redirect('pedidos:stock_control')
 
-    # Devolvemos errores en JSON para debug
+    errors = form.errors.as_json()
+    formset_errors = formset.errors
     return JsonResponse({
         'success': False,
-        'errors':         form.errors,
-        'formset_errors': formset.non_form_errors(),
+        'errors':         errors,
+        'formset_errors': formset_errors,
     }, status=400)
 
 @staff_member_required

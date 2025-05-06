@@ -42,7 +42,7 @@ class ProductoForm(forms.ModelForm):
 class StockControlForm(forms.ModelForm):
     class Meta:
         model = StockControl
-        fields = ['pedido', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas']
+        fields = ['pedido','excursion', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
