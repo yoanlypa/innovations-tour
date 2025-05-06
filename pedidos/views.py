@@ -419,6 +419,24 @@ def exportar_csv(request):
     return response
 @require_GET
 @staff_member_required
+def datos_pedido_api(request, pedido_id):
+    try:
+        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')
+        maletas = Maleta.objects.filter(pedido=pedido)
+        data = {
+            'empresa': pedido.empresa,
+            'lugar_entrega': pedido.lugar_entrega,
+            'lugar_recogida': pedido.lugar_recogida,
+            'fecha_inicio': pedido.fecha_inicio,
+            'fecha_fin': pedido.fecha_fin,
+            'maletas': [{'cantidad_pax': m.cantidad_pax, 'guia': m.guia} for m in maletas]
+        }
+        return JsonResponse(data)
+    except Pedido.DoesNotExist:
+        return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
+
+@require_GET
+@staff_member_required
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get('pedido_id')
     pedido = get_object_or_404(Pedido, pk=pedido_id, estado='confirmado')
