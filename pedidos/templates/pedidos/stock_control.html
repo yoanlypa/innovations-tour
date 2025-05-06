@@ -197,25 +197,35 @@ $(function() {
   });
 
   // --- Precarga de campos al cambiar pedido ---
-  $('#pedidoSelector').change(function() {
-    const id = $(this).val();
-    if (!id) return;
-    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
-      .done(data => {
-        $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
-        $('#id_fecha_fin').val(data.fecha_fin?.split('T')[0]||'');
-        $('#id_excursion').val(data.excursion);
-        $('#id_empresa').val(data.empresa);
-        $('#id_lugar_entrega').val(data.lugar_entrega);
-        $('#id_lugar_recogida').val(data.lugar_recogida);
-        $('#id_guia').val(data.guia);
-        $('#id_estado').val(data.estado);
-        $('#id_notas').val(data.notas);
-        renderMaletas(data.maletas);
-      })
-      .fail(()=>alert('Error al cargar datos del pedido.'));
-  });
-
+  
+    $(function() {
+      $('#pedidoSelector').on('change', function() {
+        const id = $(this).val();
+        if (!id) return;
+    
+        $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
+          .done(data => {
+            // Rellena cada campo con el id correcto:
+            $('#id_empresa').val(data.empresa);
+            $('#id_lugar_entrega').val(data.lugar_entrega);
+            $('#id_lugar_recogida').val(data.lugar_recogida);
+            $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
+            $('#id_fecha_fin').val(data.fecha_fin.split('T')[0] || '');
+            $('#id_excursion').val(data.excursion);
+            $('#id_guia').val(data.guia);
+            $('#id_estado').val(data.estado);
+            $('#id_notas').val(data.notas);
+    
+            // Formset de maletas:
+            renderMaletas(data.maletas);
+          })
+          .fail(() => {
+            alert('Error cargando datos del pedido');
+          });
+      });
+    });
+    
+    
   // --- Gestión dinámica de maletas ---
   let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
   function renderMaletas(maletas) {
