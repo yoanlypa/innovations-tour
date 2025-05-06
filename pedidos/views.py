@@ -321,24 +321,22 @@ def stock_control_view(request):
 
 
 @staff_member_required
+@require_POST
 def agregar_stock(request):
-    if request.method == 'POST':
-        form    = StockControlForm(request.POST)
-        formset = MaletaFormSet(request.POST)
-        if form.is_valid() and formset.is_valid():
-            sc = form.save()
-            formset.instance = sc
-            formset.save()
-            return redirect('pedidos:stock_control')
-    else:
-        form    = StockControlForm()
-        formset = MaletaFormSet()
-    pedidos_pagados = Pedido.objects.filter(estado='confirmado')
-    return render(request, 'pedidos/stock_control_form.html', {
-        'form': form,
-        'formset': formset,
-        'pedidos_pagados': pedidos_pagados,
-    })
+    form    = StockControlForm(request.POST)
+    formset = MaletaFormSet(request.POST)
+    if form.is_valid() and formset.is_valid():
+        sc = form.save()
+        formset.instance = sc
+        formset.save()
+        return JsonResponse({'success': True})
+    # devolvemos los errores para debugging si quieres:
+    return JsonResponse({
+        'success': False,
+        'errors': form.errors,
+        'formset_errors': formset.errors,
+    }, status=400)
+
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
