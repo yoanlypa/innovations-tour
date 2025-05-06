@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="container mt-4">
-  <!-- ─── Cabecera con botón Nuevo Registro ──────────────────── -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 style="color:#005dab;">📦 Control de Stock</h2>
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoRegistroModal">
@@ -11,7 +10,6 @@
     </button>
   </div>
 
-  <!-- ─── Tabla de registros ─────────────────────────────────── -->
   <div class="table-responsive mb-5">
     <table class="table table-hover align-middle">
       <thead class="table-dark">
@@ -36,17 +34,15 @@
           <td>
             {% for m in stock.maletas.all %}
               <span class="badge bg-secondary">🎒 {{ m.guia }} ({{ m.cantidad_pax }})</span>
-            {% empty %}
-              —
+            {% empty %}—
             {% endfor %}
           </td>
           <td>
             {% if stock.notas %}
-              <button class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="{{ stock.notas }}">
-                📝
-              </button>
-            {% else %}
-              —
+              <button class="btn btn-sm btn-info"
+                      data-bs-toggle="tooltip"
+                      title="{{ stock.notas }}">📝</button>
+            {% else %}—
             {% endif %}
           </td>
           <td>
@@ -60,11 +56,10 @@
             </button>
           </td>
           <td>
-            <a href="{% url 'pedidos:editar_stock' stock.pk %}" class="btn btn-sm btn-warning">✏️</a>
+            <a href="{% url 'pedidos:editar_stock' stock.pk %}"
+               class="btn btn-sm btn-warning">✏️</a>
             <button class="btn btn-sm btn-danger btn-eliminar"
-                    data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">
-              🗑️
-            </button>
+                    data-url="{% url 'pedidos:eliminar_stock' stock.pk %}">🗑️</button>
           </td>
         </tr>
         {% endfor %}
@@ -73,7 +68,7 @@
   </div>
 </div>
 
-<!-- ─── Modal “Nuevo Registro” ───────────────────────────────── -->
+<!-- Modal Nuevo Registro -->
 <div class="modal fade" id="nuevoRegistroModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
@@ -84,7 +79,7 @@
       <div class="modal-body">
         <form id="stock-form" method="post" action="{% url 'pedidos:agregar_stock' %}">
           {% csrf_token %}
-
+          
           <!-- 1) Selector de Pedido -->
           <div class="mb-3">
             <label for="pedidoSelector" class="form-label">Selecciona pedido pagado</label>
@@ -98,52 +93,52 @@
             </select>
           </div>
 
-          <!-- 2) Campos editables -->
+          <!-- 2) Campos principales -->
           <div class="row g-3 mb-4">
             <div class="col-md-6">
-              <label for="id_fecha_inicio">Fecha inicio*</label>
-              <input type="date" name="fecha_inicio" id="id_fecha_inicio" class="form-control" required>
+              <label>Fecha inicio*</label>
+              <input type="date" name="fecha_inicio" class="form-control" required>
             </div>
             <div class="col-md-6">
-              <label for="id_fecha_fin">Fecha fin</label>
-              <input type="date" name="fecha_fin" id="id_fecha_fin" class="form-control">
+              <label>Fecha fin</label>
+              <input type="date" name="fecha_fin" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_excursion">Excursión</label>
-              <input type="text" name="excursion" id="id_excursion" class="form-control">
+              <label>Excursión</label>
+              <input type="text" name="excursion" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_empresa">Empresa</label>
-              <input type="text" name="empresa" id="id_empresa" class="form-control">
+              <label>Empresa</label>
+              <input type="text" name="empresa" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_lugar_entrega">Lugar de entrega</label>
-              <input type="text" name="lugar_entrega" id="id_lugar_entrega" class="form-control">
+              <label>Lugar de entrega</label>
+              <input type="text" name="lugar_entrega" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_lugar_recogida">Lugar de recogida</label>
-              <input type="text" name="lugar_recogida" id="id_lugar_recogida" class="form-control">
+              <label>Lugar de recogida</label>
+              <input type="text" name="lugar_recogida" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_guia">Guía</label>
-              <input type="text" name="guia" id="id_guia" class="form-control">
+              <label>Guía</label>
+              <input type="text" name="guia" class="form-control">
             </div>
             <div class="col-md-6">
-              <label for="id_estado">Estado</label>
-              <select name="estado" id="id_estado" class="form-select">
+              <label>Estado</label>
+              <select name="estado" class="form-select">
                 <option value="G" selected>Pagado</option>
                 <option value="P">Pendiente</option>
               </select>
             </div>
             <div class="col-12">
-              <label for="id_notas">Notas</label>
-              <textarea name="notas" id="id_notas" class="form-control"></textarea>
+              <label>Notas</label>
+              <textarea name="notas" class="form-control"></textarea>
             </div>
           </div>
 
           <!-- 3) Gestión de maletas -->
           <div class="border p-3 mb-4 rounded">
-            <h6 style="color:#005dab;">🎒 Gestión de Maletas</h6>
+            <h6>🎒 Gestión de Maletas</h6>
             {{ formset.management_form }}
             <div id="maletas-container">
               {% for mform in formset %}
@@ -151,7 +146,7 @@
                   {{ mform.id }}
                   <div class="row g-2">
                     <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
-                    <div class="col-md-5">{{ mform.pax.label_tag }}  {{ mform.pax }}</div>
+                    <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
                     <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
                   </div>
                 </div>
@@ -172,101 +167,89 @@
 </div>
 {% endblock %}
 
-
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(function() {
-  // ——— Toggle Entregado / Recogido ———
-  $('.btn-estado').click(async function() {
-    const url = $(this).data('url');
-    try {
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
-      });
-      const d = await resp.json();
-      $(this).html(
-        d.entregado
-          ? '<span class="badge bg-success">Entregado</span>'
-          : '<span class="badge bg-primary">Recogido</span>'
-      );
-    } catch {
-      alert('No se pudo cambiar el estado.');
-    }
+$(function(){
+  // toggle entregado/recogido
+  $('.btn-estado').click(async function(){
+    const btn = $(this),
+          url = btn.data('url');
+    const resp = await fetch(url, { method:'POST', headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() } });
+    const d = await resp.json();
+    btn.html( d.entregado
+      ? '<span class="badge bg-success">Entregado</span>'
+      : '<span class="badge bg-primary">Recogido</span>'
+    );
   });
 
-  // ——— Precarga de campos al cambiar Pedido ———
-  $('#pedidoSelector').change(function() {
+  // precarga pedido → campos + maletas
+  $('#pedidoSelector').change(function(){
     const id = $(this).val();
-    if (!id) return;
-    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", { pedido_id: id })
-      .done(data => {
-        $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
-        $('#id_fecha_fin').val(data.fecha_fin.split('T')[0] || '');
-        $('#id_excursion').val(data.excursion);
-        $('#id_empresa').val(data.empresa);
-        $('#id_lugar_entrega').val(data.lugar_entrega);
-        $('#id_lugar_recogida').val(data.lugar_recogida);
-        $('#id_guia').val(data.guia);
-        $('#id_estado').val(data.estado);
-        $('#id_notas').val(data.notas);
-        renderMaletas(data.maletas);
-      })
-      .fail(() => alert('Error cargando datos del pedido'));
+    if(!id) return;
+    $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}",{pedido_id:id})
+     .done(data=>{
+       $('[name="fecha_inicio"]').val(data.fecha_inicio.split('T')[0]);
+       $('[name="fecha_fin"]').val(data.fecha_fin?.split('T')[0]||'');
+       $('[name="excursion"]').val(data.excursion);
+       $('[name="empresa"]').val(data.empresa);
+       $('[name="lugar_entrega"]').val(data.lugar_entrega);
+       $('[name="lugar_recogida"]').val(data.lugar_recogida);
+       $('[name="guia"]').val(data.guia);
+       $('[name="estado"]').val(data.estado);
+       $('[name="notas"]').val(data.notas);
+       renderMaletas(data.maletas);
+     })
+     .fail(()=>alert('Error cargando pedido'));
   });
 
-  // ——— Gestión dinámica de maletas ———
-  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
-  function renderMaletas(maletas) {
+  // formset dinámico
+  let idx = parseInt($('#id_form-TOTAL_FORMS').val(),10);
+  function renderMaletas(arr){
     const $c = $('#maletas-container').empty();
-    formIndex = 0;
-    maletas.forEach(m => {
+    idx=0;
+    arr.forEach(m=>{
       $c.append(`
         <div class="maleta-form mb-3 p-2 border rounded">
-          <input type="hidden" name="form-${formIndex}-id"/>
+          <input type="hidden" name="form-${idx}-id"/>
           <div class="row g-2">
             <div class="col-md-6">
               <label>Guía:</label>
-              <input type="text" name="form-${formIndex}-guia" class="form-control" value="${m.guia}">
+              <input name="form-${idx}-guia" class="form-control" value="${m.guia}">
             </div>
             <div class="col-md-5">
               <label>PAX:</label>
-              <input type="number" name="form-${formIndex}-pax" class="form-control" value="${m.pax}">
+              <input name="form-${idx}-cantidad_pax" type="number" class="form-control" value="${m.cantidad_pax}">
             </div>
             <div class="col-md-1">
               <label>Eliminar</label>
-              <input type="checkbox" name="form-${formIndex}-DELETE">
+              <input name="form-${idx}-DELETE" type="checkbox">
             </div>
           </div>
         </div>`);
-      formIndex++;
+      idx++;
     });
-    $('#id_form-TOTAL_FORMS').val(formIndex);
+    $('#id_form-TOTAL_FORMS').val(idx);
   }
-  $('#add-maleta').click(()=> {
-    renderMaletas([ ...Array(formIndex+1).keys() ].map(i=> ({guia:'',pax:''})));
+  $('#add-maleta').click(()=>{
+    renderMaletas([ ...Array(idx+1).keys() ].map(i=>({guia:'',cantidad_pax:''})));
   });
 
-  // ——— Envío AJAX del modal ———
-  $('#stock-form').submit(async function(e) {
+  // AJAX submit modal
+  $('#stock-form').submit(async e=>{
     e.preventDefault();
-    const fd = new FormData(this);
-    try {
-      const resp = await fetch(this.action, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': fd.get('csrfmiddlewaretoken') },
-        body: fd
-      });
-      if (!resp.ok) throw '';
+    const fd=new FormData(e.target);
+    const resp=await fetch(e.target.action,{
+      method:'POST',
+      headers:{ 'X-CSRFToken':fd.get('csrfmiddlewaretoken') },
+      body:fd
+    });
+    if(resp.ok){
       bootstrap.Modal.getInstance($('#nuevoRegistroModal')[0]).hide();
       location.reload();
-    } catch {
-      alert('Error al guardar.');
-    }
+    } else alert('Error al guardar');
   });
 
-  // Inicializar tooltips de notas
   $('[data-bs-toggle="tooltip"]').tooltip();
 });
 </script>
