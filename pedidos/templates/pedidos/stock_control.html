@@ -52,7 +52,7 @@
           </td>
           <td>
             <button class="btn btn-sm btn-estado"
-                    data-url="{% url 'pedidos:toggle_estado' stock.pk %}">
+                    data-url="{% url 'pedidos:toggle_estado_stock' stock.pk %}">
               {% if stock.entregado %}
                 <span class="badge bg-success">Entregado</span>
               {% else %}
