@@ -1,6 +1,7 @@
 from django import forms
 from .models import Tarea, Pedido, Producto, StockControl, Maleta
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -46,23 +47,30 @@ class StockControlForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['pedido'].queryset = Pedido.objects.filter(estado='confirmado')
+class BaseMaletaFormSet(BaseInlineFormSet):
+    def save_new(self, form, commit=True):
+        """
+        Antes de guardar la nueva Maleta, le asignamos el mismo pedido
+        que tiene el StockControl (self.instance.pedido).
+        """
+        obj = super().save_new(form, commit=False)
+        # self.instance es la instancia de StockControl
+        obj.pedido = self.instance.pedido
+        if commit:
+            obj.save()
+        return obj
+
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta
-        fields = ['guia', 'cantidad_pax']
+        fields = ['guia', 'cantidad_pax']  # usa el nombre real del campo
 
-MaletaFormSet = forms.inlineformset_factory(
-    StockControl,
-    Maleta,
+# Creamos el inlineformset con nuestro BaseMaletaFormSet
+MaletaFormSet = inlineformset_factory(
+    parent_model=StockControl,
+    model=Maleta,
     form=MaletaForm,
-    extra=1,  # 1 maleta por defecto
-    can_delete=True
-)
-StockMaletaFormSet = forms.inlineformset_factory(
-    StockControl,
-    StockControl.maletas.through,
-    form=MaletaForm,
+    formset=BaseMaletaFormSet,
     extra=1,
     can_delete=True,
-    fields=('maleta', 'guia', 'pax')
 )

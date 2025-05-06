@@ -78,8 +78,7 @@
       </div>
       <div class="modal-body">
         <form id="stock-form" method="post" action="{% url 'pedidos:agregar_stock' %}">
-          {% csrf_token %}
-
+            {% csrf_token %}
           <!-- 1) Selector de Pedido -->
           <div class="mb-3">
             <label class="form-label">Pedido pagado*</label>
@@ -140,33 +139,28 @@
           <div class="border p-3 mb-4 rounded">
             <h6>🎒 Gestión de Maletas</h6>
             {{ formset.management_form }}
-                <div id="maletas-container">
+                
+            <div id="maletas-container">
                 {% for mform in formset %}
-                <div class="maleta-form mb-3 p-2 border rounded">
-                  {{ mform.id }}
-                  <div class="row g-2">
-                    <div class="col-md-6">
-                      {{ mform.guia.label_tag }} {{ mform.guia }}
-                    </div>
-                    <div class="col-md-5">
-                      {{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}
-                    </div>
-                    <div class="col-md-1">
-                      {{ mform.DELETE.label_tag }} {{ mform.DELETE }}
+                  <div class="maleta-form mb-3 p-2 border rounded">
+                    {{ mform.id }}
+                    <div class="row g-2">
+                      <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
+                      <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
+                      <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
                     </div>
                   </div>
-                </div>
-              {% endfor %}
+                {% endfor %}
+              </div>
+              <button type="button" id="add-maleta" class="btn btn-secondary mt-2">
+                ➕ Añadir Maleta
+              </button>
             </div>
-            <button type="button" id="add-maleta" class="btn btn-secondary mt-2">
-              ➕ Añadir Maleta
-            </button>
-          </div>
 
-          <div class="text-end">
-            <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
-          </div>
-        </form>
+            <div class="text-end">
+                <button type="submit" class="btn btn-success">💾 Guardar Todo</button>
+              </div>
+            </form>
       </div>
     </div>
   </div>
