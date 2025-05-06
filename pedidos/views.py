@@ -419,21 +419,53 @@ def exportar_csv(request):
     return response
 @require_GET
 @staff_member_required
-def cargar_datos_pedido(request):
-    pedido_id = request.GET.get('pedido_id')
+def datos_pedido_api(request, pedido_id):
     try:
-        pedido = Pedido.objects.get(id=pedido_id)
-        datos = {
-            'empresa': pedido.empresa.nombre,
-            'lugar_inicio': pedido.lugar_inicio,
-            'lugar_fin': pedido.lugar_fin,
-            'fecha_entrega': pedido.fecha_entrega.strftime('%Y-%m-%d'),
-            'fecha_retiro': pedido.fecha_retiro.strftime('%Y-%m-%d'),
-            'maletas': list(pedido.maletas.values('cantidad', 'guia__nombre')),
+        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')
+        maletas = Maleta.objects.filter(pedido=pedido)
+        data = {
+            'empresa': pedido.empresa,
+            'lugar_entrega': pedido.lugar_entrega,
+            'lugar_recogida': pedido.lugar_recogida,
+            'fecha_inicio': pedido.fecha_inicio,
+            'fecha_fin': pedido.fecha_fin,
+            'maletas': [{'cantidad_pax': m.cantidad_pax, 'guia': m.guia} for m in maletas]
         }
-        return JsonResponse(datos)
+        return JsonResponse(data)
     except Pedido.DoesNotExist:
         return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
+
+def cargar_datos_pedido(request):
+    pedido_id = request.GET.get('pedido_id')
+    pedido = Pedido.objects.get(id=pedido_id)
+    maletas = pedido.maletas.all()
+    data = {
+        'empresa': pedido.empresa,
+        'lugar_entrega': pedido.lugar_entrega,
+        'lugar_recogida': pedido.lugar_recogida,
+        'fecha_inicio': pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
+        'fecha_fin': pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
+        'maletas': [
+            {
+                'guia': maleta.guia,
+                'pax': maleta.pax
+            } for maleta in maletas
+        ]
+    }
+    return JsonResponse(data)
+
+# ========== login y registro django ==========
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, 'Cuenta creada correctamente. Ya puedes iniciar sesión.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'pedidos/register.html', {'form': form})
+class SincronizarUsuarioAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -456,14 +488,3 @@ def cargar_datos_pedido(request):
             user.save()
 
         return Response({'mensaje': 'Usuario sincronizado correctamente'}, status=status.HTTP_200_OK)
-# ========== login y registro django ==========
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Cuenta creada correctamente. Ya puedes iniciar sesión.')
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'pedidos/register.html', {'form': form})

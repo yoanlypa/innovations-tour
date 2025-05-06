@@ -44,7 +44,7 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='pedidos/password_reset_complete.html'), name='password_reset_complete'),
     
     #Usuario
-     path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
+    path('api/sincronizar-usuario/', SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     # Stock Control
     path('stock/cargar_datos_pedido/',views.cargar_datos_pedido,name='cargar_datos_pedido'),
     path('stock/', views.stock_control_view, name='stock_control'),
