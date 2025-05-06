@@ -208,36 +208,34 @@ $(function(){
   });
 
   // Formset dinámico
-    $(function() {
-        let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
-      
-        function renderMaletas(maletas = []) {
-          const $c = $('#maletas-container').empty();
-          maletas.forEach(m => {
-            $c.append(`
-              <div class="maleta-form mb-3 p-2 border rounded">
-                <input type="hidden" name="form-${formIndex}-id" />
-                <div class="row g-2">
-                  <div class="col-md-6">
-                    <label>Guía:</label>
-                    <input type="text" name="form-${formIndex}-guia"
-                           class="form-control" value="${m.guia || ''}">
-                  </div>
-                  <div class="col-md-5">
-                    <label>Cantidad Pax:</label>
-                    <input type="number" name="form-${formIndex}-cantidad_pax"
-                           class="form-control" value="${m.cantidad_pax || ''}">
-                  </div>
-                  <div class="col-md-1">
-                    <label>Eliminar</label>
-                    <input type="checkbox" name="form-${formIndex}-DELETE">
-                  </div>
-                </div>
-              </div>`);
-            formIndex++;
-          });
-          $('#id_form-TOTAL_FORMS').val(formIndex);
-        }
+   $(function(){
+  // Arrancamos formIndex desde el management_form
+  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
+
+  // Clon de la primera fila para usarla como plantilla
+  const $template = $('.maleta-form').first().clone();
+  
+  $('#add-maleta').click(function(){
+    // Creamos un nuevo contenedor a partir de la plantilla
+    const $nuevo = $template.clone();
+    
+    // Reemplazamos todos los índices viejos por formIndex
+    $nuevo.find(':input').each(function(){
+      const name = $(this).attr('name');
+      if (!name) return;
+      // name="form-0-guia" → "form-{formIndex}-guia"
+      const nuevoName = name.replace(/form-\d+-/, `form-${formIndex}-`);
+      $(this).attr('name', nuevoName).attr('id', nuevoName);
+      // si es checkbox DELETE, desmarcamos
+      if ($(this).is(':checkbox')) $(this).prop('checked', false);
+      else $(this).val('');  // limpiamos valores
+    });
+    // Insertamos al final
+    $('#maletas-container').append($nuevo);
+    formIndex++;
+    $('#id_form-TOTAL_FORMS').val(formIndex);
+  });
+});
      // Al cambiar el selector de pedido precargamos
   $('#pedidoSelector').change(function() {
     const id = $(this).val();

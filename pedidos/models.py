@@ -36,7 +36,7 @@ class Pedido(models.Model):
             kwargs['fecha_creacion'] = convertir_fecha(kwargs['fecha_creacion'])
         super().__init__(*args, **kwargs)
     fecha_modificacion = models.DateTimeField(auto_now=True)
-    estado = models.CharField(max_length=20, choices=ESTADOS)
+    estado = models.CharField(max_length=20, choices=ESTADOS, default='pendiente')
     notas = models.TextField(blank=True)
     
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pedidos')

@@ -355,9 +355,14 @@ def toggle_estado_stock(request, pk):
         registro.entregado = False
         registro.recogido  = True
     else:
-        registro.entregado = True
-        registro.recogido  = False
-    registro.save()
+            registro.entregado = True
+            registro.recogido  = False
+            registro.save()
+    
+    if registro.entregado:
+        pedido = registro.pedido
+        pedido.estado = 'entregado'
+        pedido.save()
     return JsonResponse({
         'entregado': registro.entregado,
         'recogido':  registro.recogido,
