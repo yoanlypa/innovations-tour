@@ -321,29 +321,21 @@ def stock_control_view(request):
 
 
 @staff_member_required
-def agregar_stock(request, pedido_id=None):
+def agregar_stock(request):
     if request.method == 'POST':
         form = StockControlForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('pedidos:stock_control')
+            return redirect('pedidos:agregar_stock')  # o a donde quieras redirigir
     else:
-        initial_data = {}
-        if pedido_id:
-            pedido = get_object_or_404(Pedido, id=pedido_id, estado='confirmado')
-            initial_data = {
-                'pedido': pedido if 'pedido' in locals() else None,
-                'empresa': pedido.empresa,
-                'lugar_entrega': pedido.lugar_entrega,
-                'lugar_recogida': pedido.lugar_recogida,
-                'fecha_inicio': pedido.fecha_inicio,
-                'fecha_fin': pedido.fecha_fin,
-                'estado': 'G',  # o el valor por defecto en tu StockControlForm
-                'notas': pedido.notas,
-            }
-        form = StockControlForm(initial=initial_data)
-        return render(request, 'pedidos/stock_form.html', {'form': form})
- 
+        form = StockControlForm()
+    
+    pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
+    return render(request, 'pedidos/stock_control.html', {
+        'form': form,
+        'pedidos_pagados': pedidos_pagados
+    })
+
 @staff_member_required
 @require_POST
 def toggle_estado_stock(request, pk):
@@ -427,41 +419,21 @@ def exportar_csv(request):
     return response
 @require_GET
 @staff_member_required
-def datos_pedido_api(request, pedido_id):
-    try:
-        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')
-        maletas = Maleta.objects.filter(pedido=pedido)
-        data = {
-            'empresa': pedido.empresa,
-            'lugar_entrega': pedido.lugar_entrega,
-            'lugar_recogida': pedido.lugar_recogida,
-            'fecha_inicio': pedido.fecha_inicio,
-            'fecha_fin': pedido.fecha_fin,
-            'maletas': [{'cantidad_pax': m.cantidad_pax, 'guia': m.guia} for m in maletas]
-        }
-        return JsonResponse(data)
-    except Pedido.DoesNotExist:
-        return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
-
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get('pedido_id')
-    pedido = Pedido.objects.get(id=pedido_id)
-    maletas = pedido.maletas.all()
-    data = {
-        'empresa': pedido.empresa,
-        'lugar_entrega': pedido.lugar_entrega,
-        'lugar_recogida': pedido.lugar_recogida,
-        'fecha_inicio': pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
-        'fecha_fin': pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
-        'maletas': [
-            {
-                'guia': maleta.guia,
-                'pax': maleta.pax
-            } for maleta in maletas
-        ]
-    }
-    return JsonResponse(data)
-class SincronizarUsuarioAPIView(APIView):
+    try:
+        pedido = Pedido.objects.get(id=pedido_id)
+        datos = {
+            'empresa': pedido.empresa.nombre,
+            'lugar_inicio': pedido.lugar_inicio,
+            'lugar_fin': pedido.lugar_fin,
+            'fecha_entrega': pedido.fecha_entrega.strftime('%Y-%m-%d'),
+            'fecha_retiro': pedido.fecha_retiro.strftime('%Y-%m-%d'),
+            'maletas': list(pedido.maletas.values('cantidad', 'guia__nombre')),
+        }
+        return JsonResponse(datos)
+    except Pedido.DoesNotExist:
+        return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
     permission_classes = [AllowAny]
 
     def post(self, request):
