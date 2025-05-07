@@ -469,7 +469,7 @@ def cargar_datos_pedido(request):
 
     data = {
         'empresa':        pedido.empresa,
-        'usuario':        pedido.usuario.username if pedido.usuario else '',
+        'usuario':        pedido.usuario.username if hasattr(pedido, 'usuario') else '',
         'excursion':      pedido.excursion if pedido.excursion else '',
         'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
         'lugar_entrega':  pedido.lugar_entrega if pedido.lugar_entrega else '',
