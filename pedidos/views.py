@@ -444,6 +444,12 @@ def datos_pedido_api(request, pedido_id):
         maletas = Maleta.objects.filter(pedido=pedido)
         data = {
             'empresa': pedido.empresa,
+            'excursion': pedido.excursion,
+            'guia': pedido.guia,
+            'usuario': pedido.usuario.username,
+            'estado': pedido.estado,
+            'notas': pedido.notas or '',
+            'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
             'lugar_entrega': pedido.lugar_entrega,
             'lugar_recogida': pedido.lugar_recogida,
             'fecha_inicio': pedido.fecha_inicio,
@@ -463,6 +469,9 @@ def cargar_datos_pedido(request):
 
     data = {
         'empresa':        pedido.empresa,
+        'usuario':        pedido.usuario.username,
+        'excursion':      pedido.excursion,
+        'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
         'lugar_entrega':  pedido.lugar_entrega,
         'lugar_recogida': pedido.lugar_recogida,
         'fecha_inicio':   pedido.fecha_inicio.isoformat(),

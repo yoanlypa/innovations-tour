@@ -10,7 +10,7 @@ class PedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ['id', 'usuario', 'empresa', 'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas', 'maletas']
+        fields = ['id', 'usuario', 'empresa','excursion',  'lugar_entrega', 'lugar_recogida', 'fecha_inicio', 'fecha_fin', 'estado', 'notas', 'maletas']
 
     def create(self, validated_data):
         maletas_data = validated_data.pop('maletas')
