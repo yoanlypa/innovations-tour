@@ -244,7 +244,8 @@ $(function(){
           'X-Requested-With':'XMLHttpRequest'
                 },
         body: fd
-      }
+      });
+      // Comprobar respuesta
       if(!resp.ok) throw '';
       // redirigir en lugar de JSON
       window.location.href = "{% url 'pedidos:stock_control' %}";
