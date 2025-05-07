@@ -29,6 +29,6 @@ class MaletaInline(admin.TabularInline):
 
 @admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
-    list_display = ('id','usuario','empresa','Lugar de entrega','Lugar de recogida','fecha_fin','excursion','fecha_inicio','estado','estado','notas','fecha_creacion','guia')
+    list_display = ('id','usuario','empresa','lugar_entrega','lugar_recogida','fecha_fin','excursion','fecha_inicio','estado','estado','notas','fecha_creacion','guia')
     list_filter = ('estado',)
     inlines = [MaletaInline]
