@@ -190,18 +190,19 @@ $(function(){
 
   // 4) Toggle Entregado / Recogido
   $('.btn-estado').click(async function(){
-    try{
-      const resp = await fetch($(this).data('url'),{
-        method:'POST',
-        headers:{ 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
+    try {
+      const resp = await fetch($(this).data('url'), {
+        method: 'POST',
+        headers: { 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() }
       });
       const d = await resp.json();
       $(this).html(d.entregado
         ? '<span class="badge bg-success">Entregado</span>'
         : '<span class="badge bg-primary">Recogido</span>');
-  } catch (error) {
-    console.error('Error en try:', error);
-});
+    } catch (error) {
+      console.error('Error en try:', error);
+    }
+    
 
   // 5) Precargar datos del pedido
   $('#pedidoSelector').change(function(){
