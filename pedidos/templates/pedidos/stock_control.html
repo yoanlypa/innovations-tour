@@ -234,19 +234,25 @@ $(function(){
         },
         body: fd
       });
-      if (!resp.ok) {
-        const errorData = await resp.json();
-        console.error('Error del servidor:', errorData);
-        alert('Error al guardar (respuesta inválida del servidor).');
-        return;
+
+      if (resp.ok) {
+        window.location.href = "{% url 'pedidos:stock_control' %}";
+      } else {
+        let data;
+        try {
+          data = await resp.json();
+          console.error('Errores en la respuesta:', data);
+          alert('Error al guardar: ' + (data.error || 'verifica los campos.'));
+        } catch {
+          alert('Error desconocido al guardar.');
+        }
       }
-      window.location.href = "{% url 'pedidos:stock_control' %}";
+
     } catch (err) {
-      console.error('Error en la solicitud:', err);
-      alert('Error al guardar. Revisa consola.');
+      console.error('Error al enviar formulario:', err);
+      alert('Error de red. Revisa tu conexión o consola.');
     }
   });
-
 </script>
 {% endblock %}
 
