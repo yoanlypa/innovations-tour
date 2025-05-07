@@ -199,7 +199,9 @@ $(function(){
       $(this).html(d.entregado
         ? '<span class="badge bg-success">Entregado</span>'
         : '<span class="badge bg-primary">Recogido</span>');
-  });
+  } catch (error) {
+    console.error('Error en try:', error);
+});
 
   // 5) Precargar datos del pedido
   $('#pedidoSelector').change(function(){
@@ -239,7 +241,7 @@ $(function(){
         headers:{ 
           'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
           'X-Requested-With':'XMLHttpRequest'
-        },
+                },
         body: fd
       });
       if(!resp.ok) throw '';
