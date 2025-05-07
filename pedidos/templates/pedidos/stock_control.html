@@ -226,8 +226,9 @@ $(function(){
   $('#stock-form').submit(async function(e){
     e.preventDefault();
     const fd = new FormData(this);
+    let resp; // <- mueve esta línea aquí
     try {
-      const resp = await fetch(this.action, {
+      resp = await fetch(this.action, {
         method: 'POST',
         headers: { 
           'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
@@ -239,10 +240,15 @@ $(function(){
       window.location.href = "{% url 'pedidos:stock_control' %}";
     } catch {
       alert('Error al guardar. Revisa consola.');
-      console.error(await resp.json());
+      if (resp) {
+        try {
+          console.error(await resp.json());
+        } catch {
+          console.error('Respuesta no es JSON');
+        }
+      }
     }
   });
-
   $('[data-bs-toggle="tooltip"]').tooltip();
 });
 </script>
