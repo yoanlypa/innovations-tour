@@ -353,6 +353,7 @@ def agregar_stock(request):
             'success': False,
             'errors': form.errors.as_json(),
             'formset_errors': formset.errors,
+            'formset_non_form_errors': formset.non_form_errors(),  # 🔍 importante
         }
         return JsonResponse(response, status=400)
 
