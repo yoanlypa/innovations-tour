@@ -234,16 +234,19 @@ $(function(){
         },
         body: fd
       });
-      if (!resp.ok) throw '';
+      if (!resp.ok) {
+        const errorData = await resp.json();
+        console.error('Error del servidor:', errorData);
+        alert('Error al guardar (respuesta inválida del servidor).');
+        return;
+      }
       window.location.href = "{% url 'pedidos:stock_control' %}";
-    } catch {
+    } catch (err) {
+      console.error('Error en la solicitud:', err);
       alert('Error al guardar. Revisa consola.');
-      console.error(await resp.json());
     }
   });
 
-  $('[data-bs-toggle="tooltip"]').tooltip();
-});
 </script>
 {% endblock %}
 
