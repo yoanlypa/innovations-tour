@@ -1,3 +1,7 @@
+// Este script reemplaza el bloque inline de stock_control.html
+// Podés eliminar el <script> inline y en su lugar poner:
+// <script src="{% static 'pedidos/js/stock_control.js' %}"></script>
+
 $(document).ready(function () {
     const $modal = $('#nuevoRegistroModal');
     const $form = $modal.find('form');
@@ -15,7 +19,13 @@ $(document).ready(function () {
         const id = 'id_' + name;
         $(this).attr({ name, id }).val('');
       });
-      $newForm.find('input[type="checkbox"]').prop('checked', false);
+      // Asegurar que el campo DELETE está presente y desmarcado
+      const $deleteField = $('<input type="checkbox" style="display:none;">')
+        .attr('name', `form-${formIdx}-DELETE`)
+        .attr('id', `id_form-${formIdx}-DELETE`)
+        .prop('checked', false);
+      $newForm.append($deleteField);
+  
       $container.append($newForm);
       totalForms.val(formIdx + 1);
     });
@@ -75,6 +85,7 @@ $(document).ready(function () {
               <input type="text" name="form-${idx}-guia" id="id_form-${idx}-guia" value="${m.guia}" required>
               <label for="id_form-${idx}-cantidad_pax">Pax</label>
               <input type="number" name="form-${idx}-cantidad_pax" id="id_form-${idx}-cantidad_pax" value="${m.pax}" required>
+              <input type="checkbox" name="form-${idx}-DELETE" id="id_form-${idx}-DELETE" style="display:none;">
             </div>`);
           $container.append($formHtml);
         });
@@ -82,3 +93,4 @@ $(document).ready(function () {
       });
     });
   });
+  
