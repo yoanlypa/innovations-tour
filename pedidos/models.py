@@ -27,6 +27,7 @@ class Pedido(models.Model):
     lugar_entrega = models.CharField(max_length=100, blank=True, default='')
     lugar_recogida = models.CharField(max_length=100, blank=True, default='')
     empresa = models.CharField(max_length=100)
+    excursion = models.CharField(max_length=255, blank=True, null=True)
     cantidad = models.IntegerField(default=0, help_text="Cantidad de productos a entregar")
     guia = models.CharField(max_length=100, default='Sin asignar')  # 🛠 Valor por defecto para migrar
     fecha_creacion = models.DateField()

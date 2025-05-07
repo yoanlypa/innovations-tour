@@ -277,6 +277,10 @@ class PedidoCreateView(generics.ListCreateAPIView):
         # 2) (Opcional) Enviar correo con datos del pedido
         details = [
             f"Empresa: {pedido.empresa}",
+            f"Excursion: {pedido.excursion}",
+            f"Guía: {pedido.guia}",
+            f"Usuario: {pedido.usuario.username}",
+            f"Fecha creación: {pedido.fecha_creacion}",
             f"Lugar entrega: {pedido.lugar_entrega}",
             f"Lugar recogida: {pedido.lugar_recogida or 'N/A'}",
             f"Fecha inicio: {pedido.fecha_inicio}",

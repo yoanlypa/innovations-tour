@@ -16,6 +16,9 @@
               <th>Fecha Inicio</th>
               <th>Fecha Fin</th>
               <th>Empresa</th>
+              <th>Excursión</th>
+              <th>Guía</th>
+
               <th>Lugar Entrega</th>
               <th>Lugar Recogida</th>
               <th>Maletas (Pax / Guía)</th>
@@ -35,11 +38,12 @@
                   {% endif %}
                 </td>
                 <td>{{ p.empresa }}</td>
+                <td>{{ p.excursion }}</td>
                 <td>{{ p.lugar_entrega }}</td>
                 <td>{{ p.lugar_recogida|default:"—" }}</td>
                 <td>
                   {% for m in p.maletas.all %}
-                    <div>{{ m.cantidad_pax }} pax / {{ m.guia }}</div>
+                    <div>{{ m.cantidad_pax }} pax / Guia: {{ m.guia }}</div>
                   {% empty %}
                     —  
                   {% endfor %}
