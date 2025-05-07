@@ -12,6 +12,7 @@ from rest_framework.views import APIView
 from rest_framework.decorators import permission_classes,api_view
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.decorators import login_required
+from django.forms.models import BaseInlineFormSet
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST, require_http_methods, require_GET
@@ -337,25 +338,23 @@ def stock_control_view(request):
 @staff_member_required
 @require_POST
 def agregar_stock(request):
-    form    = StockControlForm(request.POST)
+    form = StockControlForm(request.POST)
     formset = MaletaFormSet(request.POST, prefix='form')
 
     if form.is_valid() and formset.is_valid():
-        sc = form.save()             # guarda StockControl (incluye excursion)
-        formset.instance = sc
-        formset.save()               # BaseMaletaFormSet asigna pedido a cada Maleta
-        # Si no es AJAX, redirigimos; si es AJAX, devolvemos JSON
+        stock = form.save()
+        formset.instance = stock
+        formset.save()
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
         return redirect('pedidos:stock_control')
-
-    errors = form.errors.as_json()
-    formset_errors = formset.errors
-    return JsonResponse({
-        'success': False,
-        'errors':         errors,
-        'formset_errors': formset_errors,
-    }, status=400)
+    else:
+        response = {
+            'success': False,
+            'errors': form.errors.as_json(),
+            'formset_errors': formset.errors,
+        }
+        return JsonResponse(response, status=400)
 
 @staff_member_required
 @require_POST

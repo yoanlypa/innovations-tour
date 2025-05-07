@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from .utils import convertir_fecha
 from pedidos.models import Pedido 
 
@@ -49,16 +50,20 @@ class StockControlForm(forms.ModelForm):
         self.fields['pedido'].queryset = Pedido.objects.filter(estado='confirmado')
 class BaseMaletaFormSet(BaseInlineFormSet):
     def save_new(self, form, commit=True):
-        """
-        Antes de guardar la nueva Maleta, le asignamos el mismo pedido
-        que tiene el StockControl (self.instance.pedido).
-        """
-        obj = super().save_new(form, commit=False)
-        # self.instance es la instancia de StockControl
-        obj.pedido = self.instance.pedido
-        if commit:
-            obj.save()
-        return obj
+        form.instance.pedido = self.instance.pedido
+        return super().save_new(form, commit=commit)
+
+    def clean(self):
+        super().clean()
+        if any(self.errors):
+            return
+        total = 0
+        for form in self.forms:
+            if not form.cleaned_data.get('DELETE', False):
+                total += 1
+        if total < 1:
+            raise ValidationError('Debe haber al menos una maleta activa.')
+
 
 class MaletaForm(forms.ModelForm):
     class Meta:
