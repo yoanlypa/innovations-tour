@@ -59,12 +59,11 @@ class BaseMaletaFormSet(BaseInlineFormSet):
             return
         total = 0
         for form in self.forms:
-            if not form.cleaned_data.get('DELETE', False):
+            # Solo cuenta formularios no vacíos y no eliminados
+            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                 total += 1
         if total < 1:
             raise ValidationError('Debe haber al menos una maleta activa.')
-
-
 class MaletaForm(forms.ModelForm):
     class Meta:
         model = Maleta
