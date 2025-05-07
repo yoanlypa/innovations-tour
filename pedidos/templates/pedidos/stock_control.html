@@ -160,6 +160,7 @@
   </div>
 </div>
 {% endblock %}
+
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
@@ -225,8 +226,9 @@ $(function(){
   $('#stock-form').submit(async function(e){
     e.preventDefault();
     const fd = new FormData(this);
+    let resp;  // <- Definimos resp fuera del try
     try {
-      const resp = await fetch(this.action, {
+      resp = await fetch(this.action, {
         method: 'POST',
         headers: { 
           'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
@@ -234,23 +236,20 @@ $(function(){
         },
         body: fd
       });
-
-      if (resp.ok) {
-        window.location.href = "{% url 'pedidos:stock_control' %}";
-      } else {
-        let data;
+      if (!resp.ok) throw new Error('Respuesta no OK');
+      window.location.href = "{% url 'pedidos:stock_control' %}";
+    } catch (error) {
+      alert('Error al guardar. Revisa consola.');
+      if (resp) {
         try {
-          data = await resp.json();
-          console.error('Errores en la respuesta:', data);
-          alert('Error al guardar: ' + (data.error || 'verifica los campos.'));
-        } catch {
-          alert('Error desconocido al guardar.');
+          const data = await resp.json();
+          console.error('Respuesta del servidor:', data);
+        } catch (jsonErr) {
+          console.error('Error inesperado:', jsonErr);
         }
+      } else {
+        console.error('Fallo antes de recibir respuesta:', error);
       }
-
-    } catch (err) {
-      console.error('Error al enviar formulario:', err);
-      alert('Error de red. Revisa tu conexión o consola.');
     }
   });
 </script>
