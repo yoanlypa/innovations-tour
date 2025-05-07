@@ -160,27 +160,21 @@
   </div>
 </div>
 {% endblock %}
-
 {% block scripts %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(function(){
-  // 1) Inicializar formIndex
-  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(),10);
-
-  // 2) Guardamos la primera fila como plantilla
+  let formIndex = parseInt($('#id_form-TOTAL_FORMS').val(), 10);
   const $template = $('.maleta-form').first().clone();
 
-  // 3) Añadir Maleta
   $('#add-maleta').click(function(){
     const $nuevo = $template.clone();
-    // Reindexar inputs
     $nuevo.find(':input').each(function(){
       const name = $(this).attr('name');
-      if(!name) return;
+      if (!name) return;
       const nuevoName = name.replace(/form-\d+-/, `form-${formIndex}-`);
       $(this).attr('name', nuevoName).attr('id', nuevoName);
-      if($(this).is(':checkbox')) $(this).prop('checked',false);
+      if ($(this).is(':checkbox')) $(this).prop('checked', false);
       else $(this).val('');
     });
     $('#maletas-container').append($nuevo);
@@ -188,7 +182,6 @@ $(function(){
     $('#id_form-TOTAL_FORMS').val(formIndex);
   });
 
-  // 4) Toggle Entregado / Recogido
   $('.btn-estado').click(async function(){
     try {
       const resp = await fetch($(this).data('url'), {
@@ -200,18 +193,17 @@ $(function(){
         ? '<span class="badge bg-success">Entregado</span>'
         : '<span class="badge bg-primary">Recogido</span>');
     } catch (error) {
-      console.error('Error en try:', error);
+      console.error('Error en toggle estado:', error);
     }
-    
+  });
 
-  // 5) Precargar datos del pedido
   $('#pedidoSelector').change(function(){
     const id = $(this).val();
-    if(!id) return;
+    if (!id) return;
     $.getJSON("{% url 'pedidos:cargar_datos_pedido' %}", {pedido_id: id})
-      .done(data=>{
+      .done(data => {
         $('#id_fecha_inicio').val(data.fecha_inicio.split('T')[0]);
-        $('#id_fecha_fin').val(data.fecha_fin?.split('T')[0]||'');
+        $('#id_fecha_fin').val(data.fecha_fin?.split('T')[0] || '');
         $('#id_excursion').val(data.excursion);
         $('#id_empresa').val(data.empresa);
         $('#id_lugar_entrega').val(data.lugar_entrega);
@@ -219,35 +211,30 @@ $(function(){
         $('#id_guia').val(data.guia);
         $('#id_estado').val(data.estado);
         $('#id_notas').val(data.notas);
-        // render maletas
-        // usar la misma lógica de cloning:
         $('#maletas-container').empty();
         formIndex = 0;
-        (data.maletas||[]).forEach(m=>{
-          $('#add-maleta').click();          // añade nueva fila limpia
-          $(`#form-${formIndex-1}-guia`).val(m.guia);
-          $(`#form-${formIndex-1}-cantidad_pax`).val(m.cantidad_pax);
+        (data.maletas || []).forEach(m => {
+          $('#add-maleta').click();
+          $(`#form-${formIndex - 1}-guia`).val(m.guia);
+          $(`#form-${formIndex - 1}-cantidad_pax`).val(m.cantidad_pax);
         });
       })
-      .fail(()=>alert('Error cargando datos del pedido.'));
+      .fail(() => alert('Error cargando datos del pedido.'));
   });
 
-  // 6) Envío AJAX del formulario
   $('#stock-form').submit(async function(e){
     e.preventDefault();
     const fd = new FormData(this);
     try {
-      const resp = await fetch(this.action,{
-        method:'POST',
-        headers:{ 
+      const resp = await fetch(this.action, {
+        method: 'POST',
+        headers: { 
           'X-CSRFToken': fd.get('csrfmiddlewaretoken'),
-          'X-Requested-With':'XMLHttpRequest'
-                },
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         body: fd
       });
-      // Comprobar respuesta
-      if(!resp.ok) throw '';
-      // redirigir en lugar de JSON
+      if (!resp.ok) throw '';
       window.location.href = "{% url 'pedidos:stock_control' %}";
     } catch {
       alert('Error al guardar. Revisa consola.');
@@ -255,8 +242,9 @@ $(function(){
     }
   });
 
-  // Inicializar tooltips
   $('[data-bs-toggle="tooltip"]').tooltip();
 });
 </script>
 {% endblock %}
+
+
