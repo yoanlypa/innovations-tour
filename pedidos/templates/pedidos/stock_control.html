@@ -212,6 +212,8 @@ $(function(){
         $('#id_guia').val(data.guia);
         $('#id_estado').val(data.estado);
         $('#id_notas').val(data.notas);
+
+        $('#id_form-TOTAL_FORMS').val(0);
         $('#maletas-container').empty();
         formIndex = 0;
         (data.maletas || []).forEach(m => {
