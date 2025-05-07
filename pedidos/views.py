@@ -380,7 +380,7 @@ def editar_stock(request, pk):
             return redirect('pedidos:stock_control')
     else:
         form = StockControlForm(instance=registro)
-    return render(request, 'pedidos/stock_form.html', {'form': form})
+    return render(request, 'pedidos/stock_control.html', {'form': form})
  
 
 
@@ -469,21 +469,21 @@ def cargar_datos_pedido(request):
 
     data = {
         'empresa':        pedido.empresa,
-        'usuario':        pedido.usuario.username,
-        'excursion':      pedido.excursion,
+        'usuario':        pedido.usuario.username if pedido.usuario else '',
+        'excursion':      pedido.excursion if pedido.excursion else '',
         'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
-        'lugar_entrega':  pedido.lugar_entrega,
-        'lugar_recogida': pedido.lugar_recogida,
-        'fecha_inicio':   pedido.fecha_inicio.isoformat(),
+        'lugar_entrega':  pedido.lugar_entrega if pedido.lugar_entrega else '',
+        'lugar_recogida': pedido.lugar_recogida if pedido.lugar_recogida else '',
+        'fecha_inicio':   pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
         'fecha_fin':      pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
-        'excursion':      pedido.excursion,
-        'guia':           pedido.guia,
-        'estado':         pedido.estado,
-        'notas':          pedido.notas or '',
+        'excursion':      pedido.excursion if pedido.excursion else '',
+        'guia':           pedido.guia if pedido.guia else '',
+        'estado':         pedido.estado if pedido.estado else '',
+        'notas':          pedido.notas or 'Sin notas',
         'maletas': [
-            {'guia': m.guia, 'pax': m.cantidad_pax}
-            for m in maletas
-        ]
+            {'guia': m.guia, 'pax': m.cantidad_pax} for m in maletas
+        
+        ],
     }
     return JsonResponse(data)
 
