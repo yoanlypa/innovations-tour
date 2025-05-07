@@ -312,19 +312,26 @@ class ProductoUpdateView( UpdateView):
     success_url = reverse_lazy('productos_lista')
     
 # ========== Control de Stock ==========
+
 @staff_member_required
 def stock_control_view(request):
     pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
-    registros       = StockControl.objects.all().order_by('-fecha_creacion')
+    registros = StockControl.objects.all().order_by('-fecha_creacion')
 
-    form    = StockControlForm()
-    formset = MaletaFormSet(prefix='form')
+    form = StockControlForm()
+    formset = MaletaFormSet(queryset=Maleta.objects.none(), prefix='formset')
+
+    if request.method == 'POST':
+        formset = MaletaFormSet(request.POST, queryset=Maleta.objects.none(), prefix='formset')
+        if formset.is_valid():
+            formset.save()
+            return redirect('pedidos:stock_control')
 
     return render(request, 'pedidos/stock_control.html', {
-        'registros':       registros,
+        'registros': registros,
         'pedidos_pagados': pedidos_pagados,
-        'form':            form,
-        'formset':         formset,
+        'form': form,
+        'formset': formset,
     })
 
 @staff_member_required

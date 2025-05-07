@@ -143,7 +143,7 @@
                 <div class="row g-2">
                   <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
                   <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
-                  <div class="col-md-1">{{ mform.DELETE.label_tag }} {{ mform.DELETE }}</div>
+                  <button type="button" class="btn btn-danger btn-sm eliminar-maleta">Eliminar</button>
                 </div>
               </div>
               {% endfor %}
@@ -197,6 +197,32 @@ $(function(){
       console.error('Error en toggle estado:', error);
     }
   });
+// Eliminar maleta
+  $(document).on('click', '.eliminar-maleta', function(){
+    const $form = $(this).closest('.maleta-form');
+    const inputName = $form.find(':input').first().attr('name'); // ejemplo: form-0-guia
+    const match = inputName.match(/form-(\d+)-/);
+    if (match) {
+      const index = match[1];
+      // Asegúrate de crear el input DELETE si no existe
+      if (!$(`#id_form-${index}-DELETE`).length) {
+        $('<input>').attr({
+          type: 'hidden',
+          name: `form-${index}-DELETE`,
+          id: `id_form-${index}-DELETE`,
+          value: 'on'
+        }).appendTo($form);
+      }
+      $form.hide(); // Lo ocultas para que desaparezca visualmente
+    } else {
+      // Si no tiene índice, es una maleta recién agregada. Elimínala del DOM.
+      $form.remove();
+      formIndex--;
+      $('#id_form-TOTAL_FORMS').val(formIndex);
+    }
+  });
+
+    
 
   $('#pedidoSelector').change(function(){
     const id = $(this).val();
