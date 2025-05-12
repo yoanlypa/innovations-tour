@@ -13,10 +13,10 @@ urlpatterns = [
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado_tarea'),
 
     # PEDIDOS (nuevo flujo unificado)
-    path('pedidos/', views.pedidos_lista_view, name='pedidos_lista'),
-    path('pedidos/nuevo/', views.pedido_nuevo_view, name='pedido_nuevo'),
-    path('pedidos/editar/<int:pk>/', views.pedido_editar_view, name='pedido_editar'),
-    path('pedidos/cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
+    path('', views.pedidos_lista_view, name='pedidos_lista'),
+    path('nuevo/', views.pedido_nuevo_view, name='pedido_nuevo'),
+    path('editar/<int:pk>/', views.pedido_editar_view, name='pedido_editar'),
+    path('cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
     path('mis-pedidos/', views.pedidos_mios_view, name='mis_pedidos'),
 
     # LOGIN / REGISTRO

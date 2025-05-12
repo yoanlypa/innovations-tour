@@ -1,27 +1,24 @@
-"""
-URL configuration for control_radioguias project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.1/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic.base import RedirectView
 
 urlpatterns = [
+    # Panel de administración
     path('admin/', admin.site.urls),
-    path('pedidos/', include('pedidos.urls', namespace='pedidos')),    
-    path('api-auth/', include('rest_framework.urls')),
-    path('', RedirectView.as_view(url='pedidos/pedidos/')),
-    
+
+    # Todas las URLs de la app “pedidos”
+    path('pedidos/', include('pedidos.urls', namespace='pedidos')),
+
+    # Login de la API (DRF)
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+
+    # Redirección raíz al listado de pedidos
+    path(
+        '',
+        RedirectView.as_view(
+            pattern_name='pedidos:pedidos_lista',
+            permanent=False
+        ),
+        name='home'
+    ),
 ]
