@@ -21,7 +21,8 @@ urlpatterns = [
 
     # LOGIN / REGISTRO
     path('acceso/', views.auth_combined_view, name='login'),
-    
+    path('logout/', auth_views.LogoutView.as_view(next_page='pedidos:login'), name='logout'),
+
     # PASSWORD RESET
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='pedidos/password_reset_done.html'), name='password_reset_done'),
