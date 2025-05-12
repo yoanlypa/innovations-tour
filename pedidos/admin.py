@@ -1,34 +1,30 @@
 from django.contrib import admin
-from .models import Tarea, StockControl, Maleta, Pedido
-from django.utils.html import format_html
+from .models import Pedido, Maleta, Producto, Tarea, RegistroCliente
 
-
-@admin.register(Tarea)
-class TareaAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'fecha_creacion','fecha_especifica','completada']
-    
-    def fecha_creacion_formateada(self, obj):
-        return obj.fecha_creacion.strftime("%d/%m/%Y")
-    fecha_creacion_formateada.short_description = 'Fecha'
-    
-class StockControlAdmin(admin.ModelAdmin):
-    list_display = ('fecha_inicio', 'fecha_fin', 'excursion', 'empresa', 'lugar_entrega', 'lugar_recogida', 'estado', 'guia', 'fecha_creacion', 'entregado', 'recogido', 'mostrar_maletas', 'notas')
-    list_filter = ('fecha_creacion', 'entregado', 'recogido')
-    search_fields = ('excursion', 'guia')
-    ordering = ('fecha_creacion',)
-
-    # Función personalizada para mostrar maletas
-    def mostrar_maletas(self, obj):
-        return ", ".join([str(maleta) for maleta in obj.maletas.all()])
-    mostrar_maletas.short_description = 'Maletas'
-
-admin.site.register(StockControl, StockControlAdmin)
 class MaletaInline(admin.TabularInline):
     model = Maleta
     extra = 0
+    readonly_fields = ['guia', 'cantidad_pax']
+    can_delete = False
 
-@admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
-    list_display = ('id','usuario','fecha_inicio','fecha_fin','empresa','lugar_entrega','lugar_recogida','excursion','estado','notas','fecha_creacion','guia')
-    list_filter = ('estado',)
+    list_display = ('empresa', 'excursion', 'fecha_inicio', 'estado_cliente', 'estado_equipo')
+    list_filter = ('estado_cliente', 'estado_equipo', 'fecha_inicio')
+    search_fields = ('empresa', 'excursion', 'usuario__username')
+    ordering = ['-fecha_inicio']
     inlines = [MaletaInline]
+
+class ProductoAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'cantidad', 'almacen')
+    search_fields = ('nombre',)
+
+class TareaAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'prioridad', 'completada', 'fecha_creacion', 'fecha_especifica')
+    list_filter = ('completada', 'prioridad')
+    search_fields = ('titulo',)
+
+admin.site.register(Pedido, PedidoAdmin)
+admin.site.register(Producto, ProductoAdmin)
+admin.site.register(Tarea, TareaAdmin)
+admin.site.register(RegistroCliente)
+admin.site.site_header = "Control Radioguías Admin"

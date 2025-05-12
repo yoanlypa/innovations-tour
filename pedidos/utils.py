@@ -1,19 +1,12 @@
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 def convertir_fecha(fecha_str):
     """
-    Convierte 'dd/mm/aaaa' a objeto date
+    Convierte una fecha en formato 'dd/mm/yyyy' a un objeto datetime.date.
+    Lanza ValidationError si el formato es incorrecto.
     """
     try:
-        return datetime.strptime(fecha_str, '%d/%m/%Y').date()
+        return datetime.strptime(fecha_str, "%d/%m/%Y").date()
     except ValueError:
-        raise ValueError("Formato de fecha inválido. Use dd/mm/aaaa")
-
-def convertir_datetime(fecha_hora_str):
-    """
-    Convierte 'dd/mm/aaaa HH:MM' a objeto datetime
-    """
-    try:
-        return datetime.strptime(fecha_hora_str, '%d/%m/%Y %H:%M')
-    except ValueError:
-        raise ValueError("Formato inválido. Use dd/mm/aaaa hh:mm")
+        raise ValidationError("La fecha debe estar en formato dd/mm/aaaa")

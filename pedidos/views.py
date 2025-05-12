@@ -19,7 +19,7 @@ from django.views.decorators.http import require_POST, require_http_methods, req
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -49,6 +49,12 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
 
 
 
+#
+# 
+# 
+# 
+# 
+# 
 # ========== TAREAS ==========
 
 
@@ -113,418 +119,168 @@ class TareaDeleteView( DeleteView):
     success_url = reverse_lazy('pedidos:tareas')
 
 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
 # ========== LOGIN Y REGISTRO==========
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth import login as auth_login
+from django.shortcuts import render, redirect
 
-User = get_user_model()
+def auth_combined_view(request):
+    if request.user.is_authenticated:
+        return redirect('pedidos:mis_pedidos' if not request.user.is_staff else 'pedidos:tareas')
 
-class RegistroAPIView(APIView):
-    permission_classes = [AllowAny]
+    login_form = AuthenticationForm()
+    register_form = UserCreationForm()
 
-    def post(self, request):
-        username = request.data.get('username', '').strip()
-        email    = request.data.get('email', '').strip()
-        password = request.data.get('password', '')
-        empresa  = request.data.get('empresa', '').strip()
-        telefono = request.data.get('telefono', '').strip()
-
-        # 1) Campos obligatorios
-        if not username or not email or not password:
-            return Response(
-                {'detail': 'username, email y password son requeridos.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # 2) Validar longitud de contraseña
-        if len(password) < 8:
-            return Response(
-                {'detail': 'La contraseña debe tener al menos 8 caracteres.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # 3) Validar unicidad manual
-        if User.objects.filter(username=username).exists():
-            return Response(
-                {'detail': 'El nombre de usuario ya existe.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if User.objects.filter(email=email).exists():
-            return Response(
-                {'detail': 'El email ya está registrado.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # 4) Intentar crear usuario y atrapar cualquier duplicado residual
-        try:
-            user = User.objects.create_user(username=username, email=email, password=password)
-        except IntegrityError:
-            return Response(
-                {'detail':'No se pudo crear el usuario. Username o email duplicado.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # 5) Guardar en tu modelo RegistroCliente
-        RegistroCliente.objects.create(
-            nombre_usuario=username,
-            email=email,
-            empresa=empresa,
-            telefono=telefono
-        )
-
-        # 6) Generar token
-        token = Token.objects.create(user=user)
-
-        # 7) Enviar correo de notificación al admin
-        send_mail(
-            subject="🎉 Nuevo registro en Innovations Tours",
-            message=(
-                f"Nuevo usuario registrado:\n\n"
-                f"Nombre: {username}\n"
-                f"Email: {email}\n"
-                f"Empresa: {empresa}\n"
-                f"Teléfono: {telefono}\n"
-                f"Fecha: {user.date_joined.strftime('%Y-%m-%d %H:%M')}"
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['pyoanly@gmail.com'],
-            fail_silently=True,
-        )
-
-        # 8) Responder con token
-        return Response({'token': token.key}, status=status.HTTP_201_CREATED)
-class LoginAPIView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        if not username or not password:
-            return Response({'detail': 'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = authenticate(username=username, password=password)
-        if user:
-            token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
+    if request.method == 'POST':
+        if 'username' in request.POST and 'password' in request.POST:
+            # login
+            login_form = AuthenticationForm(request, data=request.POST)
+            if login_form.is_valid():
+                auth_login(request, login_form.get_user())
+                return redirect('pedidos:mis_pedidos' if not request.user.is_staff else 'pedidos:tareas')
         else:
-            return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_400_BAD_REQUEST)
-        
-def logout_view(request):
-    logout(request)  
-    return redirect('pedidos:tareas')
+            # registro
+            register_form = UserCreationForm(request.POST)
+            if register_form.is_valid():
+                user = register_form.save()
+                return redirect('pedidos:login')  # opcional: loguear directo
 
-class PasswordResetRequestAPIView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        email = request.data.get('email')
-        if not email:
-            return Response({'detail':'Email requerido'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            # No decimos si existe o no, por seguridad
-            return Response({'detail':'Si el email existe, recibirás un enlace'}, status=status.HTTP_200_OK)
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        reset_link = f"{settings.FRONTEND_URL}/new-password/?uid={uid}&token={token}"
-        subject = "🔑 Restablece tu contraseña"
-        message = (
-            f"Hola {user.username},\n\n"
-            "Solicitaste restablecer tu contraseña. "
-            f"Pulsa este enlace para crear una nueva:\n\n{reset_link}\n\n"
-            "Si no lo solicitaste, ignora este correo."
-        )
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [email], fail_silently=False)
-        return Response({'detail':'En breve recibirás un email con instrucciones'}, status=status.HTTP_200_OK)
-
-class PasswordResetConfirmAPIView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        uidb64 = request.data.get('uid')
-        token  = request.data.get('token')
-        new_password = request.data.get('new_password')
-        if not uidb64 or not token or not new_password:
-            return Response({'detail':'Faltan datos'}, status=status.HTTP_400_BAD_REQUEST)
-        try:
-            uid = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except Exception:
-            return Response({'detail':'Enlace inválido'}, status=status.HTTP_400_BAD_REQUEST)
-        if not default_token_generator.check_token(user, token):
-            return Response({'detail':'Token inválido o caducado'}, status=status.HTTP_400_BAD_REQUEST)
-        user.set_password(new_password)
-        user.save()
-        return Response({'detail':'Contraseña restablecida correctamente'}, status=status.HTTP_200_OK)
-        
+    return render(request, 'pedidos/auth.html', {
+        'form': login_form,
+        'register_form': register_form
+    })
+#
+# 
+# 
+# 
+# 
+# 
 # ========== PEDIDOS ==========
 
-class PedidoListView(StaffRequiredMixin, ListView):
-    model = Pedido
-    template_name = 'pedidos/pedidos_lista.html'
-    context_object_name = 'pedidos'
-    ordering = ['-fecha_inicio']
-
-class PedidoCreateView(generics.ListCreateAPIView):
-    queryset = Pedido.objects.all().order_by('-fecha_inicio')
-    serializer_class = PedidoSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def perform_create(self, serializer):
-        # 1) Guardamos en BD
-        pedido = serializer.save(usuario=self.request.user)
-
-        # 2) (Opcional) Enviar correo con datos del pedido
-        details = [
-            f"Empresa: {pedido.empresa}",
-            f"Excursion: {pedido.excursion}",
-            f"Guía: {pedido.guia}",
-            f"Usuario: {pedido.usuario.username}",
-            f"Fecha creación: {pedido.fecha_creacion}",
-            f"Lugar entrega: {pedido.lugar_entrega}",
-            f"Lugar recogida: {pedido.lugar_recogida or 'N/A'}",
-            f"Fecha inicio: {pedido.fecha_inicio}",
-            f"Fecha fin: {pedido.fecha_fin or 'N/A'}",
-            f"Notas: {pedido.notas or 'Ninguna'}",
-            "Maletas:"
-        ]
-        for m in pedido.maletas.all():
-            details.append(f"  - Pax: {m.cantidad_pax}, Guía: {m.guia}")
-
-        send_mail(
-            subject=f"Nuevo pedido #{pedido.id}",
-            message="\n".join(details),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['pyoanly@gmail.com'],
-            fail_silently=True,
-        )
-
-# ========== PRODUCTOS ==========
-
-class ProductoListView(StaffRequiredMixin,ListView):
-    model = Producto
-    template_name = 'pedidos/productos_lista.html'
-
-class ProductoUpdateView( UpdateView):
-    model = Producto
-    form_class = ProductoForm
-    template_name = 'pedidos/producto_form.html'
-    success_url = reverse_lazy('productos_lista')
-    
-# ========== Control de Stock ==========
+@staff_member_required
+def pedidos_lista_view(request):
+    pedidos = Pedido.objects.all().order_by('-fecha_inicio')
+    return render(request, 'pedidos/pedidos_lista.html', {
+        'pedidos': pedidos
+    })
 
 @staff_member_required
-def stock_control_view(request):
-    pedidos_pagados = Pedido.objects.filter(estado='confirmado').order_by('-fecha_inicio')
-    registros = StockControl.objects.all().order_by('-fecha_creacion')
-
-    form = StockControlForm()
-    formset = MaletaFormSet(queryset=Maleta.objects.none(), prefix='formset')
+def pedido_nuevo_view(request):
+    form = PedidoForm(request.POST or None)
+    formset = MaletaFormSet(request.POST or None, prefix='maleta')
 
     if request.method == 'POST':
-        formset = MaletaFormSet(request.POST, queryset=Maleta.objects.none(), prefix='formset')
-        if formset.is_valid():
+        if form.is_valid() and formset.is_valid():
+            pedido = form.save(commit=False)
+            pedido.usuario = request.user
+            pedido.save()
+            form.save_m2m()
+            formset.instance = pedido
             formset.save()
-            return redirect('pedidos:stock_control')
 
-    return render(request, 'pedidos/stock_control.html', {
-        'registros': registros,
-        'pedidos_pagados': pedidos_pagados,
+            # Enlace directo para editar
+            enlace_edicion = request.build_absolute_uri(
+                reverse('pedidos:pedido_editar', args=[pedido.id])
+            )
+
+            # Enviar correo
+            detalles = [
+                f"📢 *Nuevo pedido registrado*",
+                f"🏢 Empresa: {pedido.empresa}",
+                f"📅 Fecha inicio: {pedido.fecha_inicio.strftime('%d/%m/%Y')}",
+                f"🧭 Excursión: {pedido.excursion or '—'}",
+                f"👤 Usuario: {pedido.usuario.username}",
+                f"🔗 Editar pedido: {enlace_edicion}"
+            ]
+
+            send_mail(
+                subject=f"Nuevo pedido #{pedido.id}",
+                message="\n".join(detalles),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['pyoanly@gmail.com'],  # Puedes agregar más emails aquí
+                fail_silently=True
+            )
+            messages.success(request, 'Pedido registrado satisfactoriamente.')
+            # redirección según botón
+            if request.POST.get('action') == 'guardar_otro':
+                return redirect('pedidos:pedido_nuevo')
+            return redirect('pedidos:mis_pedidos')
+        else:
+            messages.error(request, 'Hay errores en el formulario.')
+
+    return render(request, 'pedidos/pedido_form.html', {
         'form': form,
         'formset': formset,
+        'pedido': None,
     })
-
 @staff_member_required
-@require_POST
-def agregar_stock(request):
-    form = StockControlForm(request.POST)
-    formset = MaletaFormSet(request.POST, prefix='form')
+def pedido_editar_view(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
 
-    if form.is_valid() and formset.is_valid():
-        stock = form.save()
-        formset.instance = stock
-        formset.save()
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'success': True})
-        return redirect('pedidos:stock_control')
-    else:
-        response = {
-            'success': False,
-            'errors': form.errors.as_json(),
-            'formset_errors': formset.errors,
-            'formset_non_form_errors': formset.non_form_errors(),  # 🔍 importante
-        }
-        return JsonResponse(response, status=400)
-
-@staff_member_required
-@require_POST
-def toggle_estado_stock(request, pk):
-    registro = get_object_or_404(StockControl, pk=pk)
-    # Si estaba entregado, marcamos recogido; sino lo contrario
-    if registro.entregado and not registro.recogido:
-        registro.entregado = False
-        registro.recogido  = True
-    else:
-            registro.entregado = True
-            registro.recogido  = False
-            registro.save()
-    
-    if registro.entregado:
-        pedido = registro.pedido
-        pedido.estado = 'entregado'
-        pedido.save()
-    return JsonResponse({
-        'entregado': registro.entregado,
-        'recogido':  registro.recogido,
-    })
-def editar_stock(request, pk):
-    registro = get_object_or_404(StockControl, pk=pk)
     if request.method == 'POST':
-        form = StockControlForm(request.POST, instance=registro)
-        if form.is_valid():
+        form = PedidoForm(request.POST, instance=pedido)
+        formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
+
+        if form.is_valid() and formset.is_valid():
             form.save()
-            return redirect('pedidos:stock_control')
+            formset.save()
+            messages.success(request, 'Pedido actualizado correctamente.')
+            return redirect('pedidos:pedidos_lista')
+        else:
+            messages.error(request, 'Hay errores al guardar los cambios.')
+
     else:
-        form = StockControlForm(instance=registro)
-    return render(request, 'pedidos/stock_control.html', {'form': form})
- 
+        form = PedidoForm(instance=pedido)
+        formset = MaletaFormSet(instance=pedido, prefix='maleta')
 
+    return render(request, 'pedidos/pedido_form.html', {
+        'form': form,
+        'formset': formset,
+        'pedido': pedido
+    })
 
-
-@require_POST
-def eliminar_stock(request, pk):
-    registro = get_object_or_404(StockControl, pk=pk)
-    registro.delete()
-    return redirect('pedidos:stock_control')
-@staff_member_required
-@require_POST
-def toggle_estado(request, pk):
-    registro = get_object_or_404(StockControl, pk=pk)
-    
-    # Alternar estados
-    registro.entregado = not registro.entregado
-    registro.recogido = not registro.recogido
-    
-    try:
-        registro.save()
-        return JsonResponse({
-            'success': True,
-            'entregado': registro.entregado,
-            'recogido': registro.recogido
-        })
-    except ValidationError as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=400)
-
-def exportar_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="stock_control.csv"'
-    
-    writer = csv.writer(response)
-    writer.writerow([
-        'Fecha Creación', 'PAX', 'Lugar E/R', 
-        'Excursión', 'Guía', 'Fecha E/R', 
-        'Entregado', 'Recogido',
-        localtime(r.fecha_creacion).strftime('%d/%m/%Y %H:%M'),
-    ])
-    
-    registros = StockControl.objects.all().order_by('-fecha_creacion')
-    
-    for r in registros:
-        writer.writerow([
-            timezone.localtime(r.fecha_creacion).strftime('%Y-%m-%d %H:%M'),
-            r.pax,
-            r.lugar_er,
-            r.excursion,
-            r.guia,
-            r.fecha_er.strftime('%Y-%m-%d'),
-            'Sí' if r.entregado else 'No',
-            'Sí' if r.recogido else 'No'
-        ])
-    
-    return response
-@require_GET
-@staff_member_required
-def datos_pedido_api(request, pedido_id):
-    try:
-        pedido = Pedido.objects.get(id=pedido_id, estado='confirmado')
-        maletas = Maleta.objects.filter(pedido=pedido)
-        data = {
-            'empresa': pedido.empresa,
-            'excursion': pedido.excursion,
-            'guia': pedido.guia,
-            'usuario': pedido.usuario.username,
-            'estado': pedido.estado,
-            'notas': pedido.notas or '',
-            'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
-            'lugar_entrega': pedido.lugar_entrega,
-            'lugar_recogida': pedido.lugar_recogida,
-            'fecha_inicio': pedido.fecha_inicio,
-            'fecha_fin': pedido.fecha_fin,
-            'maletas': [{'cantidad_pax': m.cantidad_pax, 'guia': m.guia} for m in maletas]
-        }
-        return JsonResponse(data)
-    except Pedido.DoesNotExist:
-        return JsonResponse({'error': 'Pedido no encontrado'}, status=404)
 
 @require_GET
 @staff_member_required
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get('pedido_id')
-    pedido = get_object_or_404(Pedido, pk=pedido_id, estado='confirmado')
-    maletas = Maleta.objects.filter(pedido=pedido)
+    pedido = get_object_or_404(Pedido, pk=pedido_id)
+    maletas = pedido.maletas.all()
 
     data = {
-        'empresa':        pedido.empresa,
-        'usuario':        pedido.usuario.username if hasattr(pedido, 'usuario') else '',
-        'excursion':      pedido.excursion if pedido.excursion else '',
-        'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S'),
-        'lugar_entrega':  pedido.lugar_entrega if pedido.lugar_entrega else '',
-        'lugar_recogida': pedido.lugar_recogida if pedido.lugar_recogida else '',
-        'fecha_inicio':   pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
-        'fecha_fin':      pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
-        'excursion':      pedido.excursion if pedido.excursion else '',
-        'guia':           pedido.guia if pedido.guia else '',
-        'estado':         pedido.estado if pedido.estado else '',
-        'notas':          pedido.notas or 'Sin notas',
+        'empresa': pedido.empresa,
+        'usuario': pedido.usuario.username,
+        'excursion': pedido.excursion or '',
+        'fecha_creacion': pedido.fecha_creacion.strftime('%Y-%m-%d'),
+        'lugar_entrega': pedido.lugar_entrega or '',
+        'lugar_recogida': pedido.lugar_recogida or '',
+        'fecha_inicio': pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else '',
+        'fecha_fin': pedido.fecha_fin.isoformat() if pedido.fecha_fin else '',
+        'guia_general': pedido.guia_general or '',
+        'estado_cliente': pedido.estado_cliente,
+        'estado_equipo': pedido.estado_equipo,
+        'notas': pedido.notas or '',
         'maletas': [
-            {'guia': m.guia, 'pax': m.cantidad_pax} for m in maletas
-        
+            {'guia': m.guia, 'cantidad_pax': m.cantidad_pax} for m in maletas
         ],
     }
     return JsonResponse(data)
 
-# ========== login y registro django ==========
-def register(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, 'Cuenta creada correctamente. Ya puedes iniciar sesión.')
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'pedidos/register.html', {'form': form})
-class SincronizarUsuarioAPIView(APIView):
-    permission_classes = [AllowAny]
 
-    def post(self, request):
-        data = request.data
-        username = data.get('username')
-        email = data.get('email')
-        nombre = data.get('nombre', '')
+@login_required
+def pedidos_mios_view(request):
+    pedidos = Pedido.objects.filter(usuario=request.user).order_by('-fecha_inicio')
+    return render(request, 'pedidos/pedidos_mios.html', {'pedidos': pedidos})
 
-        if not username or not email:
-            return Response({'error': 'Faltan datos requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user, created = User.objects.get_or_create(username=username, defaults={
-            'email': email,
-            'first_name': nombre
-        })
-
-        if not created:
-            user.email = email
-            user.first_name = nombre
-            user.save()
-
-        return Response({'mensaje': 'Usuario sincronizado correctamente'}, status=status.HTTP_200_OK)
+# 
+# 
+# 
+# 

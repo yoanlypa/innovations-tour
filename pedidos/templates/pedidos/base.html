@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Control Radioguías</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{% static '/pedidos/css/styles.css' %}" rel="stylesheet">
-    <script src="{% static '/pedidos/js/edit.js' %}"></script>
+    <link href="{% static 'pedidos/css/styles.css' %}" rel="stylesheet">
+    <script src="{% static 'pedidos/js/edit.js' %}"></script>
     <meta name="csrf-token" content="{{ csrf_token }}">
-
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -19,19 +19,24 @@
             <div class="navbar-nav">
                 <a class="nav-link" href="{% url 'pedidos:tareas' %}">📋 Tareas</a>
                 <a class="nav-link" href="{% url 'pedidos:pedidos_lista' %}">📦 Pedidos</a>
-                <a class="nav-link" href="{% url 'pedidos:stock_control' %}">📊 Stock</a>
-                <div class="ml-auto">
-                    {% if user.is_authenticated %}
-                      <span class="nav-link">Hola, {{ user.username }}</span>
-                      <a href="{% url 'pedidos:logout' %}" class="btn btn-secondary">Cerrar sesión</a>
-                    {% else %}
-                      <a href="{% url 'pedidos:login' %}" class="btn btn-primary">Iniciar sesión</a>
-                    {% endif %}
-                    {% csrf_token %}
-                    <meta name="csrf-token" content="{{ csrf_token }}">
-
-
+                <a class="nav-link" href="{% url 'pedidos:productos_lista' %}">🧪 Productos</a>
             </div>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                {% if user.is_authenticated %}
+                    <span class="text-white">Hola, {{ user.username }}</span>
+            
+                    {% if not user.is_staff %}
+                        <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-outline-warning btn-sm">
+                            🧾 Mis pedidos
+                        </a>
+                    {% endif %}
+            
+                    <a href="{% url 'pedidos:logout' %}" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
+                {% else %}
+                    <a href="{% url 'pedidos:login' %}" class="btn btn-outline-primary btn-sm">Iniciar sesión</a>
+                {% endif %}
+            </div>
+            
         </div>
     </nav>
     
@@ -41,27 +46,36 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% static 'pedidos/js/stock_control.js' %}"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Formatear todos los inputs de fecha
-            document.querySelectorAll('input[type="date"], input[type="datetime-local"]').forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.type = 'text';
-                    this.placeholder = 'dd/mm/aaaa';
-                });
-                
-                input.addEventListener('blur', function() {
-                    const value = this.value;
-                    if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-                        const [day, month, year] = value.split('/');
-                        this.value = `${year}-${month}-${day}`;
-                    }
-                    this.type = 'date';
-                });
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('input[type="date"], input[type="datetime-local"]').forEach(input => {
+            input.addEventListener('focus', function () {
+                this.type = 'text';
+                this.placeholder = 'dd/mm/aaaa';
+            });
+
+            input.addEventListener('blur', function () {
+                const value = this.value;
+                if (value.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                    const [day, month, year] = value.split('/');
+                    this.value = `${year}-${month}-${day}`;
+                }
+                this.type = 'date';
             });
         });
-        </script>
-        {% block scripts %}
-        {% endblock %}
+    });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+  flatpickr("input[type='date']", {
+    dateFormat: "Y-m-d",
+    allowInput: true
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

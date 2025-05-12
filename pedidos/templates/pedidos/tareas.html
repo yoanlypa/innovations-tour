@@ -3,138 +3,118 @@
 {% load fechas %}
 
 {% block content %}
-
 <div class="container">
-    <!-- Botón para nueva tarea -->
-    <div class="text-end mb-4">
-        <button 
-            type="button" 
-            class="btn btn-primary btn-floating"
-            data-bs-toggle="modal" 
-            data-bs-target="#modalNuevaTarea"
-        >
-            ➕
-        </button>
-    </div>
+  <div class="text-end mb-4">
+    <button type="button" class="btn btn-primary btn-floating" data-bs-toggle="modal" data-bs-target="#modalNuevaTarea">
+      ➕
+    </button>
+  </div>
 
-    <h1>Tareas</h1>
+  <h1 class="mb-3" style="color:#005dab;">📋 Tareas</h1>
 
-    <!-- Modal (sin cambios) -->
-    <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Nueva Tarea</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-              
-                <form method="POST" id="formNuevaTarea" action="{% url 'pedidos:tarea_nueva' %}">
-                    {% csrf_token %} 
-                    
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Título</label>
-                            <input type="text" class="form-control" name="titulo" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Descripción</label>
-                            <textarea class="form-control" name="descripcion" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Fecha Específica</label>
-                            <input type="date" class="form-control" name="fecha_especifica">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                    </div>
-                </form>
+  <!-- MODAL NUEVA TAREA -->
+  <div class="modal fade" id="modalNuevaTarea" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" id="formNuevaTarea" action="{% url 'pedidos:tarea_nueva' %}">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Nueva Tarea</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Título</label>
+              <input type="text" class="form-control" name="titulo" required>
             </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Lista de tareas agrupadas -->
-    {% regroup tareas by fecha_especifica|date:"d/m/Y" as grouped_tareas %}
-    {% for group in grouped_tareas %}
-    <div class="card mb-4 shadow">
-        <div class="card-header bg-primary text-white">
-            <h4>📅 Fecha: {{ group.grouper }}</h4>
-        </div>
-        <div class="card-body">
-            <div class="list-group">
-                {% for tarea in group.list %}
-                <div class="list-group-item">
-                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
-                        <!-- Contenido de texto -->
-                        <div class="flex-grow-1 me-md-3 mb-2 mb-md-0 w-100">
-                            <h5>{{ tarea.titulo }}</h5>
-                            <p class="mb-0 text-break">{{ tarea.descripcion }}</p>
-                        </div>
-                        
-                        <!-- Botón que ahora se colocará debajo en móvil -->
-                        <div class="align-self-center">
-                            <button 
-                                class="btn {% if tarea.completada %}btn-success{% else %}btn-outline-secondary{% endif %} btn-estado mt-2 mt-md-0"
-                                data-tarea-id="{{ tarea.id }}"
-                            >
-                                {% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
+            <div class="mb-3">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" name="descripcion" rows="3"></textarea>
             </div>
-            
-        </div>
+            <div class="mb-3">
+              <label class="form-label">Fecha Específica</label>
+              <input type="date" class="form-control" name="fecha_especifica">
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+          </div>
+        </form>
+      </div>
     </div>
-    {% endfor %}
+  </div>
+
+  {% regroup tareas by fecha_especifica|date:"d/m/Y" as grouped_tareas %}
+  {% for group in grouped_tareas %}
+    <div class="card mb-4 shadow border-0">
+      <div class="card-header text-white" style="background-color:#005dab;">
+        <h5 class="mb-0">📅 Fecha: {{ group.grouper }}</h5>
+      </div>
+      <div class="card-body">
+        <div class="list-group">
+          {% for tarea in group.list %}
+          <div class="list-group-item">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start">
+              <div class="flex-grow-1 me-md-3 mb-2 mb-md-0 w-100">
+                <h5 class="mb-1">{{ tarea.titulo }}</h5>
+                <p class="mb-0 text-break">{{ tarea.descripcion }}</p>
+              </div>
+              <div class="align-self-center">
+                <button 
+                  class="btn {% if tarea.completada %}btn-success{% else %}btn-outline-secondary{% endif %} btn-estado mt-2 mt-md-0"
+                  data-tarea-id="{{ tarea.id }}"
+                  data-url="{% url 'pedidos:cambiar_estado_tarea' tarea.id %}"
+                >
+                  {% if tarea.completada %}Realizada ✅{% else %}Pendiente ⚪{% endif %}
+                </button>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const cambiarEstado = async (tareaId) => {
-        const url = `/tareas/cambiar-estado/${tareaId}/`;
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const boton = document.querySelector(`[data-tarea-id="${tareaId}"]`);
+  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json',
-                },
-            });
-            
-            const data = await response.json();
-            
-            // Actualizar botón
-            if (data.completada) {
-                boton.classList.replace('btn-outline-secondary', 'btn-success');
-                boton.innerHTML = 'Realizada ✅';
-            } else {
-                boton.classList.replace('btn-success', 'btn-outline-secondary');
-                boton.innerHTML = 'Pendiente ⚪';
-            }
-            
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
+  document.querySelectorAll('.btn-estado').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const tareaId = button.dataset.tareaId;
+      const url = button.dataset.url;
 
-    // Evento click en los botones
-    document.querySelectorAll('.btn-estado').forEach(boton => {
-        boton.addEventListener('click', (event) => {
-            event.preventDefault();
-            const tareaId = event.currentTarget.dataset.tareaId;
-            cambiarEstado(tareaId);
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          }
         });
+
+        const data = await response.json();
+
+        if (data.completada) {
+          button.classList.remove('btn-outline-secondary');
+          button.classList.add('btn-success');
+          button.innerText = 'Realizada ✅';
+        } else {
+          button.classList.remove('btn-success');
+          button.classList.add('btn-outline-secondary');
+          button.innerText = 'Pendiente ⚪';
+        }
+      } catch (error) {
+        console.error('Error al cambiar estado:', error);
+      }
     });
+  });
 });
 </script>
-
-
-
 {% endblock %}
