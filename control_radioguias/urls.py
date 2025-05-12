@@ -7,7 +7,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # Todas las URLs de la app “pedidos”
-    path('pedidos/', include('pedidos.urls', namespace='pedidos')),
+    path('', include('pedidos.urls', namespace='pedidos')),
 
     # Login de la API (DRF)
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
