@@ -206,15 +206,18 @@ def pedido_editar_view(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
 
     if request.method == 'POST':
+        print("📥 LLEGÓ POST A pedido_editar_view con data:", request.POST)  # <<-- DEBUG
         form = PedidoForm(request.POST, instance=pedido)
         formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
 
         if form.is_valid() and formset.is_valid():
+            print("✅ form válido, guardando pedido...") 
             form.save()
             formset.save()
             messages.success(request, 'Pedido actualizado correctamente.')
             return redirect('pedidos:pedidos_lista')
         else:
+            print("❌ ERRORES FORM:", form.errors, formset.errors)
             messages.error(request, 'Hay errores al guardar los cambios.')
 
     else:

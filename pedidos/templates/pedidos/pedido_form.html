@@ -7,7 +7,22 @@
 
   <form method="post" novalidate>
     {% csrf_token %}
-
+    {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+  
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      {{ form.errors }}
+    </div>
+  {% endif %}
+  {% if formset.non_form_errors %}
+    <div class="alert alert-danger">
+      {{ formset.non_form_errors }}
+    </div>
+  {% endif %}
     <!-- Formulario de Pedido -->
     <div class="row g-3 mb-4">
       <div class="col-md-6">{{ form.empresa.label_tag }} {{ form.empresa }}</div>

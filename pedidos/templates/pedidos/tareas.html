@@ -82,36 +82,25 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-
-  document.querySelectorAll('.btn-estado').forEach(button => {
-    button.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const tareaId = button.dataset.tareaId;
-      const url = button.dataset.url;
-
+  document.querySelectorAll('.btn-estado').forEach(boton => {
+    boton.addEventListener('click', async function () {
+      const tareaId = this.dataset.tareaId;
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
       try {
-        const response = await fetch(url, {
+        const response = await fetch(`/tareas/cambiar-estado/${tareaId}/`, {
           method: 'POST',
-          headers: {
-            'X-CSRFToken': csrfToken,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'X-CSRFToken': csrftoken }
         });
-
         const data = await response.json();
-
         if (data.completada) {
-          button.classList.remove('btn-outline-secondary');
-          button.classList.add('btn-success');
-          button.innerText = 'Realizada ✅';
+          this.classList.replace('btn-outline-secondary', 'btn-success');
+          this.innerHTML = 'Realizada ✅';
         } else {
-          button.classList.remove('btn-success');
-          button.classList.add('btn-outline-secondary');
-          button.innerText = 'Pendiente ⚪';
+          this.classList.replace('btn-success', 'btn-outline-secondary');
+          this.innerHTML = 'Pendiente ⚪';
         }
-      } catch (error) {
-        console.error('Error al cambiar estado:', error);
+      } catch (err) {
+        console.error('Error cambiando estado:', err);
       }
     });
   });
