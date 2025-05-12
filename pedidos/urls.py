@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import logout_view, acceso_view, pedido_nuevo_cliente_view  # Import the missing views
+from .views import logout_view, acceso_view, pedido_nuevo_cliente_view, pedido_editar_cliente_view  # Import the missing views
 
 app_name = 'pedidos'
 
@@ -22,7 +22,8 @@ urlpatterns = [
     path('cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
     path('mis-pedidos/', views.pedidos_mios_view, name='mis_pedidos'),
     path('mis-pedidos/nuevo/', views.pedido_nuevo_cliente_view, name='pedido_nuevo_cliente'),
-
+     path('mis-pedidos/editar/<int:pk>/', pedido_editar_cliente_view,
+         name='pedido_editar_cliente'),
     # LOGIN / REGISTRO
     path('acceso/', views.acceso_view, name='acceso'),
     path('logout/', views.logout_view, name='logout'),

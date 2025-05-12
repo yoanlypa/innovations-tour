@@ -26,9 +26,9 @@
   .btn-primary:hover{background:var(--azulOscuro)}
 </style>
 
-<div class="card card-form">
-  <div class="card-header text-center">➕ Nuevo pedido</div>
-
+<div class="card-header text-center">
+    {% if es_edicion %}✏️ Editar pedido{% else %}➕ Nuevo pedido{% endif %}
+  </div>
   <div class="card-body">
     {% if messages %}
       {% for m in messages %}
@@ -49,7 +49,9 @@
         ➕ Añadir maleta
       </button>
 
-      <button class="btn btn-primary w-100">Guardar pedido</button>
+      <button class="btn btn-primary w-100">
+        {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+      </button>
     </form>
   </div>
 </div>

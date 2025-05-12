@@ -6,7 +6,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.decorators.http import require_GET, require_POST, require_http_methods
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
@@ -281,7 +281,35 @@ def pedido_editar_view(request, pk):
         'formset': formset,
         'pedido': pedido
     })
+@login_required
+def pedido_editar_cliente_view(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
 
+    # ✓ Verificamos que el pedido sea del usuario logueado
+    if pedido.usuario != request.user:
+        raise Http404()
+
+    if request.method == 'POST':
+        form    = PedidoFormCliente(request.POST, instance=pedido)
+        formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
+        if form.is_valid() and formset.is_valid():
+            form.save()
+            formset.save()
+            messages.success(request, '✅ Pedido actualizado.')
+            return redirect('pedidos:mis_pedidos')
+    else:
+        form    = PedidoFormCliente(instance=pedido)
+        formset = MaletaFormSet(instance=pedido, prefix='maleta')
+
+    return render(
+        request,
+        'pedidos/pedido_nuevo_cliente.html',   # mismo template
+        {
+            'form': form,
+            'formset': formset,
+            'es_edicion': True   # flag para cambiar título y botón
+        }
+    )
 
 @require_GET
 @staff_member_required
@@ -310,9 +338,13 @@ def cargar_datos_pedido(request):
 
 @login_required
 def pedidos_mios_view(request):
-    pedidos = Pedido.objects.filter(usuario=request.user).order_by('-fecha_inicio')
+    pedidos = (
+        Pedido.objects
+        .filter(usuario=request.user)
+        .prefetch_related('maletas')          # evita consultas N+1
+        .order_by('-fecha_inicio')
+    )
     return render(request, 'pedidos/pedidos_mios.html', {'pedidos': pedidos})
-
 # 
 # 
 # 

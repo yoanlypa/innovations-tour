@@ -8,19 +8,33 @@
       <table class="table table-striped">
         <thead class="table-dark">
           <tr>
-            <th>Fecha inicio</th><th>Excursión</th><th>Empresa</th>
-            <th>Lugar E/R</th><th>Estado</th><th>Notas</th>
+            <th>Fecha inicio</th><th>Fecha Fin</th><th>Excursión</th><th>Empresa</th>
+            <th>Lugar E/R</th><th>Maletas<br>(Pax / Guía)</th><th>Estado</th><th>Notas</th>
+            <th style="width:75px;">Acciones</th>
+
           </tr>
         </thead>
         <tbody>
           {% for p in pedidos %}
           <tr>
             <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+            <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
             <td>{{ p.excursion|default:"—" }}</td>
             <td>{{ p.empresa }}</td>
             <td>{{ p.lugar_entrega }} / {{ p.lugar_recogida|default:"—" }}</td>
+            <td>
+              {% for m in p.maletas.all %}
+                <div>{{ m.cantidad_pax }} pax / {{ m.guia }}</div>
+              {% empty %}
+                —
+              {% endfor %}
+            </td>
             <td>{{ p.get_estado_cliente_display }}</td>
             <td>{{ p.notas|default:"—" }}</td>
+            <td>
+              <a class="btn btn-sm btn-warning"
+                 href="{% url 'pedidos:pedido_editar_cliente' p.pk %}">✏️</a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>
