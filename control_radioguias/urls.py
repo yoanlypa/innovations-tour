@@ -12,13 +12,6 @@ urlpatterns = [
     # Login de la API (DRF)
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
-    # Redirección raíz al listado de pedidos
-    path(
-        '',
-        RedirectView.as_view(
-            pattern_name='pedidos:pedidos_lista',
-            permanent=False
-        ),
-        name='home'
-    ),
+    # Redirección raíz al acesso
+    path('', RedirectView.as_view(url='/acceso/')),
 ]
