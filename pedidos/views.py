@@ -9,7 +9,7 @@ from django.views.decorators.http import require_GET, require_POST, require_http
 from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from .models import Tarea, Pedido, Producto, RegistroCliente, Maleta
@@ -109,35 +109,68 @@ class TareaDeleteView( DeleteView):
 # 
 # ========== LOGIN Y REGISTRO==========
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 
-def auth_combined_view(request):
-    if request.user.is_authenticated:
-        return redirect('pedidos:mis_pedidos' )
 
-    login_form = AuthenticationForm()
-    register_form = UserCreationForm()
+@csrf_protect
+def acceso_view(request):
+    if request.user.is_authenticated:
+        return redirect('pedidos:pedidos_lista')
+
+    modo = request.GET.get('modo', 'login')
 
     if request.method == 'POST':
-        if 'username' in request.POST and 'password' in request.POST:
-            # login
-            login_form = AuthenticationForm(request, data=request.POST)
-            if login_form.is_valid():
-                auth_login(request, login_form.get_user())
-                return redirect('pedidos:mis_pedidos' )
-        else:
-            # registro
-            register_form = UserCreationForm(request.POST)
-            if register_form.is_valid():
-                user = register_form.save()
-                return redirect('pedidos:login')  # opcional: loguear directo
+        action = request.POST.get('action')
 
-    return render(request, 'pedidos/auth.html', {
-        'form': login_form,
-        'register_form': register_form
-    })
-#
+        if action == 'login':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user:
+                login(request, user)
+                return redirect('pedidos:pedidos_lista')
+            else:
+                messages.error(request, 'Credenciales inválidas')
+                return redirect('acceso')
+
+        elif action == 'register':
+            username = request.POST.get('username')
+            email = request.POST.get('email')
+            password = request.POST.get('password')
+            empresa = request.POST.get('empresa')
+            telefono = request.POST.get('telefono')
+
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'El nombre de usuario ya existe.')
+                return redirect('acceso')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, 'El correo ya está registrado.')
+                return redirect('acceso')
+
+            user = User.objects.create_user(username=username, email=email, password=password)
+            RegistroCliente.objects.create(
+                nombre_usuario=username,
+                email=email,
+                empresa=empresa,
+                telefono=telefono
+            )
+
+            send_mail(
+                subject='🎉 Nuevo registro de cliente',
+                message=f"Empresa: {empresa}\nNombre: {username}\nEmail: {email}\nTel: {telefono}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=['pyoanly@gmail.com'],
+                fail_silently=True
+            )
+
+            messages.success(request, 'Usuario registrado. Inicia sesión.')
+            return redirect('acceso')
+
+    return render(request, 'pedidos/acceso.html')
+
 # 
 # 
 # 

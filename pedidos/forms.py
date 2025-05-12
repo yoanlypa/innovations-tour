@@ -3,8 +3,41 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from .models import Pedido, Producto, Tarea, Maleta
 from .utils import convertir_fecha
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Usuario'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'}))
 
+class RegistroForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Contraseña'}))
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': 'Nombre de usuario'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Correo electrónico'}),
+        }
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(label='Usuario', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label='Contraseña', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+class CustomRegisterForm(UserCreationForm):
+    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError('Este email ya está en uso.')
+        return email
 # ========== FORMULARIO DE TAREAS ==========
 class TareaForm(forms.ModelForm):
     class Meta:
