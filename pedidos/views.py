@@ -19,6 +19,9 @@ from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
 import csv
 from datetime import datetime
+from django.contrib.auth.forms import AuthenticationForm as LoginForm
+from .forms import RegistroForm
+from django.contrib.auth.forms import PasswordResetForm 
 
 
 
@@ -119,57 +122,17 @@ from django.shortcuts import render, redirect
 def acceso_view(request):
     if request.user.is_authenticated:
         return redirect('pedidos:pedidos_lista')
+    login_form = LoginForm()
+    register_form = RegistroForm()
+    reset_form = PasswordResetForm()
 
-    modo = request.GET.get('modo', 'acceso')
+    context = {
+        'login_form': login_form,
+        'register_form': register_form,
+        'reset_form': reset_form
+    }
 
-    if request.method == 'POST':
-        action = request.POST.get('action')
-
-        if action == 'acceso':
-            username = request.POST.get('username')
-            password = request.POST.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user:
-                login(request, user)
-                return redirect('pedidos:pedidos_lista')
-            else:
-                messages.error(request, 'Credenciales inválidas')
-                return redirect('acceso')
-
-        elif action == 'register':
-            username = request.POST.get('username')
-            email = request.POST.get('email')
-            password = request.POST.get('password')
-            empresa = request.POST.get('empresa')
-            telefono = request.POST.get('telefono')
-
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'El nombre de usuario ya existe.')
-                return redirect('acceso')
-            if User.objects.filter(email=email).exists():
-                messages.error(request, 'El correo ya está registrado.')
-                return redirect('acceso')
-
-            user = User.objects.create_user(username=username, email=email, password=password)
-            RegistroCliente.objects.create(
-                nombre_usuario=username,
-                email=email,
-                empresa=empresa,
-                telefono=telefono
-            )
-
-            send_mail(
-                subject='🎉 Nuevo registro de cliente',
-                message=f"Empresa: {empresa}\nNombre: {username}\nEmail: {email}\nTel: {telefono}",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['pyoanly@gmail.com'],
-                fail_silently=True
-            )
-
-            messages.success(request, 'Usuario registrado. Inicia sesión.')
-            return redirect('acceso')
-
-    return render(request, 'pedidos/acceso.html')
+    return render(request, 'pedidos/acceso.html', context)
 
 def logout_view(request):
     logout(request)
