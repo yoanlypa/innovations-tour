@@ -110,8 +110,7 @@ MaletaFormSet = inlineformset_factory(
     model=Maleta,
     form=MaletaForm,
     extra=1,
-    can_delete=True,
-    prefix='maleta'       # muy importante para el JS
+    can_delete=True
 )
 # ========== FORMULARIO DE PRODUCTOS ==========
 class ProductoForm(forms.ModelForm):
