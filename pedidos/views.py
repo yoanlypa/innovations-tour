@@ -13,7 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from .models import Tarea, Pedido, Producto, RegistroCliente, Maleta
-from .forms import TareaForm, ProductoForm, PedidoForm, MaletaFormSet, CustomRegisterForm, CustomLoginForm
+from .forms import TareaForm, ProductoForm, PedidoForm, PedidoFormCliente, MaletaFormSet, CustomRegisterForm, CustomLoginForm
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
@@ -180,6 +180,22 @@ def pedidos_lista_view(request):
     return render(request, 'pedidos/pedidos_lista.html', {
         'pedidos': pedidos
     })
+# --- CREAR NUEVO PEDIDO (CLIENTE) ---
+@login_required
+def pedido_nuevo_cliente_view(request):
+    if request.method == 'POST':
+        form = PedidoFormCliente(request.POST)
+        if form.is_valid():
+            pedido = form.save(commit=False)
+            pedido.usuario = request.user
+            # Estado “pendiente” hasta que la empresa confirme pago
+            pedido.estado_cliente = 'pendiente'
+            pedido.save()
+            messages.success(request, '✅ Pedido creado correctamente.')
+            return redirect('pedidos:mis_pedidos')
+    else:
+        form = PedidoFormCliente()
+    return render(request, 'pedidos/pedido_nuevo_cliente.html', {'form': form})
 
 @staff_member_required
 def pedido_nuevo_view(request):

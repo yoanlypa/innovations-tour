@@ -1,77 +1,38 @@
-{% extends 'pedidos/base.html' %}
-
+{% extends "pedidos/base.html" %}
 {% block content %}
-{% if messages %}
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        {% for msg in messages %}
-          {% if msg.tags == 'success' %}
-            Swal.fire({
-              title: '¡Éxito!',
-              text: '{{ msg|escapejs }}',
-              icon: 'success',
-              confirmButtonText: '¡Genial!',
-              confirmButtonColor: '#005dab',
-              background: '#ffffff',
-            });
-          {% endif %}
-        {% endfor %}
-      });
-    </script>
-  {% endif %}
+<div class="container">
+  <h2 class="mb-4">Mis pedidos</h2>
 
-  <h2 class="mb-4" style="color:#005dab;">🧾 Mis Pedidos</h2>
-
-{% if not pedidos %}
-  <div class="card shadow-sm mb-4">
-    <div class="card-body text-center">
-      <h4 class="mb-3">¡Bienvenido a Innovations Tours!</h4>
-      <p class="mb-4">Aún no tienes ningún pedido registrado. Comienza ahora tu primer viaje con nosotros.</p>
-      <a href="{% url 'pedidos:pedido_nuevo' %}" class="btn btn-lg btn-success">
-        🎒 Crear mi primer pedido
+  {% if pedidos %}
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead class="table-dark">
+          <tr>
+            <th>Fecha inicio</th><th>Excursión</th><th>Empresa</th>
+            <th>Lugar E/R</th><th>Estado</th><th>Notas</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pedidos %}
+          <tr>
+            <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+            <td>{{ p.excursion|default:"—" }}</td>
+            <td>{{ p.empresa }}</td>
+            <td>{{ p.lugar_entrega }} / {{ p.lugar_recogida|default:"—" }}</td>
+            <td>{{ p.get_estado_cliente_display }}</td>
+            <td>{{ p.notas|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      Aún no tienes pedidos registrados.
+      <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary mt-3">
+        ➕ Crear mi primer pedido
       </a>
     </div>
-  </div>
-{% else %}
-  <div class="text-end mb-3">
-    <a href="{% url 'pedidos:pedido_nuevo' %}" class="btn btn-outline-primary">➕ Crear nuevo pedido</a>
-  </div>
-
-  <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
-    <table class="table table-striped align-middle">
-      <thead class="table-light" style="background-color: #005dab; color: white;">
-        <tr>
-          <th>Fecha Inicio</th>
-          <th>Fecha Fin</th>
-          <th>Empresa</th>
-          <th>Excursión</th>
-          <th>Maletas</th>
-          <th>Estado</th>
-          <th>Notas</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in pedidos %}
-        <tr>
-          <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-          <td>{{ p.fecha_fin|date:"d/m/Y" }}</td>
-          <td>{{ p.empresa }}</td>
-          <td>{{ p.excursion }}</td>
-          <td>
-            {% for m in p.maletas.all %}
-              <span class="badge text-bg-light border d-block mb-1">🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}</span>
-            {% empty %}—{% endfor %}
-          </td>
-          <td>
-            <span class="badge {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark{% elif p.estado_cliente == 'pagado' %}bg-success{% else %}bg-primary{% endif %}">
-              {{ p.get_estado_cliente_display }}
-            </span>
-          </td>
-          <td>{{ p.notas|default:"—" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 {% endblock %}

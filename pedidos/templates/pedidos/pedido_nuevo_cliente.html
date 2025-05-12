@@ -1,0 +1,19 @@
+{% extends "pedidos/base.html" %}
+{% load static %}
+{% block content %}
+<style>
+  .card-form{max-width:520px;margin:0 auto;border-radius:1rem;box-shadow:0 8px 24px rgb(0 0 0 / .12);}
+  .card-form .card-header{background:#005dab;color:#fff;border-radius:1rem 1rem 0 0;}
+</style>
+
+<div class="card card-form">
+  <div class="card-header text-center">➕ Nuevo pedido</div>
+  <div class="card-body">
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn btn-primary w-100">Guardar pedido</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

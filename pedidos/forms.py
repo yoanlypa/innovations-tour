@@ -74,7 +74,24 @@ class PedidoForm(forms.ModelForm):
         fecha_str = self.cleaned_data['fecha_creacion']
         return convertir_fecha(fecha_str)
 
-
+class PedidoFormCliente(forms.ModelForm):
+    class Meta:
+        model  = Pedido
+        fields = [
+            'fecha_inicio', 'fecha_fin',
+            'empresa', 'excursion',
+            'lugar_entrega', 'lugar_recogida',
+            'notas'
+        ]
+        widgets = {
+            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_fin':    forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'empresa':      forms.TextInput(attrs={'class': 'form-control'}),
+            'excursion':    forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega': forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
+            'notas':        forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
 # ========== FORMULARIO DE PRODUCTOS ==========
 class ProductoForm(forms.ModelForm):
     class Meta:
