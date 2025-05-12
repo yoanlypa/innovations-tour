@@ -19,7 +19,6 @@
             <div class="navbar-nav">
                 <a class="nav-link" href="{% url 'pedidos:tareas' %}">📋 Tareas</a>
                 <a class="nav-link" href="{% url 'pedidos:pedidos_lista' %}">📦 Pedidos</a>
-                <a class="nav-link" href="{% url 'pedidos:productos_lista' %}">🧪 Productos</a>
             </div>
             <div class="ms-auto d-flex align-items-center gap-2">
                 {% if user.is_authenticated %}
