@@ -81,7 +81,8 @@ class PedidoFormCliente(forms.ModelForm):
             'fecha_inicio', 'fecha_fin',
             'empresa', 'excursion',
             'lugar_entrega', 'lugar_recogida',
-            'notas'
+            'notas', 'estado_cliente'
+
         ]
         widgets = {
             'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
@@ -91,7 +92,27 @@ class PedidoFormCliente(forms.ModelForm):
             'lugar_entrega': forms.TextInput(attrs={'class': 'form-control'}),
             'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
             'notas':        forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'estado_cliente': forms.Select(attrs={'class': 'form-select'}),
         }
+
+class MaletaForm(forms.ModelForm):
+    class Meta:
+        model  = Maleta
+        fields = ['guia', 'cantidad_pax']
+        widgets = {
+            'guia':         forms.TextInput(attrs={'class': 'form-control'}),
+            'cantidad_pax': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+
+MaletaFormSet = inlineformset_factory(
+    parent_model=Pedido,
+    model=Maleta,
+    form=MaletaForm,
+    extra=1,
+    can_delete=True,
+    prefix='maleta'       # muy importante para el JS
+)
 # ========== FORMULARIO DE PRODUCTOS ==========
 class ProductoForm(forms.ModelForm):
     class Meta:

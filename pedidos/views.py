@@ -184,19 +184,27 @@ def pedidos_lista_view(request):
 @login_required
 def pedido_nuevo_cliente_view(request):
     if request.method == 'POST':
-        form = PedidoFormCliente(request.POST)
-        if form.is_valid():
+        form     = PedidoFormCliente(request.POST)
+        formset  = MaletaFormSet(request.POST, prefix='maleta')
+
+        if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
-            # Estado “pendiente” hasta que la empresa confirme pago
             pedido.estado_cliente = 'pendiente'
             pedido.save()
+            formset.instance = pedido
+            formset.save()
             messages.success(request, '✅ Pedido creado correctamente.')
             return redirect('pedidos:mis_pedidos')
     else:
-        form = PedidoFormCliente()
-    return render(request, 'pedidos/pedido_nuevo_cliente.html', {'form': form})
+        form    = PedidoFormCliente()
+        formset = MaletaFormSet(prefix='maleta')
 
+    return render(
+        request,
+        'pedidos/pedido_nuevo_cliente.html',
+        {'form': form, 'formset': formset}
+    )
 @staff_member_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
