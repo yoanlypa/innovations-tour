@@ -13,7 +13,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 
 from .models import Tarea, Pedido, Producto, RegistroCliente, Maleta
-from .forms import TareaForm, ProductoForm, PedidoForm, MaletaFormSet
+from .forms import TareaForm, ProductoForm, PedidoForm, MaletaFormSet, CustomRegisterForm, CustomLoginForm
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
