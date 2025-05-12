@@ -8,6 +8,15 @@ from .utils import convertir_fecha
 from django.db import models
 from django.contrib.auth.models import User
 
+class Producto(models.Model):
+    nombre = models.CharField("Nombre", max_length=100)
+    cantidad = models.IntegerField("Cantidad", default=0)
+    almacen = models.CharField("Almacén", max_length=100)
+
+    def __str__(self):
+        return f"{self.nombre} ({self.cantidad})"
+
+
 class Pedido(models.Model):
     ESTADO_CLIENTE = [
         ('pendiente', '🟡 Pendiente'),
@@ -56,20 +65,24 @@ class Maleta(models.Model):
         return f"{self.guia} ({self.cantidad_pax} pax)"
 
 class Tarea(models.Model):
+    PRIORIDADES = [('alta','Alta'),('media','Media'),('baja','Baja')]
     titulo = models.CharField(max_length=200)
     descripcion = models.TextField()
-    prioridad = models.CharField(max_length=20, choices=[('alta', 'Alta'), ('media', 'Media'), ('baja', 'Baja')])
-    completada = models.BooleanField(default=False)
-    fecha_creacion = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Fecha creación"
-    )
-    fecha_especifica = models.DateTimeField(
-        default=timezone.localtime,  # Fecha local
-        verbose_name="Fecha programada"
-    )
+    prioridad = models.CharField("Prioridad", max_length=20, choices=PRIORIDADES)
+    completada      = models.BooleanField("Completada", default=False)
+    fecha_creacion  = models.DateTimeField("Creada", auto_now_add=True)
+    fecha_especifica= models.DateTimeField("Para", default=models.timezone.localtime)
 
 
     def __str__(self):
         return self.titulo
 
+class RegistroCliente(models.Model):
+    nombre_usuario  = models.CharField("Usuario", max_length=150)
+    email           = models.EmailField("Email")
+    empresa         = models.CharField("Empresa", max_length=255, blank=True, null=True)
+    telefono        = models.CharField("Teléfono", max_length=50, blank=True, null=True)
+    fecha_registro  = models.DateTimeField("Registrado", auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.nombre_usuario} – {self.empresa}"
