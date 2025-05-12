@@ -57,7 +57,6 @@ class Maleta(models.Model):
     def __str__(self):
         return f"{self.guia} ({self.cantidad_pax} pax)"
 
-
 class Tarea(models.Model):
     PRIORIDADES = [
         ('alta',  'Alta'),
