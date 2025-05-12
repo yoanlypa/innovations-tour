@@ -23,7 +23,7 @@ from datetime import datetime
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    login_url = 'login'
+    login_url = 'acceso'
     def test_func(self):
         return self.request.user.is_staff or self.request.user.is_superuser
 
@@ -120,12 +120,12 @@ def acceso_view(request):
     if request.user.is_authenticated:
         return redirect('pedidos:pedidos_lista')
 
-    modo = request.GET.get('modo', 'login')
+    modo = request.GET.get('modo', 'acceso')
 
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        if action == 'login':
+        if action == 'acceso':
             username = request.POST.get('username')
             password = request.POST.get('password')
             user = authenticate(request, username=username, password=password)
