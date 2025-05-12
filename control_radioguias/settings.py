@@ -138,7 +138,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-LOGIN_URL = 'acceso/'
+LOGIN_URL = '/acceso/'
 LOGIN_REDIRECT_URL = ''  # URL a la que redirigir después de iniciar sesión
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
@@ -189,7 +189,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_LOGOUT_REDIRECT_URL = 'acceso/' 
+ACCOUNT_LOGOUT_REDIRECT_URL = '/acceso/' 
 
 if not DEBUG:
     LOGGING = {

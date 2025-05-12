@@ -114,7 +114,7 @@ from django.shortcuts import render, redirect
 
 def auth_combined_view(request):
     if request.user.is_authenticated:
-        return redirect('pedidos:mis_pedidos' if not request.user.is_staff else 'pedidos:tareas')
+        return redirect('pedidos:mis_pedidos' )
 
     login_form = AuthenticationForm()
     register_form = UserCreationForm()
@@ -125,7 +125,7 @@ def auth_combined_view(request):
             login_form = AuthenticationForm(request, data=request.POST)
             if login_form.is_valid():
                 auth_login(request, login_form.get_user())
-                return redirect('pedidos:mis_pedidos' if not request.user.is_staff else 'pedidos:tareas')
+                return redirect('pedidos:mis_pedidos' )
         else:
             # registro
             register_form = UserCreationForm(request.POST)
