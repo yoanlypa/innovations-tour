@@ -109,7 +109,7 @@ MaletaFormSet = inlineformset_factory(
     parent_model=Pedido,
     model=Maleta,
     form=MaletaForm,
-    extra=1,
+    extra=0,
     can_delete=True
 )
 # ========== FORMULARIO DE PRODUCTOS ==========
