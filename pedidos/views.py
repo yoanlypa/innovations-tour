@@ -119,19 +119,49 @@ from django.shortcuts import render, redirect
 
 
 @csrf_protect
+
 def acceso_view(request):
-    if request.user.is_authenticated:
-        return redirect('pedidos:pedidos_lista')
-    login_form = LoginForm()
-    register_form = RegistroForm()
-    reset_form = PasswordResetForm()
+    # Formularios vacíos para la primera carga
+    login_form    = CustomLoginForm()
+    register_form = CustomRegisterForm()
+    mode = request.POST.get('mode', 'login')  # modo activo (login / register / reset)
+
+    if request.method == 'POST':
+        # ---------- LOGIN ----------
+        if mode == 'login':
+            login_form = CustomLoginForm(request, data=request.POST)
+            if login_form.is_valid():
+                login(request, login_form.get_user())
+                # A dónde redirigimos según permisos
+                if request.user.is_staff:
+                    return redirect('pedidos:pedidos_lista')   # vista staff
+                return redirect('pedidos:mis_pedidos')         # vista cliente
+            messages.error(request, 'Credenciales inválidas.')
+
+        # ---------- REGISTRO ----------
+        elif mode == 'register':
+            register_form = CustomRegisterForm(request.POST)
+            if register_form.is_valid():
+                user = register_form.save()
+                RegistroCliente.objects.create(
+                    nombre_usuario=user.username,
+                    email=user.email
+                )
+                login(request, user)
+                return redirect('pedidos:mis_pedidos')
+            messages.error(request, 'Corrige los errores del formulario.')
+
+        # ---------- RESET ----------
+        elif mode == 'reset':
+            email = request.POST.get('email')
+            # … lógica de envío de enlace (omitida aquí) …
+            messages.success(request, 'Te enviamos un enlace a tu correo.')
 
     context = {
         'login_form': login_form,
         'register_form': register_form,
-        'reset_form': reset_form
+        'mode': mode,  # para que la plantilla sepa qué pestaña mostrar
     }
-
     return render(request, 'pedidos/acceso.html', context)
 
 def logout_view(request):

@@ -1,29 +1,64 @@
-{% extends 'pedidos/base.html' %}
+{% extends "pedidos/base.html" %}
 {% load static %}
 
 {% block content %}
 <style>
-  .form-card {
-    max-width: 500px;
-    margin: 0 auto;
-    border-radius: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    padding: 2rem;
-    background: #fff;
+  :root{
+    --azul:#005dab;
+    --azul-oscuro:#004080;
+    --naranja:#f78243;
   }
-  .form-title {
-    font-size: 1.5rem;
-    color: #005dab;
-    text-align: center;
-    margin-bottom: 1rem;
+  /* Fondo general con degradado suave */
+  body{
+    background: linear-gradient(135deg,var(--azul) 0%,var(--naranja) 100%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
-  .form-footer {
-    text-align: center;
-    margin-top: 1rem;
+  /* Tarjeta contenedora */
+  .form-card{
+    width:100%;
+    max-width:480px;
+    background:#fff;
+    border-radius:1.25rem;
+    padding:2rem 2.25rem;
+    box-shadow:0 8px 24px rgb(0 0 0 / .15);
+    animation:slideDown .5s ease;
   }
-  .form-footer a {
-    text-decoration: underline;
-    cursor: pointer;
+  @keyframes slideDown{
+    from{opacity:0;transform:translateY(-15px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .form-title{
+    font-size:1.6rem;
+    font-weight:600;
+    color:var(--azul);
+    text-align:center;
+    margin-bottom:1.25rem;
+  }
+  .btn-primary{
+    background:var(--azul);
+    border:none;
+  }
+  .btn-primary:hover{background:var(--azul-oscuro)}
+  /* Enlaces inferiores */
+  .form-footer{
+    margin-top:1rem;
+    text-align:center;
+    font-size:.9rem;
+  }
+  .form-footer a{
+    color:var(--azul);
+    cursor:pointer;
+    text-decoration:underline;
+  }
+  /* Inputs + espaciado uniforme */
+  .form-control{min-height:45px}
+  .form-control:not(:last-child){margin-bottom: .9rem}
+  /* Media-query para pantallas muy estrechas */
+  @media(max-width:420px){
+    .form-card{padding:1.5rem}
   }
 </style>
 
@@ -32,57 +67,60 @@
     <div class="alert alert-danger">Por favor revisa los errores en el formulario.</div>
   {% endif %}
 
+  {# ------ REGISTRO ------ #}
   {% if mode == 'register' %}
     <h2 class="form-title">Registro</h2>
     <form method="post">
       {% csrf_token %}
       {{ register_form.as_p }}
       <input type="hidden" name="mode" value="register">
-      <button class="btn btn-primary w-100 mt-3">Crear cuenta</button>
+      <button class="btn btn-primary w-100">Crear cuenta</button>
     </form>
     <div class="form-footer">
-      <span>¿Ya tienes cuenta?</span> <a onclick="cambiarModo('acceso')">Inicia sesión</a>
+      ¿Ya tienes cuenta? <a onclick="cambiarModo('login')">Inicia sesión</a>
     </div>
+
+  {# ------ RESET PASSWORD ------ #}
   {% elif mode == 'reset' %}
-    <h2 class="form-title">Recuperar Contraseña</h2>
+    <h2 class="form-title">Recuperar contraseña</h2>
     <form method="post">
       {% csrf_token %}
-      <input type="email" name="email" class="form-control mb-3" placeholder="Tu correo" required>
+      <input type="email" name="email" class="form-control" placeholder="Tu correo" required>
       <input type="hidden" name="mode" value="reset">
       <button class="btn btn-primary w-100">Enviar enlace</button>
     </form>
     <div class="form-footer">
-      <a onclick="cambiarModo('acceso')">Volver al login</a>
+      <a onclick="cambiarModo('login')">Volver al login</a>
     </div>
+
+  {# ------ LOGIN (por defecto) ------ #}
   {% else %}
-    <h2 class="form-title">Iniciar Sesión</h2>
+    <h2 class="form-title">Iniciar sesión</h2>
     <form method="post" action="{% url 'pedidos:acceso' %}">
       {% csrf_token %}
       {{ login_form.as_p }}
-      <input type="hidden" name="mode" value="acceso">
+      <input type="hidden" name="mode" value="login">
       <button class="btn btn-primary w-100">Ingresar</button>
     </form>
     <div class="form-footer">
-      <a onclick="cambiarModo('register')">Crear cuenta</a> | 
+      <a onclick="cambiarModo('register')">Crear cuenta</a> |
       <a onclick="cambiarModo('reset')">Olvidé mi contraseña</a>
     </div>
   {% endif %}
 </div>
 
 <script>
-  function cambiarModo(modo) {
-    const form = document.createElement('form');
-    form.method = 'post';
-    form.style.display = 'none';
-    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').cloneNode();
-    const modeInput = document.createElement('input');
-    modeInput.type = 'hidden';
-    modeInput.name = 'mode';
-    modeInput.value = modo;
-    form.appendChild(csrf);
-    form.appendChild(modeInput);
-    document.body.appendChild(form);
-    form.submit();
-  }
+/* Envía un POST oculto cambiando el modo (login / register / reset) */
+function cambiarModo(modo){
+  const form=document.createElement('form');
+  form.method='post';
+  form.style.display='none';
+  const csrf=document.querySelector('[name=csrfmiddlewaretoken]').cloneNode();
+  const mode=document.createElement('input');
+  mode.type='hidden';mode.name='mode';mode.value=modo;
+  form.append(csrf,mode);
+  document.body.append(form);
+  form.submit();
+}
 </script>
 {% endblock %}
