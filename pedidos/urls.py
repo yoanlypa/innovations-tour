@@ -29,5 +29,7 @@ urlpatterns = [
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='pedidos/password_reset_complete.html'), name='password_reset_complete'),
 
     # API / Sincronización
-    path('api/sincronizar-usuario/', views.SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
+    # path('api/sincronizar-usuario/', views.SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
+    # 
+    
 ]
