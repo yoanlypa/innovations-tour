@@ -24,6 +24,7 @@ class PedidoForm(forms.ModelForm):
 
     class Meta:
         model = Pedido
+        exclude = ['fecha_creacion']
         fields = [
             'empresa', 'excursion', 'guia_general', 'lugar_entrega', 'lugar_recogida',
             'fecha_inicio', 'fecha_fin', 'fecha_creacion',

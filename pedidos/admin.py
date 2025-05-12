@@ -9,6 +9,7 @@ class MaletaInline(admin.TabularInline):
 
 class PedidoAdmin(admin.ModelAdmin):
     list_display = ('empresa', 'excursion', 'fecha_inicio', 'estado_cliente', 'estado_equipo')
+    readonly_fields = ('fecha_creacion',)
     list_filter = ('estado_cliente', 'estado_equipo', 'fecha_inicio')
     search_fields = ('empresa', 'excursion', 'usuario__username')
     ordering = ['-fecha_inicio']

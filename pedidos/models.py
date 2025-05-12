@@ -26,8 +26,8 @@ class Pedido(models.Model):
     ]
 
     fecha_inicio       = models.DateTimeField("Fecha inicio", default=timezone.now)
-    fecha_fin          = models.DateField("Fecha fin", null=True, blank=True)
-    fecha_creacion     = models.DateField("Fecha creación", default=timezone.localdate)
+    fecha_fin          = models.DateTimeField("Fecha fin", null=True, blank=True)
+    fecha_creacion     = models.DateTimeField("Fecha creación", default=timezone.now)
     fecha_modificacion = models.DateTimeField("Última modificación", auto_now=True)
 
     empresa        = models.CharField("Empresa", max_length=100)
