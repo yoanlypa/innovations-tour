@@ -190,7 +190,6 @@ def pedido_nuevo_cliente_view(request):
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
-            pedido.estado_cliente = 'pendiente'
             pedido.save()
             formset.instance = pedido
             formset.save()
