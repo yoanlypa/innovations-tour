@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import acceso_unificado_view, logout_view, acceso_view  # Import the missing views
+from .views import logout_view, acceso_view  # Import the missing views
 
 app_name = 'pedidos'
 
@@ -21,8 +21,8 @@ urlpatterns = [
     path('mis-pedidos/', views.pedidos_mios_view, name='mis_pedidos'),
 
     # LOGIN / REGISTRO
-    path('acceso/', acceso_view, name='acceso'),
-    path('logout/', logout_view, name='logout'),
+    path('acceso/', views.acceso_view, name='acceso'),
+    path('logout/', views.logout_view, name='logout'),
     path('acceso/registro/', views.register_view, name='register'),
 
     # PASSWORD RESET
