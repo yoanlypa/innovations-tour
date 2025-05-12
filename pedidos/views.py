@@ -1,39 +1,19 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, logout, get_user_model
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.timezone import make_aware, localtime
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.db import IntegrityError
-from django.utils.encoding import force_bytes, force_str
-from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.decorators import permission_classes,api_view
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.contrib.auth.decorators import login_required
-from django.forms.models import BaseInlineFormSet
-from django.core.exceptions import PermissionDenied, ValidationError
-from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_POST, require_http_methods, require_GET
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
-from django.shortcuts import get_object_or_404, render, redirect
-from django.http import JsonResponse, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
-from django.utils import timezone
-from .models import Tarea, Pedido, Producto, StockControl, RegistroCliente, StockMaleta, Maleta
-from .forms import TareaForm, PedidoForm, ProductoForm, StockControlForm, MaletaFormSet
-from rest_framework.views import APIView
-from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
-from rest_framework import status, generics, serializers
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from rest_framework.authtoken.models import Token
+from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.decorators.http import require_GET, require_POST, require_http_methods
+from django.http import JsonResponse, HttpResponse
+from django.conf import settings
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+
+from .models import Tarea, Pedido, Producto, RegistroCliente, Maleta
+from .forms import TareaForm, ProductoForm, PedidoForm, MaletaFormSet
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
