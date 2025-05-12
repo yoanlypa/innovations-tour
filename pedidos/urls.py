@@ -22,6 +22,10 @@ urlpatterns = [
     # LOGIN / REGISTRO
     path('acceso/', views.auth_combined_view, name='login'),
     
+    # ————— Productos —————
+    path('productos/', views.ProductoListView.as_view(), name='productos_lista'),
+    path('productos/editar/<int:pk>/', views.ProductoUpdateView.as_view(), name='producto_editar'),
+    
     # PASSWORD RESET
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
     path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='pedidos/password_reset_done.html'), name='password_reset_done'),
