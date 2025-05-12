@@ -14,20 +14,13 @@ class TareaForm(forms.ModelForm):
 
 # ========== FORMULARIO DE PEDIDOS ==========
 class PedidoForm(forms.ModelForm):
-    fecha_creacion = forms.CharField(
-        label="Fecha de creación (dd/mm/aaaa)",
-        widget=forms.TextInput(attrs={
-            'placeholder': 'dd/mm/aaaa',
-            'class': 'form-control',
-        })
-    )
 
     class Meta:
         model = Pedido
         exclude = ['fecha_creacion']
         fields = [
             'empresa', 'excursion', 'guia_general', 'lugar_entrega', 'lugar_recogida',
-            'fecha_inicio', 'fecha_fin', 'fecha_creacion',
+            'fecha_inicio', 'fecha_fin',
             'estado_cliente', 'estado_equipo', 'notas', 'productos'
         ]
         widgets = {
