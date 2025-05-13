@@ -216,7 +216,7 @@ def pedido_nuevo_cliente_view(request):
         'pedidos/pedido_nuevo_cliente.html',
         {'form': form, 'formset': formset}
     )
-@staff_member_required
+@login_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
     formset = MaletaFormSet(request.POST or None, prefix='maleta')
