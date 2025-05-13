@@ -36,8 +36,13 @@
                  href="{% url 'pedidos:pedido_editar_cliente' p.pk %}">✏️</a>
             </td>
           </tr>
+          
           {% endfor %}
-          {# ---------- FAB “+” ---------- #}
+        </tbody>
+      </table>
+    </div>
+
+    {# ---------- FAB “+” ---------- #}
 <a href="#"
    class="btn btn-primary btn-lg rounded-circle fab"
    data-bs-toggle="modal"
@@ -62,14 +67,6 @@
     </div>
   </div>
 </div>
-          {% empty %}
-          <tr>
-            <td colspan="9" class="text-center">No hay pedidos registrados.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
   {% else %}
     <div class="alert alert-info text-center">
       Aún no tienes pedidos registrados.
