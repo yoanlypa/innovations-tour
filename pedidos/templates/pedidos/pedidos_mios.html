@@ -37,6 +37,36 @@
             </td>
           </tr>
           {% endfor %}
+          {# ---------- FAB “+” ---------- #}
+<a href="#"
+   class="btn btn-primary btn-lg rounded-circle fab"
+   data-bs-toggle="modal"
+   data-bs-target="#modalNuevoPedido"
+   title="Crear nuevo pedido">
+   <span class="fs-3 fw-bold">+</span>
+</a>
+
+{# ---------- Modal con iframe ---------- #}
+<div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo pedido</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0" style="height:80vh;">
+        <iframe src="{% url 'pedidos:pedido_nuevo_cliente' %}"
+                class="w-100 h-100 border-0"
+                loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+          {% empty %}
+          <tr>
+            <td colspan="9" class="text-center">No hay pedidos registrados.</td>
+          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>

@@ -142,6 +142,7 @@ LOGIN_URL = "pedidos:acceso"
 LOGIN_REDIRECT_URL = ''  # URL a la que redirigir después de iniciar sesión
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Formato de fechas para toda la app
 USE_L10N = False
