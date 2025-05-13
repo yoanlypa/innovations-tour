@@ -1,44 +1,8 @@
 {% extends "pedidos/base.html" %}
-{% load static %}
-
+{% block title %}Nuevo pedido{% endblock %}
 {% block content %}
-<style>
-  :root{
-    --azul:#005dab;
-    --azulOscuro:#004080;
-  }
-  .card-form{
-    max-width:560px;margin:1.5rem auto;border-radius:1rem;
-    box-shadow:0 8px 24px rgb(0 0 0 / .10);
-  }
-  .card-header{
-    background:var(--azul);color:#fff;font-weight:600;
-    border-radius:1rem 1rem 0 0
-  }
-  .maleta-box{
-    border:1px solid #dee2e6;border-radius:.5rem;padding:.9rem;
-    margin-bottom:1rem;position:relative
-  }
-  .maleta-box .btn-danger{
-    position:absolute;top:.35rem;right:.35rem
-  }
-  .btn-primary{background:var(--azul);border:none}
-  .btn-primary:hover{background:var(--azulOscuro)}
-</style>
-
-<div class="card-header text-center">
-    {% if es_edicion %}✏️ Editar pedido{% else %}➕ Nuevo pedido{% endif %}
-  </div>
-  <div class="card-body">
-    {% if messages %}
-      {% for m in messages %}
-        <div class="alert alert-{{ m.tags }}">{{ m }}</div>
-      {% endfor %}
-    {% endif %}
-  </div>
+<div class="container my-5">
+  <h1 class="h4 mb-4">Nuevo pedido</h1>
+  {% include "pedidos/_pedido_form.html" %}
 </div>
-{% endblock %}
-
-{% block scripts %}
-
 {% endblock %}
