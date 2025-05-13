@@ -86,6 +86,32 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 class PedidoFormCliente(forms.ModelForm):
+    # Redefinimos los campos de fecha para aceptar dd/mm/aaaa
+    fecha_inicio = forms.DateField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'dd/mm/aaaa',   # guía visual
+            'autocomplete': 'off',
+        }),
+        input_formats=['%d/%m/%Y'],
+        error_messages={
+            'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
+            'required': 'Este campo es obligatorio',
+        }
+    )
+    fecha_fin = forms.DateField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'dd/mm/aaaa',
+            'autocomplete': 'off',
+        }),
+        input_formats=['%d/%m/%Y', ''],  # permitimos vacío
+        error_messages={
+            'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
+        }
+    )
     class Meta:
         model = Pedido
         fields = [
@@ -113,7 +139,6 @@ class PedidoFormCliente(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Valor por defecto en Estado
         self.fields['estado_cliente'].initial = 'pagado'
-
 
 class MaletaForm(forms.ModelForm):
     class Meta:
