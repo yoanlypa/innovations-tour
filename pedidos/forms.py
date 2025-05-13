@@ -38,6 +38,12 @@ class CustomRegisterForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Este email ya está en uso.')
         return email
+# 
+# 
+# 
+# 
+# 
+# 
 # ========== FORMULARIO DE TAREAS ==========
 class TareaForm(forms.ModelForm):
     class Meta:
@@ -45,6 +51,12 @@ class TareaForm(forms.ModelForm):
         fields = ['titulo', 'descripcion', 'prioridad', 'completada']
 
 
+# 
+# 
+# 
+# 
+# 
+# 
 # ========== FORMULARIO DE PEDIDOS ==========
 class PedidoForm(forms.ModelForm):
 
@@ -93,6 +105,11 @@ class PedidoFormCliente(forms.ModelForm):
             'notas':        forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'estado_cliente': forms.Select(attrs={'class': 'form-select'}),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si quisieras asegurarte que todos los campos usen form-control:
+        for field in self.fields.values():
+            field.widget.attrs.setdefault("class", "form-control")
 
 class MaletaForm(forms.ModelForm):
     class Meta:
@@ -105,12 +122,19 @@ class MaletaForm(forms.ModelForm):
 
 
 MaletaFormSet = inlineformset_factory(
-    parent_model=Pedido,
-    model=Maleta,
-    form=MaletaForm,
+    Pedido, Maleta,
+    fields=("guia", "cantidad_pax"),
+    widgets={
+        "guia": forms.TextInput(attrs={"class": "form-control"}),
+        "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+    },
     extra=0,
     can_delete=True
 )
+# 
+# 
+# 
+# 
 # ========== FORMULARIO DE PRODUCTOS ==========
 class ProductoForm(forms.ModelForm):
     class Meta:
@@ -123,6 +147,10 @@ class ProductoForm(forms.ModelForm):
         }
 
 
+#
+# 
+# 
+# 
 # ========== FORMULARIO DE MALETAS ==========
 class MaletaForm(forms.ModelForm):
     class Meta:
