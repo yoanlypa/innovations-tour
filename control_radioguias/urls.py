@@ -13,5 +13,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Redirección raíz al acesso
-    path('', RedirectView.as_view(url='/acceso/')),
+    path('', RedirectView.as_view(url='/pedidos/')),
 ]

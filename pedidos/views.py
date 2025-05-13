@@ -26,9 +26,9 @@ from django.contrib.auth.forms import PasswordResetForm
 
 
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    login_url = 'acceso'
+    login_url = reverse_lazy('pedidos:acceso')
     def test_func(self):
-        return self.request.user.is_staff or self.request.user.is_superuser
+        return self.request.user.is_staff 
 
 
 
