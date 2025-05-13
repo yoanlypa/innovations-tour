@@ -43,8 +43,25 @@
       <h5 class="mt-4">Maletas</h5>
       {{ formset.management_form }}
 
-      <div id="maletas-container"></div>
-
+      <div id="maletas-container">
+        {% for f in formset %}
+        <div class="maleta-box">
+          {{ f.id }}
+          <div class="row g-3">
+            <div class="col">
+              {{ f.guia.label_tag }}{{ f.guia }}
+            </div>
+            <div class="col">
+              {{ f.cantidad_pax.label_tag }}{{ f.cantidad_pax }}
+            </div>
+          </div>
+          <input type="checkbox" name="maleta-{{ forloop.counter0 }}-DELETE"
+                 id="id_maleta-{{ forloop.counter0 }}-DELETE" style="display:none">
+          <button type="button" class="btn btn-danger btn-sm eliminar-maleta">🗑</button>
+        </div>
+        {% endfor %}
+      </div>
+      
       <button type="button" id="add-maleta" class="btn btn-outline-secondary mb-3">
         ➕ Añadir maleta
       </button>
@@ -59,53 +76,52 @@
 
 {% block scripts %}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  /* ELEMENTOS PRINCIPALES */
-  const cont     = document.getElementById('maletas-container');
-  const totalInp = document.getElementById('id_maleta-TOTAL_FORMS');
-  const addBtn   = document.getElementById('add-maleta');
-
-  /* TEMPLATE VACÍO para cada maleta */
-  const nuevaMaleta = (idx) => `
-    <div class="maleta-box">
-      <div class="row g-3">
-        <div class="col">
-          <label class="form-label">Guía</label>
-          <input type="text" name="maleta-${idx}-guia" id="id_maleta-${idx}-guia"
-                 class="form-control" placeholder="Nombre guía">
-        </div>
-        <div class="col">
-          <label class="form-label">Pax</label>
-          <input type="number" name="maleta-${idx}-cantidad_pax"
-                 id="id_maleta-${idx}-cantidad_pax"
-                 class="form-control" min="1" value="1">
-        </div>
-      </div>
-      <input type="checkbox" name="maleta-${idx}-DELETE"
-             id="id_maleta-${idx}-DELETE" style="display:none">
-      <button type="button" class="btn btn-danger btn-sm eliminar-maleta">🗑</button>
-    </div>`;
-
-  /* Añade la primera maleta al cargar */
-  agregarMaleta();
-
-  /* --- Añadir nueva maleta --- */
-  addBtn.addEventListener('click', agregarMaleta);
-
-  function agregarMaleta(){
-    const idx = parseInt(totalInp.value,10);
-    cont.insertAdjacentHTML('beforeend', nuevaMaleta(idx));
-    totalInp.value = idx + 1;
-  }
-
-  /* --- Eliminar maleta --- */
-  cont.addEventListener('click', e => {
-    if(!e.target.classList.contains('eliminar-maleta')) return;
-    const box = e.target.closest('.maleta-box');
-    const del = box.querySelector('[name$=\"-DELETE\"]');
-    del.checked = true;
-    box.style.display = 'none';
-  });
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        const cont     = document.getElementById('maletas-container');
+        const totalInp = document.getElementById('id_maleta-TOTAL_FORMS');
+        const addBtn   = document.getElementById('add-maleta');
+      
+        const templateHTML = idx => `
+          <div class="maleta-box">
+            <div class="row g-3">
+              <div class="col">
+                <label>Guía</label>
+                <input type="text" name="maleta-${idx}-guia" id="id_maleta-${idx}-guia"
+                       class="form-control">
+              </div>
+              <div class="col">
+                <label>Pax</label>
+                <input type="number" name="maleta-${idx}-cantidad_pax"
+                       id="id_maleta-${idx}-cantidad_pax"
+                       class="form-control" min="1" value="1">
+              </div>
+            </div>
+            <input type="checkbox" name="maleta-${idx}-DELETE"
+                   id="id_maleta-${idx}-DELETE" style="display:none">
+            <button type="button" class="btn btn-danger btn-sm eliminar-maleta">🗑</button>
+          </div>`;
+      
+        function agregarMaleta(){
+          const idx = parseInt(totalInp.value,10);
+          cont.insertAdjacentHTML('beforeend', templateHTML(idx));
+          totalInp.value = idx + 1;
+        }
+      
+        /* Si el pedido nuevo llega sin maletas, añadimos la primera */
+        if (parseInt(totalInp.value,10) === 0){
+          agregarMaleta();
+        }
+      
+        addBtn.addEventListener('click', agregarMaleta);
+      
+        cont.addEventListener('click', e=>{
+          if(!e.target.classList.contains('eliminar-maleta')) return;
+          const box = e.target.closest('.maleta-box');
+          const del = box.querySelector('[name$=\"-DELETE\"]');
+          del.checked = true;
+          box.style.display = 'none';
+        });
+      });
+      
 </script>
 {% endblock %}
