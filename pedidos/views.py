@@ -193,15 +193,12 @@ def pedidos_lista_view(request):
         'pedidos': pedidos
     })
 # --- CREAR NUEVO PEDIDO (CLIENTE) ---
-
 @login_required
 def pedido_nuevo_cliente_view(request):
     """
-    Vista para crear un pedido desde el cliente.
-    Si viene ?embed=1 devuelve solo el formulario (para iframe/modal),
-    si no, la página completa.
+    Crear un pedido. Si viene ?embed=1 (iframe/modal), al guardar
+    recarga la página padre en vez de mostrar la lista dentro del iframe.
     """
-    # 1. Procesar POST
     if request.method == 'POST':
         form = PedidoFormCliente(request.POST)
         formset = MaletaFormSet(request.POST, prefix='maleta')
@@ -212,28 +209,26 @@ def pedido_nuevo_cliente_view(request):
             pedido.save()
             formset.instance = pedido
             formset.save()
+            # Si estamos en modo embed (iframe/modal):
+            if request.GET.get('embed') == '1':
+                return HttpResponse(
+                    '<script>window.parent.location.reload();</script>'
+                )
+            # En caso normal, redirigimos al listado
             messages.success(request, '✅ Pedido creado correctamente.')
             return redirect('pedidos:mis_pedidos')
         else:
-            # Dejamos que el template muestre errores inline
             messages.error(request, 'Corrige los errores del formulario.')
-    # 2. GET inicial
     else:
         form = PedidoFormCliente()
         formset = MaletaFormSet(prefix='maleta')
 
-    # 3. Selección de plantilla según modo embed
-    if request.GET.get('embed') == '1':
-        template = "pedidos/pedido_nuevo_cliente_modal.html"
-    else:
-        template = "pedidos/pedido_nuevo_cliente.html"
-
-    # 4. Renderizar con el formulario y formset
-    context = {
-        "form": form,
-        "formset": formset,
-    }
-    return render(request, template, context)
+    template = (
+        "pedidos/pedido_nuevo_cliente_modal.html"
+        if request.GET.get('embed') == '1'
+        else "pedidos/pedido_nuevo_cliente.html"
+    )
+    return render(request, template, {"form": form, "formset": formset})
 
 
 @login_required

@@ -86,12 +86,12 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 class PedidoFormCliente(forms.ModelForm):
-    # Redefinimos los campos de fecha para aceptar dd/mm/aaaa
+    # Campos de fecha que aceptan dd/mm/aaaa y muestran el valor inicial formateado
     fecha_inicio = forms.DateField(
         required=True,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'dd/mm/aaaa',   # guía visual
+            'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
         input_formats=['%d/%m/%Y'],
@@ -107,11 +107,12 @@ class PedidoFormCliente(forms.ModelForm):
             'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
-        input_formats=['%d/%m/%Y', ''],  # permitimos vacío
+        input_formats=['%d/%m/%Y', ''],
         error_messages={
             'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
         }
     )
+
     class Meta:
         model = Pedido
         fields = [
@@ -125,20 +126,26 @@ class PedidoFormCliente(forms.ModelForm):
             'notas',
         ]
         widgets = {
-            'fecha_inicio':  forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
-            'fecha_fin':     forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
-            'empresa':       forms.TextInput(attrs={'class':'form-control'}),
-            'excursion':     forms.TextInput(attrs={'class':'form-control'}),
-            'lugar_entrega': forms.TextInput(attrs={'class':'form-control'}),
-            'lugar_recogida':forms.TextInput(attrs={'class':'form-control'}),
-            'estado_cliente':forms.Select(attrs={'class':'form-select'}),
-            'notas':         forms.Textarea(attrs={'class':'form-control', 'rows':3}),
+            'empresa':        forms.TextInput(attrs={'class':'form-control'}),
+            'excursion':      forms.TextInput(attrs={'class':'form-control'}),
+            'lugar_entrega':  forms.TextInput(attrs={'class':'form-control'}),
+            'lugar_recogida': forms.TextInput(attrs={'class':'form-control'}),
+            'estado_cliente': forms.Select(attrs={'class':'form-select'}),
+            'notas':          forms.Textarea(attrs={'class':'form-control', 'rows':3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Valor por defecto en Estado
         self.fields['estado_cliente'].initial = 'pagado'
+
+        # Si venimos editando, formateamos las fechas iniciales a dd/mm/aaaa
+        if self.instance and self.instance.pk:
+            if self.instance.fecha_inicio:
+                self.initial['fecha_inicio'] = self.instance.fecha_inicio.strftime('%d/%m/%Y')
+            if self.instance.fecha_fin:
+                self.initial['fecha_fin'] = self.instance.fecha_fin.strftime('%d/%m/%Y')
+
 
 class MaletaForm(forms.ModelForm):
     class Meta:
