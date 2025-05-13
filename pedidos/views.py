@@ -193,11 +193,18 @@ def pedidos_lista_view(request):
         'pedidos': pedidos
     })
 # --- CREAR NUEVO PEDIDO (CLIENTE) ---
+
 @login_required
 def pedido_nuevo_cliente_view(request):
+    """
+    Vista para crear un pedido desde el cliente.
+    Si viene ?embed=1 devuelve solo el formulario (para iframe/modal),
+    si no, la página completa.
+    """
+    # 1. Procesar POST
     if request.method == 'POST':
-        form     = PedidoFormCliente(request.POST)
-        formset  = MaletaFormSet(request.POST, prefix='maleta')
+        form = PedidoFormCliente(request.POST)
+        formset = MaletaFormSet(request.POST, prefix='maleta')
 
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
@@ -207,15 +214,28 @@ def pedido_nuevo_cliente_view(request):
             formset.save()
             messages.success(request, '✅ Pedido creado correctamente.')
             return redirect('pedidos:mis_pedidos')
+        else:
+            # Dejamos que el template muestre errores inline
+            messages.error(request, 'Corrige los errores del formulario.')
+    # 2. GET inicial
     else:
-        form    = PedidoFormCliente()
+        form = PedidoFormCliente()
         formset = MaletaFormSet(prefix='maleta')
-        template = (
-        "pedidos/pedido_nuevo_cliente_modal.html"
-        if request.GET.get("embed") == "1"
-        else "pedidos/pedido_nuevo_cliente.html"
-    )
-    return render(request, template, {"form": form, "formset": formset})
+
+    # 3. Selección de plantilla según modo embed
+    if request.GET.get('embed') == '1':
+        template = "pedidos/pedido_nuevo_cliente_modal.html"
+    else:
+        template = "pedidos/pedido_nuevo_cliente.html"
+
+    # 4. Renderizar con el formulario y formset
+    context = {
+        "form": form,
+        "formset": formset,
+    }
+    return render(request, template, context)
+
+
 @login_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
