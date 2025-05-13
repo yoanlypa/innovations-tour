@@ -52,14 +52,13 @@ class PedidoForm(forms.ModelForm):
         model = Pedido
         exclude = ['fecha_creacion']
         fields = [
-            'empresa', 'excursion', 'guia_general', 'lugar_entrega', 'lugar_recogida',
+            'empresa', 'excursion', 'lugar_entrega', 'lugar_recogida',
             'fecha_inicio', 'fecha_fin',
             'estado_cliente', 'estado_equipo', 'notas', 'productos'
         ]
         widgets = {
             'empresa': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la empresa'}),
             'excursion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de la excursión'}),
-            'guia_general': forms.TextInput(attrs={'class': 'form-control'}),
             'lugar_entrega': forms.TextInput(attrs={'class': 'form-control'}),
             'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
             'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
