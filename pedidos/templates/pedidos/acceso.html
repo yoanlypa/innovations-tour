@@ -9,12 +9,19 @@
     --naranja:#f78243;
   }
   /* Fondo general con degradado suave */
- 
+  body{
+    background: linear-gradient(135deg,var(--azul) 0%,var(--naranja) 100%);
+    min-height:100vh;
+      }
+
   /* Tarjeta contenedora */
   .form-card{
     width:100%;
     max-width:480px;
     background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     border-radius:1.25rem;
     padding:2rem 2.25rem;
     box-shadow:0 8px 24px rgb(0 0 0 / .15);
