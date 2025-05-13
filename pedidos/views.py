@@ -355,7 +355,7 @@ def pedido_editar_cliente_view(request, pk):
                     datetime.datetime.combine(pedido.fecha_fin, datetime.time())
                 )
 
-            pedido.save()
+            form.save()
             formset.save()
 
             messages.success(request, '✅ Pedido actualizado correctamente.')
@@ -370,6 +370,7 @@ def pedido_editar_cliente_view(request, pk):
         "form": form,
         "formset": formset,
         "es_edicion": True,
+        "pedido": pedido, 
     })
 
 @require_GET

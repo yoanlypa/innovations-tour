@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-  {% if es_edicion %}Editar pedido · Innovations Tours{% else %}Nuevo pedido · Innovations Tours{% endif %}
+  {% if es_edicion %}Editar pedido{% else %}Nuevo pedido{% endif %} · Innovations Tours
 {% endblock %}
 
 {% block content %}
@@ -11,20 +11,17 @@
     {% if es_edicion %}Editar pedido{% else %}Nuevo pedido{% endif %}
   </h1>
 
-  {# Formulario: action dinámico según modo #}
   <form
     id="pedido-form"
     method="post"
     novalidate
-    {% if es_edicion %}
+    {% if es_edicion and pedido.pk %}
       action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
     {% else %}
       action="{% url 'pedidos:pedido_nuevo_cliente' %}"
     {% endif %}
   >
     {% csrf_token %}
-
-    {# Incluimos el partial con todos los campos y formset #}
     {% include "pedidos/_pedido_form.html" %}
   </form>
 </div>
