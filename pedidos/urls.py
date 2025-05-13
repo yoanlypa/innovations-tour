@@ -15,7 +15,7 @@ urlpatterns = [
 
     # PEDIDOS (nuevo flujo unificado)
     path("", HomeView.as_view(), name="home"),
-    path('', views.pedidos_lista_view, name='pedidos_lista'),
+    path('pedidos/', views.pedidos_lista_view, name='pedidos_lista'),
     path('nuevo/', views.pedido_nuevo_view, name='pedido_nuevo'),
     path('editar/<int:pk>/', views.pedido_editar_view, name='pedido_editar'),
     path('cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
