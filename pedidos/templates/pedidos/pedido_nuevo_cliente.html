@@ -1,8 +1,35 @@
-{% extends "pedidos/base_blank.html" %}
-{% block title %}Nuevo pedido{% endblock %}
+{% extends "pedidos/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if es_edicion %}Editar pedido · Innovations Tours{% else %}Nuevo pedido · Innovations Tours{% endif %}
+{% endblock %}
+
 {% block content %}
 <div class="container my-5">
-  <h1 class="h4 mb-4">Nuevo pedido</h1>
-  {% include "pedidos/_pedido_form.html" %}
+  <h1 class="h4 mb-4 text-center">
+    {% if es_edicion %}Editar pedido{% else %}Nuevo pedido{% endif %}
+  </h1>
+
+  {# Formulario: action dinámico según modo #}
+  <form
+    id="pedido-form"
+    method="post"
+    novalidate
+    {% if es_edicion %}
+      action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
+    {% else %}
+      action="{% url 'pedidos:pedido_nuevo_cliente' %}"
+    {% endif %}
+  >
+    {% csrf_token %}
+
+    {# Incluimos el partial con todos los campos y formset #}
+    {% include "pedidos/_pedido_form.html" %}
+  </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}
