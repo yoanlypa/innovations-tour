@@ -1,0 +1,50 @@
+{% load static %}
+{% extends "base.html" %}
+
+{% block title %}Inicio · Control Radioguías{% endblock %}
+
+{% block content %}
+<!-- ========= HERO ========= -->
+<section class="position-relative">
+    <!-- Imagen de fondo -->
+    <img src="{% static 'pedidos/img/hero_excursion.png' %}"
+         alt="Grupo de turistas con radioguías durante una excursión"
+         class="w-100 object-fit-cover"
+         style="height: 65vh; min-height: 380px;">
+
+    <!-- Cartel flotante -->
+    <div class="position-absolute top-50 start-50 translate-middle
+                text-center text-white p-4 p-md-5 rounded-4 shadow-lg"
+         style="background: rgba(0,0,0,.55); max-width: 28rem;">
+        <h1 class="display-5 fw-bold mb-3">Experiencias que se escuchan</h1>
+        <p class="lead mb-4">
+            Gestiona tus radioguías en un solo lugar.<br>
+            Fácil, rápido y&nbsp;100&nbsp;% online.
+        </p>
+
+        <a href="{% url 'pedidos:acceso' %}"
+           class="btn btn-lg btn-primary">
+           🚀 Empezar ahora
+        </a>
+    </div>
+</section>
+
+<!-- ========= SECCIÓN “¿CÓMO FUNCIONA?”  (opcional) ========= -->
+<section class="container my-5">
+    <h2 class="h4 mb-4 text-uppercase">¿Cómo funciona?</h2>
+    <div class="row gx-5 text-start">
+        <div class="col-md-4 mb-4">
+            <h3 class="h6 fw-bold">1 · Regístrate</h3>
+            <p>Crea tu cuenta en menos de un minuto.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h3 class="h6 fw-bold">2 · Solicita tu pedido</h3>
+            <p>Indica fechas y cantidad de maletas necesarias.</p>
+        </div>
+        <div class="col-md-4 mb-4">
+            <h3 class="h6 fw-bold">3 · Disfruta la excursión</h3>
+            <p>Haz seguimiento y recibe confirmaciones en tu panel.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
