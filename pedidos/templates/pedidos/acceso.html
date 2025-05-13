@@ -19,9 +19,6 @@
     width:100%;
     max-width:480px;
     background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
     border-radius:1.25rem;
     padding:2rem 2.25rem;
     box-shadow:0 8px 24px rgb(0 0 0 / .15);
@@ -56,8 +53,9 @@
   }
   
 </style>
+<div class="d-flex justify-content-center align-items-center min-vh-100 login-bg">
 
-<div class="form-card">
+    <div class="form_card card shadow-lg p-4 p-md-5" style="max-width: 420px; width: 100%;">
   {% if login_form.errors or register_form.errors %}
     <div class="alert alert-danger">Por favor revisa los errores en el formulario.</div>
   {% endif %}
