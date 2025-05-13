@@ -105,7 +105,7 @@ class PedidoFormCliente(forms.ModelForm):
             'excursion':     forms.TextInput(attrs={'class':'form-control'}),
             'lugar_entrega': forms.TextInput(attrs={'class':'form-control'}),
             'lugar_recogida':forms.TextInput(attrs={'class':'form-control'}),
-            'estado_cliente':forms.Select(attrs={'class':'form-control'}),
+            'estado_cliente':forms.Select(attrs={'class':'form-select'}),
             'notas':         forms.Textarea(attrs={'class':'form-control', 'rows':3}),
         }
 

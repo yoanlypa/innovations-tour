@@ -1,37 +1,40 @@
+// staticfiles/pedidos/js/pedido_form.js
+
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('#form-pedido');
-    if (!form) return;
-  
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      const resp = await fetch(form.action, {
-        method: 'POST',
-        body: data,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-          'X-CSRFToken': data.get('csrfmiddlewaretoken'),
-        }
-      });
-  
-      if (resp.ok) {
-        const json = await resp.json();
-        if (json.success) {
-          alert('✅ Pedido registrado satisfactoriamente.');
-          window.location.href = json.redirect_url;
-        } else {
-          alert('❌ Hubo errores en el formulario. Revisa los campos.');
-        }
-      } else {
-        alert('❌ Error inesperado al enviar el formulario.');
-      }
+  const form = document.getElementById('pedido-form');
+  if (!form) return;
+
+  // —— 0. Scroll a primer error si lo hay —— 
+  const firstError = document.querySelector('.invalid-feedback, .alert-danger');
+  if (firstError) {
+    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // —— 1. Flatpickr en campos de fecha —— 
+  if (window.flatpickr) {
+    flatpickr("#id_fecha_inicio", {
+      locale: "es",
+      dateFormat: "d/m/Y",
+      allowInput: true,
+      altInput: true,
+      altFormat: "d/m/Y",
+      ariaDateFormat: "Y-m-d"
     });
-    
-  // —— 1. Autofocus en primer campo —— 
+    flatpickr("#id_fecha_fin", {
+      locale: "es",
+      dateFormat: "d/m/Y",
+      allowInput: true,
+      altInput: true,
+      altFormat: "d/m/Y",
+      ariaDateFormat: "Y-m-d"
+    });
+  }
+
+  // —— 2. Autofocus en primer campo —— 
   const firstInput = form.querySelector('input:not([type="hidden"]), select, textarea');
   if (firstInput) firstInput.focus();
 
-  // —— 2. Spinner al enviar —— 
+  // —— 3. Spinner al enviar —— 
   form.addEventListener('submit', () => {
     const btn = form.querySelector('button[type="submit"]');
     if (btn) {
@@ -43,13 +46,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // —— 3. Dinámica de formulario de maletas —— 
+  // —— 4. Dinámica de maletas —— 
+  // 4.1. Buscar el input de TOTAL_FORMS
+  const totalInp = form.querySelector('input[name$="-TOTAL_FORMS"]');
   const cont = document.getElementById('maletas-container');
-  const totalInp = document.getElementById('id_maleta-TOTAL_FORMS');
   const addBtn = document.getElementById('add-maleta');
-  const prefix = 'maleta';
 
-  // HTML plantilla para nueva maleta
+  if (!totalInp || !cont || !addBtn) {
+    console.warn('Formset de maletas no se encontró correctamente.');
+    return;
+  }
+
+  // 4.2. Derivar automáticamente el prefix: todo antes de "-TOTAL_FORMS"
+  const prefix = totalInp.name.replace('-TOTAL_FORMS', '');
+
+  // 4.3. Plantilla para nueva maleta
   const templateHTML = idx => `
     <div class="card mb-3 p-3 position-relative">
       <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-maleta"
@@ -82,26 +93,25 @@ document.addEventListener('DOMContentLoaded', () => {
              hidden>
     </div>`;
 
-  // Añade la primera maleta si no hay ninguna
+  // 4.4. Si no hay maletas al inicio, añadir una
   if (parseInt(totalInp.value, 10) === 0) {
     cont.insertAdjacentHTML('beforeend', templateHTML(0));
     totalInp.value = 1;
   }
 
-  // Click en “Añadir maleta”
+  // 4.5. Al hacer clic en “Añadir maleta”
   addBtn.addEventListener('click', () => {
     const idx = parseInt(totalInp.value, 10);
     cont.insertAdjacentHTML('beforeend', templateHTML(idx));
     totalInp.value = idx + 1;
   });
 
-  // Botón para eliminar maleta
+  // 4.6. Manejar eliminación de maleta
   cont.addEventListener('click', e => {
     if (!e.target.classList.contains('eliminar-maleta')) return;
     const box = e.target.closest('.card');
     const del = box.querySelector('input[type="checkbox"]');
-    del.checked = true;
-    box.remove();  // quitamos del DOM
+    if (del) del.checked = true;
+    box.remove();
   });
 });
-  
