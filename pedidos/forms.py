@@ -87,29 +87,33 @@ class PedidoForm(forms.ModelForm):
 
 class PedidoFormCliente(forms.ModelForm):
     class Meta:
-        model  = Pedido
+        model = Pedido
         fields = [
-            'fecha_inicio', 'fecha_fin',
-            'empresa', 'excursion',
-            'lugar_entrega', 'lugar_recogida',
-            'notas', 'estado_cliente'
-
+            'fecha_inicio',
+            'fecha_fin',
+            'empresa',
+            'excursion',
+            'lugar_entrega',
+            'lugar_recogida',
+            'estado_cliente',
+            'notas',
         ]
         widgets = {
-            'fecha_inicio': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'fecha_fin':    forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'empresa':      forms.TextInput(attrs={'class': 'form-control'}),
-            'excursion':    forms.TextInput(attrs={'class': 'form-control'}),
-            'lugar_entrega': forms.TextInput(attrs={'class': 'form-control'}),
-            'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
-            'notas':        forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            'estado_cliente': forms.Select(attrs={'class': 'form-select'}),
+            'fecha_inicio':  forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'fecha_fin':     forms.DateInput(attrs={'class':'form-control', 'type':'date'}),
+            'empresa':       forms.TextInput(attrs={'class':'form-control'}),
+            'excursion':     forms.TextInput(attrs={'class':'form-control'}),
+            'lugar_entrega': forms.TextInput(attrs={'class':'form-control'}),
+            'lugar_recogida':forms.TextInput(attrs={'class':'form-control'}),
+            'estado_cliente':forms.Select(attrs={'class':'form-control'}),
+            'notas':         forms.Textarea(attrs={'class':'form-control', 'rows':3}),
         }
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si quisieras asegurarte que todos los campos usen form-control:
-        for field in self.fields.values():
-            field.widget.attrs.setdefault("class", "form-control")
+        # Valor por defecto en Estado
+        self.fields['estado_cliente'].initial = 'pagado'
+
 
 class MaletaForm(forms.ModelForm):
     class Meta:

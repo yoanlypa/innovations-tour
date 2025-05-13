@@ -10,7 +10,7 @@
     </div>
   {% endif %}
 
-  {# —— campos principales —— #}
+  {# —— filas para fechas —— #}
   <div class="row">
     <div class="col-md-6 mb-3">
       <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
@@ -36,26 +36,81 @@
     </div>
   </div>
 
-  <div class="mb-3">
-    <label for="{{ form.empresa.id_for_label }}" class="form-label">
-      Empresa <span class="text-danger">*</span>
-    </label>
-    {{ form.empresa }}
-    {% if form.empresa.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.empresa.errors.0 }}
-      </div>
-    {% endif %}
+  {# —— fila para empresa, excursión y estado —— #}
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label for="{{ form.empresa.id_for_label }}" class="form-label">
+        Empresa <span class="text-danger">*</span>
+      </label>
+      {{ form.empresa }}
+      {% if form.empresa.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.empresa.errors.0 }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-md-4 mb-3">
+      <label for="{{ form.excursion.id_for_label }}" class="form-label">
+        Excursión
+      </label>
+      {{ form.excursion }}
+      {% if form.excursion.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.excursion.errors.0 }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-md-4 mb-3">
+      <label for="{{ form.estado_cliente.id_for_label }}" class="form-label">
+        Estado <span class="text-danger">*</span>
+      </label>
+      {{ form.estado_cliente }}
+      <small class="form-text text-muted">
+        Si el pedido aún no ha sido pagado, selecciona “Pendiente”.
+      </small>
+      {% if form.estado_cliente.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.estado_cliente.errors.0 }}
+        </div>
+      {% endif %}
+    </div>
   </div>
 
+  {# —— fila para lugares de entrega y recogida —— #}
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="{{ form.lugar_entrega.id_for_label }}" class="form-label">
+        Lugar de entrega
+      </label>
+      {{ form.lugar_entrega }}
+      {% if form.lugar_entrega.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.lugar_entrega.errors.0 }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="{{ form.lugar_recogida.id_for_label }}" class="form-label">
+        Lugar de recogida
+      </label>
+      {{ form.lugar_recogida }}
+      {% if form.lugar_recogida.errors %}
+        <div class="invalid-feedback d-block">
+          {{ form.lugar_recogida.errors.0 }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# —— campo notas —— #}
   <div class="mb-3">
-    <label for="{{ form.excursion.id_for_label }}" class="form-label">
-      Excursión
+    <label for="{{ form.notas.id_for_label }}" class="form-label">
+      Notas
     </label>
-    {{ form.excursion }}
-    {% if form.excursion.errors %}
+    {{ form.notas }}
+    {% if form.notas.errors %}
       <div class="invalid-feedback d-block">
-        {{ form.excursion.errors.0 }}
+        {{ form.notas.errors.0 }}
       </div>
     {% endif %}
   </div>
@@ -104,13 +159,12 @@
   </div>
 
   <div class="text-center mb-4">
-    <button type="button" id="add-maleta"
-            class="btn btn-outline-secondary">
+    <button type="button" id="add-maleta" class="btn btn-outline-secondary">
       + Añadir maleta
     </button>
   </div>
 
-  {# —— botón submit —— #}
+  {# —— botón de envío —— #}
   <div class="text-center">
     <button type="submit" class="btn btn-primary px-5">
       {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
@@ -118,5 +172,4 @@
   </div>
 </form>
 
-{# punto de inserción para scripts; tu pedido_form.js se cargará en base.html/base_blank.html #}
 {% block scripts %}{% endblock %}
