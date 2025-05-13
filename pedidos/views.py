@@ -210,12 +210,12 @@ def pedido_nuevo_cliente_view(request):
     else:
         form    = PedidoFormCliente()
         formset = MaletaFormSet(prefix='maleta')
-
-    return render(
-        request,
-        'pedidos/pedido_nuevo_cliente.html',
-        {'form': form, 'formset': formset}
+        template = (
+        "pedidos/pedido_nuevo_cliente_modal.html"
+        if request.GET.get("embed") == "1"
+        else "pedidos/pedido_nuevo_cliente.html"
     )
+    return render(request, template, {"form": form, "formset": formset})
 @login_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
