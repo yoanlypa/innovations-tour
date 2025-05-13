@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RadioGuias Manager</title>
+    <meta name="description" content="Gestión de pedidos y tareas para radioguías.">
+    <meta name="author" content="Yoanly">
     <style>
         :root {
             --primary: #2c3e50;
@@ -71,7 +73,6 @@
     <nav class="nav">
         <a href="{% url 'pedidos:lista_pedidos' %}">Pedidos</a>
         <a href="{% url 'pedidos:calendario' %}">Ver Calendario</a> 
-        <a href="{% url 'pedidos:control_stock' %}">📊 Stock</a>
         <a href="{% url 'pedidos:tareas' %}">✅ Tareas</a>
     </nav>
     

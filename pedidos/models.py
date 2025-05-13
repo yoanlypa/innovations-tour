@@ -32,7 +32,6 @@ class Pedido(models.Model):
 
     empresa        = models.CharField("Empresa", max_length=100)
     excursion      = models.CharField("Excursión", max_length=255, blank=True, null=True)
-    guia_general   = models.CharField("Guía general", max_length=100, default='Sin asignar')
     lugar_entrega  = models.CharField("Lugar entrega", max_length=100, blank=True, default='')
     lugar_recogida = models.CharField("Lugar recogida", max_length=100, blank=True, default='')
     notas          = models.TextField("Notas", blank=True)
