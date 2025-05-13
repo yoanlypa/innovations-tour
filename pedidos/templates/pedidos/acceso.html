@@ -99,7 +99,7 @@
     <form method="post" action="{% url 'pedidos:acceso' %}">
       {% csrf_token %}
       {{ login_form.as_p }}
-      <input type="hidden" name="mode" value="login">
+      <input type="hidden" name="next" value="{{ request.GET.next }}">
       <button class="btn btn-primary w-100">Ingresar</button>
     </form>
     <div class="form-footer">

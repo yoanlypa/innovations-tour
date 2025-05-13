@@ -10,7 +10,7 @@ from django.http import JsonResponse, HttpResponse, Http404
 from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
 
 from .models import Tarea, Pedido, Producto, RegistroCliente, Maleta
 from .forms import TareaForm, ProductoForm, PedidoForm, PedidoFormCliente, MaletaFormSet, CustomRegisterForm, CustomLoginForm
@@ -30,8 +30,18 @@ class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     def test_func(self):
         return self.request.user.is_staff 
 
-
-
+class HomeView(TemplateView):
+    """
+    Portada pública: sólo muestra la landing.
+    No redirigimos aunque el usuario esté logueado; así puede volver
+    a la home si quiere. Si prefieres redirigir, dímelo y cambiamos dispatch().
+    """
+    template_name = "pedidos/home.html"
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect('pedidos:pedidos_lista' if request.user.is_staff
+                            else 'pedidos:mis_pedidos')
+        return super().dispatch(request, *args, **kwargs)
 #
 # 
 # 
@@ -132,30 +142,32 @@ def acceso_view(request):
             login_form = CustomLoginForm(request, data=request.POST)
             if login_form.is_valid():
                 login(request, login_form.get_user())
-                # A dónde redirigimos según permisos
-                if request.user.is_staff:
-                    return redirect('pedidos:pedidos_lista')   # vista staff
-                return redirect('pedidos:mis_pedidos')         # vista cliente
+
+                next_url = request.POST.get('next') or request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+
+                return redirect('pedidos:pedidos_lista' if request.user.is_staff
+                                else 'pedidos:mis_pedidos')
             messages.error(request, 'Credenciales inválidas.')
+    # ---------- REGISTRO ----------
+    elif mode == 'register':
+        register_form = CustomRegisterForm(request.POST)
+        if register_form.is_valid():
+            user = register_form.save()
+            RegistroCliente.objects.create(
+                nombre_usuario=user.username,
+                email=user.email
+            )
+            login(request, user)
+            return redirect('pedidos:mis_pedidos')
+        messages.error(request, 'Corrige los errores del formulario.')
 
-        # ---------- REGISTRO ----------
-        elif mode == 'register':
-            register_form = CustomRegisterForm(request.POST)
-            if register_form.is_valid():
-                user = register_form.save()
-                RegistroCliente.objects.create(
-                    nombre_usuario=user.username,
-                    email=user.email
-                )
-                login(request, user)
-                return redirect('pedidos:mis_pedidos')
-            messages.error(request, 'Corrige los errores del formulario.')
-
-        # ---------- RESET ----------
-        elif mode == 'reset':
-            email = request.POST.get('email')
-            # … lógica de envío de enlace (omitida aquí) …
-            messages.success(request, 'Te enviamos un enlace a tu correo.')
+    # ---------- RESET ----------
+    elif mode == 'reset':
+        email = request.POST.get('email')
+        # … lógica de envío de enlace (omitida aquí) …
+        messages.success(request, 'Te enviamos un enlace a tu correo.')
 
     context = {
         'login_form': login_form,

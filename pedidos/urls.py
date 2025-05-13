@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
 from . import views
-from .views import logout_view, acceso_view, pedido_nuevo_cliente_view, pedido_editar_cliente_view  # Import the missing views
+from .views import logout_view, acceso_view, pedido_nuevo_cliente_view, pedido_editar_cliente_view, HomeView  # Import the missing views
 
 app_name = 'pedidos'
 
@@ -14,9 +14,8 @@ urlpatterns = [
     path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado_tarea'),
 
     # PEDIDOS (nuevo flujo unificado)
+    path("", HomeView.as_view(), name="home"),
     path('', views.pedidos_lista_view, name='pedidos_lista'),
-    path('acceso/', views.acceso_view, name='acceso'),  # ya lo tienes
-    path('', views.acceso_view), 
     path('nuevo/', views.pedido_nuevo_view, name='pedido_nuevo'),
     path('editar/<int:pk>/', views.pedido_editar_view, name='pedido_editar'),
     path('cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
@@ -25,8 +24,8 @@ urlpatterns = [
      path('mis-pedidos/editar/<int:pk>/', pedido_editar_cliente_view,
          name='pedido_editar_cliente'),
     # LOGIN / REGISTRO
-    path('acceso/', views.acceso_view, name='acceso'),
-    path('logout/', views.logout_view, name='logout'),
+    path("acceso/", views.acceso_view, name="acceso"),
+    path("logout/", views.logout_view, name="logout"),
 
     # PASSWORD RESET
     path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
