@@ -1,4 +1,6 @@
 {% extends "pedidos/base_blank.html" %}
+{% load static %}
+
 {% block title %}Nuevo pedido · Innovations Tours{% endblock %}
 
 {% block content %}
@@ -14,4 +16,8 @@
     {% include "pedidos/_pedido_form.html" %}
   </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}
