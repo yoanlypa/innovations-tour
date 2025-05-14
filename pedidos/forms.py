@@ -87,6 +87,7 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 
+
 class PedidoFormCliente(forms.ModelForm):
     fecha_inicio = forms.DateField(
         required=True,
@@ -95,9 +96,10 @@ class PedidoFormCliente(forms.ModelForm):
             'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
-        input_formats=['%d/%m/%Y'],
+        # Ahora acepta tanto dd/mm/aaaa como YYYY-MM-DD
+        input_formats=['%d/%m/%Y', '%Y-%m-%d'],
         error_messages={
-            'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
+            'invalid': 'Introduce una fecha válida (dd/mm/aaaa)',
             'required': 'Este campo es obligatorio',
         },
     )
@@ -108,9 +110,9 @@ class PedidoFormCliente(forms.ModelForm):
             'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
-        input_formats=['%d/%m/%Y', ''],
+        input_formats=['%d/%m/%Y', '%Y-%m-%d', ''],
         error_messages={
-            'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
+            'invalid': 'Introduce una fecha válida (dd/mm/aaaa)',
         },
     )
 
@@ -133,10 +135,9 @@ class PedidoFormCliente(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Por defecto, estado “pagado”
         self.fields['estado_cliente'].initial = 'pagado'
 
-        # Si editamos, forzamos la fecha en la zona local y sacamos solo la parte de fecha
+        # Al editar, mostramos la parte de fecha en dd/mm/aaaa
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
                 local_inicio = timezone.localtime(self.instance.fecha_inicio)
