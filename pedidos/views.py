@@ -18,7 +18,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from .serializers import PedidoSerializer
 import csv
-from datetime import datetime
+from datetime import datetime,time
 from django.utils import timezone
 from django.contrib.auth.forms import AuthenticationForm as LoginForm
 from .forms import RegistroForm
@@ -192,6 +192,52 @@ def pedidos_lista_view(request):
     return render(request, 'pedidos/pedidos_lista.html', {
         'pedidos': pedidos
     })
+# --- EDITAR PEDIDO (CLIENTE) ---
+@login_required
+def pedido_editar_cliente_view(request, pk):
+    """
+    Editar un pedido del cliente. Convierte las fechas y guarda correctamente.
+    """
+    pedido = get_object_or_404(Pedido, pk=pk)
+    if pedido.usuario != request.user:
+        raise Http404()
+
+    if request.method == 'POST':
+        form = PedidoFormCliente(request.POST, instance=pedido)
+        formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
+
+        if form.is_valid() and formset.is_valid():
+            # Guardar sin commit para ajustar fechas
+            pedido = form.save(commit=False)
+
+            # Convertir a datetime aware
+            if pedido.fecha_inicio:
+                pedido.fecha_inicio = timezone.make_aware(
+                    datetime.combine(pedido.fecha_inicio, time())
+                )
+            if pedido.fecha_fin:
+                pedido.fecha_fin = timezone.make_aware(
+                    datetime.combine(pedido.fecha_fin, time())
+                )
+
+            form.save()
+            formset.save()
+
+            messages.success(request, '✅ Pedido actualizado correctamente.')
+            return redirect('pedidos:mis_pedidos')
+        else:
+            messages.error(request, 'Corrige los errores del formulario.')
+    else:
+        form = PedidoFormCliente(instance=pedido)
+        formset = MaletaFormSet(instance=pedido, prefix='maleta')
+
+    return render(request, 'pedidos/pedido_nuevo_cliente.html', {
+        "form": form,
+        "formset": formset,
+        "es_edicion": True,
+        "pedido": pedido, 
+    })
+
 # --- CREAR NUEVO PEDIDO (CLIENTE) ---
 
 @login_required
@@ -211,11 +257,11 @@ def pedido_nuevo_cliente_view(request):
             # ② Convertir a datetime aware
             if pedido.fecha_inicio:
                 pedido.fecha_inicio = timezone.make_aware(
-                    datetime.datetime.combine(pedido.fecha_inicio, datetime.time())
+                    datetime.combine(pedido.fecha_inicio, time())
                 )
             if pedido.fecha_fin:
                 pedido.fecha_fin = timezone.make_aware(
-                    datetime.datetime.combine(pedido.fecha_fin, datetime.time())
+                    datetime.combine(pedido.fecha_fin, time())
                 )
 
             pedido.usuario = request.user
@@ -327,50 +373,6 @@ def pedido_editar_view(request, pk):
         'pedido': pedido
     })
 
-@login_required
-def pedido_editar_cliente_view(request, pk):
-    """
-    Editar un pedido del cliente. Convierte las fechas y guarda correctamente.
-    """
-    pedido = get_object_or_404(Pedido, pk=pk)
-    if pedido.usuario != request.user:
-        raise Http404()
-
-    if request.method == 'POST':
-        form = PedidoFormCliente(request.POST, instance=pedido)
-        formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
-
-        if form.is_valid() and formset.is_valid():
-            # Guardar sin commit para ajustar fechas
-            pedido = form.save(commit=False)
-
-            # Convertir a datetime aware
-            if pedido.fecha_inicio:
-                pedido.fecha_inicio = timezone.make_aware(
-                    datetime.combine(pedido.fecha_inicio, datetime.time())
-                )
-            if pedido.fecha_fin:
-                pedido.fecha_fin = timezone.make_aware(
-                    datetime.combine(pedido.fecha_fin, datetime.time())
-                )
-
-            form.save()
-            formset.save()
-
-            messages.success(request, '✅ Pedido actualizado correctamente.')
-            return redirect('pedidos:mis_pedidos')
-        else:
-            messages.error(request, 'Corrige los errores del formulario.')
-    else:
-        form = PedidoFormCliente(instance=pedido)
-        formset = MaletaFormSet(instance=pedido, prefix='maleta')
-
-    return render(request, 'pedidos/pedido_nuevo_cliente.html', {
-        "form": form,
-        "formset": formset,
-        "es_edicion": True,
-        "pedido": pedido, 
-    })
 
 @require_GET
 @staff_member_required
