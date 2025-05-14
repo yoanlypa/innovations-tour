@@ -6,6 +6,7 @@ from .utils import convertir_fecha
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.utils import timezone
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Usuario'}))
@@ -132,17 +133,19 @@ class PedidoFormCliente(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Por defecto, estado “pagado”
         self.fields['estado_cliente'].initial = 'pagado'
 
-        # Al editar, sacamos la fecha sin desfase de zona
+        # Si editamos, forzamos la fecha en la zona local y sacamos solo la parte de fecha
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
-                date = self.instance.fecha_inicio.date()
-                self.initial['fecha_inicio'] = date.strftime('%d/%m/%Y')
+                local_inicio = timezone.localtime(self.instance.fecha_inicio)
+                self.initial['fecha_inicio'] = local_inicio.strftime('%d/%m/%Y')
             if self.instance.fecha_fin:
-                date = self.instance.fecha_fin.date()
-                self.initial['fecha_fin'] = date.strftime('%d/%m/%Y')
-                
+                local_fin = timezone.localtime(self.instance.fecha_fin)
+                self.initial['fecha_fin'] = local_fin.strftime('%d/%m/%Y')
+
+
 MaletaFormSet = inlineformset_factory(
     Pedido,
     Maleta,
