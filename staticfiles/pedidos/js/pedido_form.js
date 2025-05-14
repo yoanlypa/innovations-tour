@@ -1,5 +1,4 @@
 // staticfiles/pedidos/js/pedido_form.js
-
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('pedido-form');
   if (!form) return;
@@ -9,20 +8,20 @@ document.addEventListener('DOMContentLoaded', () => {
     flatpickr.localize(flatpickr.l10ns.es);
   }
 
-  // 2) Inicializar Flatpickr en los inputs de fecha
+  // 2) Inicializar Flatpickr: value=ISO, visible=dd/mm/YYYY
   ["fecha_inicio", "fecha_fin"].forEach(id => {
     const el = document.getElementById(`id_${id}`);
     if (el) {
       flatpickr(el, {
-        dateFormat: "d/m/Y",
-        altInput: true,
-        altFormat: "d/m/Y",
+        dateFormat: "Y-m-d",      // formato que se envía al servidor
+        altInput: true,           // elemento visible aparte
+        altFormat: "d/m/Y",       // formato que ve el usuario
         allowInput: true
       });
     }
   });
 
-  // 3) Autofocus en el primer campo
+  // 3) Autofocus en primer campo
   const first = form.querySelector('input:not([type="hidden"]), select, textarea');
   if (first) first.focus();
 
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5) Dinámica de maletas (un solo listener)
+  // 5) Dinámica de maletas
   const totalInp = form.querySelector('input[name$="-TOTAL_FORMS"]');
   const cont     = document.getElementById('maletas-container');
   const addBtn   = document.getElementById('add-maleta');
@@ -69,14 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
     totalInp.value = 1;
   }
 
-  // Evento click “Añadir maleta”
+  // Añadir nuevas maletas
   addBtn.onclick = () => {
     const idx = parseInt(totalInp.value, 10);
     cont.insertAdjacentHTML('beforeend', plantilla(idx));
     totalInp.value = idx + 1;
   };
 
-  // Evento click “Eliminar maleta”
+  // Eliminar maleta
   cont.onclick = e => {
     if (!e.target.classList.contains('eliminar-maleta')) return;
     const card = e.target.closest('.card');
