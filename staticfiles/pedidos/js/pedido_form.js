@@ -3,25 +3,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('pedido-form');
   if (!form) return;
 
-  // 1) Localizar Flatpickr en español
+  // 1) Cargar locale ES si existe
   if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.es) {
     flatpickr.localize(flatpickr.l10ns.es);
   }
 
-  // 2) Inicializar Flatpickr: value=ISO, visible=dd/mm/YYYY
+  // 2) Inicializar Flatpickr SIN altInput, mostrando dd/mm/YYYY
   ["fecha_inicio", "fecha_fin"].forEach(id => {
     const el = document.getElementById(`id_${id}`);
-    if (el) {
-      flatpickr(el, {
-        dateFormat: "Y-m-d",      // formato que se envía al servidor
-        altInput: true,           // elemento visible aparte
-        altFormat: "d/m/Y",       // formato que ve el usuario
-        allowInput: true
-      });
-    }
+    if (!el) return;
+    flatpickr(el, {
+      dateFormat: "d/m/Y",    // formato que ve el usuario y se envía
+      allowInput: true,
+      wrap: false
+    });
   });
 
-  // 3) Autofocus en primer campo
+  // 3) Autofocus
   const first = form.querySelector('input:not([type="hidden"]), select, textarea');
   if (first) first.focus();
 
@@ -37,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5) Dinámica de maletas
+  // 5) Dinámica del formset de maletas
   const totalInp = form.querySelector('input[name$="-TOTAL_FORMS"]');
   const cont     = document.getElementById('maletas-container');
   const addBtn   = document.getElementById('add-maleta');
   if (!totalInp || !cont || !addBtn) return;
 
   const prefix = totalInp.name.replace('-TOTAL_FORMS', '');
-  const plantilla = idx => `
+  const tpl = idx => `
     <div class="card mb-3 p-3 position-relative">
       <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-maleta"></button>
       <div class="row g-3">
@@ -62,16 +60,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <input type="checkbox" name="${prefix}-${idx}-DELETE" id="id_${prefix}-${idx}-DELETE" hidden>
     </div>`;
 
-  // Añadir la primera maleta si TOTAL_FORMS=0
+  // Si no hay maletas, creamos una sola
   if (parseInt(totalInp.value, 10) === 0) {
-    cont.insertAdjacentHTML('beforeend', plantilla(0));
+    cont.insertAdjacentHTML('beforeend', tpl(0));
     totalInp.value = 1;
   }
 
-  // Añadir nuevas maletas
+  // Añadir maleta de uno en uno
   addBtn.onclick = () => {
     const idx = parseInt(totalInp.value, 10);
-    cont.insertAdjacentHTML('beforeend', plantilla(idx));
+    cont.insertAdjacentHTML('beforeend', tpl(idx));
     totalInp.value = idx + 1;
   };
 
