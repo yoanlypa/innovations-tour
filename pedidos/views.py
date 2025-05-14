@@ -198,6 +198,7 @@ def pedidos_lista_view(request):
 from .forms import PedidoFormCliente, MaletaFormSet
 from .models import Pedido
 
+
 @login_required
 def pedido_nuevo_cliente_view(request):
     if request.method == "POST":

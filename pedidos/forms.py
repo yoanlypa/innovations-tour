@@ -90,7 +90,6 @@ class PedidoForm(forms.ModelForm):
 
 
 from .models import Pedido, Maleta
-
 class PedidoFormCliente(forms.ModelForm):
     # Campos de fecha siguen siendo DateField (reciben date)
     fecha_inicio = forms.DateField(
