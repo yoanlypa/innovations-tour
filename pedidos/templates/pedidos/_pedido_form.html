@@ -1,175 +1,164 @@
 {% load static %}
 {# templates/pedidos/_pedido_form.html #}
-<form id="pedido-form" method="post" novalidate>
-  {% csrf_token %}
+{# ✂️ Aquí NO debe haber etiqueta <form> ✂️ #}
 
-  {# —— errores globales —— #}
-  {% if form.non_field_errors %}
-    <div class="alert alert-danger">
-      {{ form.non_field_errors }}
-    </div>
-  {% endif %}
-
-  {# —— filas para fechas —— #}
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
-        Fecha de inicio <span class="text-danger">*</span>
-      </label>
-      {{ form.fecha_inicio }}
-      {% if form.fecha_inicio.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.fecha_inicio.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-    <div class="col-md-6 mb-3">
-      <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">
-        Fecha fin
-      </label>
-      {{ form.fecha_fin }}
-      {% if form.fecha_fin.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.fecha_fin.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
+{# —— errores globales —— #}
+{% if form.non_field_errors %}
+  <div class="alert alert-danger">
+    {{ form.non_field_errors }}
   </div>
+{% endif %}
 
-  {# —— fila para empresa, excursión y estado —— #}
-  <div class="row">
-    <div class="col-md-4 mb-3">
-      <label for="{{ form.empresa.id_for_label }}" class="form-label">
-        Empresa <span class="text-danger">*</span>
-      </label>
-      {{ form.empresa }}
-      {% if form.empresa.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.empresa.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-    <div class="col-md-4 mb-3">
-      <label for="{{ form.excursion.id_for_label }}" class="form-label">
-        Excursión
-      </label>
-      {{ form.excursion }}
-      {% if form.excursion.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.excursion.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-    <div class="col-md-4 mb-3">
-      <label for="{{ form.estado_cliente.id_for_label }}" class="form-label">
-        Estado <span class="text-danger">*</span>
-      </label>
-      {{ form.estado_cliente }}
-      <small class="form-text text-muted">
-        Si el pedido aún no ha sido pagado, selecciona “Pendiente”.
-      </small>
-      {% if form.estado_cliente.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.estado_cliente.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  {# —— fila para lugares de entrega y recogida —— #}
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <label for="{{ form.lugar_entrega.id_for_label }}" class="form-label">
-        Lugar de entrega
-      </label>
-      {{ form.lugar_entrega }}
-      {% if form.lugar_entrega.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.lugar_entrega.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-    <div class="col-md-6 mb-3">
-      <label for="{{ form.lugar_recogida.id_for_label }}" class="form-label">
-        Lugar de recogida
-      </label>
-      {{ form.lugar_recogida }}
-      {% if form.lugar_recogida.errors %}
-        <div class="invalid-feedback d-block">
-          {{ form.lugar_recogida.errors.0 }}
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  {# —— campo notas —— #}
-  <div class="mb-3">
-    <label for="{{ form.notas.id_for_label }}" class="form-label">
-      Notas
+{# —— fecha de inicio + fecha fin —— #}
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
+      Fecha de inicio <span class="text-danger">*</span>
     </label>
-    {{ form.notas }}
-    {% if form.notas.errors %}
+    {{ form.fecha_inicio }}
+    {% if form.fecha_inicio.errors %}
       <div class="invalid-feedback d-block">
-        {{ form.notas.errors.0 }}
+        {{ form.fecha_inicio.errors.0 }}
       </div>
     {% endif %}
   </div>
-
-  {# —— sección de maletas —— #}
-  <h5 class="mt-4 mb-3">Maletas</h5>
-  {{ formset.management_form }}
-  <div id="maletas-container">
-    {% for mf in formset %}
-      <div class="card mb-3 p-3 position-relative">
-        <button type="button"
-                class="btn-close position-absolute top-0 end-0 eliminar-maleta"
-                aria-label="Eliminar maleta"></button>
-
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label for="{{ mf.guia.id_for_label }}" class="form-label">
-              Guía <span class="text-danger">*</span>
-            </label>
-            {{ mf.guia }}
-            {% if mf.guia.errors %}
-              <div class="invalid-feedback d-block">
-                {{ mf.guia.errors.0 }}
-              </div>
-            {% endif %}
-          </div>
-          <div class="col-md-6">
-            <label for="{{ mf.cantidad_pax.id_for_label }}" class="form-label">
-              Cantidad de Pax <span class="text-danger">*</span>
-            </label>
-            {{ mf.cantidad_pax }}
-            {% if mf.cantidad_pax.errors %}
-              <div class="invalid-feedback d-block">
-                {{ mf.cantidad_pax.errors.0 }}
-              </div>
-            {% endif %}
-          </div>
-        </div>
-
-        <input type="checkbox"
-               name="{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
-               id="id_{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
-               hidden>
+  <div class="col-md-6 mb-3">
+    <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">
+      Fecha fin
+    </label>
+    {{ form.fecha_fin }}
+    {% if form.fecha_fin.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.fecha_fin.errors.0 }}
       </div>
-    {% endfor %}
+    {% endif %}
   </div>
+</div>
 
-  <div class="text-center mb-4">
-    <button type="button" id="add-maleta" class="btn btn-outline-secondary">
-      + Añadir maleta
-    </button>
+{# —— empresa, excursión, estado —— #}
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.empresa.id_for_label }}" class="form-label">
+      Empresa <span class="text-danger">*</span>
+    </label>
+    {{ form.empresa }}
+    {% if form.empresa.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.empresa.errors.0 }}
+      </div>
+    {% endif %}
   </div>
-
-  {# —— botón de envío —— #}
-  <div class="text-center">
-    <button type="submit" class="btn btn-primary px-5">
-      {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
-    </button>
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.excursion.id_for_label }}" class="form-label">
+      Excursión
+    </label>
+    {{ form.excursion }}
+    {% if form.excursion.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.excursion.errors.0 }}
+      </div>
+    {% endif %}
   </div>
-</form>
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.estado_cliente.id_for_label }}" class="form-label">
+      Estado <span class="text-danger">*</span>
+    </label>
+    {{ form.estado_cliente }}
+    <small class="form-text text-muted">
+      Si no ha pagado, elige “Pendiente”.
+    </small>
+    {% if form.estado_cliente.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.estado_cliente.errors.0 }}
+      </div>
+    {% endif %}
+  </div>
+</div>
 
-{% block scripts %}{% endblock %}
+{# —— lugares —— #}
+<div class="row">
+  <div class="col-md-6 mb-3">
+    <label for="{{ form.lugar_entrega.id_for_label }}" class="form-label">
+      Lugar de entrega
+    </label>
+    {{ form.lugar_entrega }}
+    {% if form.lugar_entrega.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.lugar_entrega.errors.0 }}
+      </div>
+    {% endif %}
+  </div>
+  <div class="col-md-6 mb-3">
+    <label for="{{ form.lugar_recogida.id_for_label }}" class="form-label">
+      Lugar de recogida
+    </label>
+    {{ form.lugar_recogida }}
+    {% if form.lugar_recogida.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.lugar_recogida.errors.0 }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{# —— notas —— #}
+<div class="mb-3">
+  <label for="{{ form.notas.id_for_label }}" class="form-label">
+    Notas
+  </label>
+  {{ form.notas }}
+  {% if form.notas.errors %}
+    <div class="invalid-feedback d-block">
+      {{ form.notas.errors.0 }}
+    </div>
+  {% endif %}
+</div>
+
+{# —— maletas —— #}
+<h5 class="mt-4 mb-3">Maletas</h5>
+{{ formset.management_form }}
+<div id="maletas-container">
+  {% for mf in formset %}
+    <div class="card mb-3 p-3 position-relative">
+      <button type="button"
+              class="btn-close position-absolute top-0 end-0 eliminar-maleta"
+              aria-label="Eliminar"></button>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="{{ mf.guia.id_for_label }}" class="form-label">
+            Guía <span class="text-danger">*</span>
+          </label>
+          {{ mf.guia }}
+          {% if mf.guia.errors %}
+            <div class="invalid-feedback d-block">{{ mf.guia.errors.0 }}</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="{{ mf.cantidad_pax.id_for_label }}" class="form-label">
+            Pax <span class="text-danger">*</span>
+          </label>
+          {{ mf.cantidad_pax }}
+          {% if mf.cantidad_pax.errors %}
+            <div class="invalid-feedback d-block">{{ mf.cantidad_pax.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+      <input type="checkbox"
+             name="{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
+             id="id_{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
+             hidden>
+    </div>
+  {% endfor %}
+</div>
+<div class="text-center mb-4">
+  <button type="button" id="add-maleta" class="btn btn-outline-secondary">
+    + Añadir maleta
+  </button>
+</div>
+
+{# —— submit —— #}
+<div class="text-center">
+  <button type="submit" class="btn btn-primary px-5">
+    {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+  </button>
+</div>
