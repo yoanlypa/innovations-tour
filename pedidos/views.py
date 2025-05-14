@@ -25,7 +25,6 @@ from .forms import RegistroForm
 from django.contrib.auth.forms import PasswordResetForm 
 
 
-
 class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
     login_url = reverse_lazy('pedidos:acceso')
     def test_func(self):
@@ -348,11 +347,11 @@ def pedido_editar_cliente_view(request, pk):
             # Convertir a datetime aware
             if pedido.fecha_inicio:
                 pedido.fecha_inicio = timezone.make_aware(
-                    datetime.datetime.combine(pedido.fecha_inicio, datetime.time())
+                    datetime.combine(pedido.fecha_inicio, datetime.time())
                 )
             if pedido.fecha_fin:
                 pedido.fecha_fin = timezone.make_aware(
-                    datetime.datetime.combine(pedido.fecha_fin, datetime.time())
+                    datetime.combine(pedido.fecha_fin, datetime.time())
                 )
 
             form.save()
