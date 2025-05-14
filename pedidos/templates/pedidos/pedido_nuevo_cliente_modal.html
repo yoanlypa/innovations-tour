@@ -1,8 +1,20 @@
+{#   Modal / iframe   #}
 {% extends "pedidos/base_blank.html" %}
-{% block title %}Nuevo pedido{% endblock %}
+{% load static %}
+
+{% block title %}Nuevo pedido · Innovations Tours{% endblock %}
+
 {% block content %}
 <div class="container my-4">
   <h1 class="h5 mb-3 text-center">Nuevo pedido</h1>
-  {% include "pedidos/_pedido_form.html" %}
+
+  <form id="pedido-form" method="post" novalidate action="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1">
+    {% csrf_token %}
+    {% include "pedidos/_pedido_form.html" %}
+  </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}

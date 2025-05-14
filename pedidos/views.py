@@ -192,109 +192,85 @@ def pedidos_lista_view(request):
     return render(request, 'pedidos/pedidos_lista.html', {
         'pedidos': pedidos
     })
-# --- EDITAR PEDIDO (CLIENTE) ---
+
+# ---------- NUEVO PEDIDO CLIENTE ----------
+@login_required
+def pedido_nuevo_cliente_view(request):
+    if request.method == "POST":
+        form     = PedidoFormCliente(request.POST)
+        formset  = MaletaFormSet(request.POST, prefix="maleta")
+        if form.is_valid() and formset.is_valid():
+            pedido = form.save(commit=False)
+            pedido.usuario = request.user
+
+            # convertir a aware sin cambiar día
+            for field in ("fecha_inicio", "fecha_fin"):
+                fecha = getattr(pedido, field)
+                if fecha:
+                    aware = timezone.make_aware(
+                        datetime.combine(fecha, time()),   # 00:00 local
+                        timezone.get_current_timezone()
+                    )
+                    setattr(pedido, field, aware)
+
+            pedido.save()
+            formset.instance = pedido
+            formset.save()
+
+            # si viene desde iframe: recargar padre
+            if request.GET.get("embed") == "1":
+                return HttpResponse("<script>window.parent.location.reload();</script>")
+
+            messages.success(request, "✅ Pedido creado correctamente.")
+            return redirect("pedidos:mis_pedidos")
+        messages.error(request, "Corrige los errores del formulario.")
+    else:
+        form = PedidoFormCliente()
+        formset = MaletaFormSet(prefix="maleta")
+
+    template = (
+        "pedidos/pedido_nuevo_cliente_modal.html"
+        if request.GET.get("embed") == "1"
+        else "pedidos/pedido_nuevo_cliente.html"
+    )
+    return render(request, template, {"form": form, "formset": formset})
+
+# ---------- EDITAR PEDIDO CLIENTE----------
 @login_required
 def pedido_editar_cliente_view(request, pk):
-    """
-    Editar un pedido del cliente. Convierte las fechas y guarda correctamente.
-    """
     pedido = get_object_or_404(Pedido, pk=pk)
     if pedido.usuario != request.user:
         raise Http404()
 
-    if request.method == 'POST':
-        form = PedidoFormCliente(request.POST, instance=pedido)
-        formset = MaletaFormSet(request.POST, instance=pedido, prefix='maleta')
-
+    if request.method == "POST":
+        form    = PedidoFormCliente(request.POST, instance=pedido)
+        formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
         if form.is_valid() and formset.is_valid():
-            # Guardar sin commit para ajustar fechas
             pedido = form.save(commit=False)
 
-            # Convertir a datetime aware
-            if pedido.fecha_inicio:
-                pedido.fecha_inicio = timezone.make_aware(
-                    datetime.combine(pedido.fecha_inicio, time())
-                )
-            if pedido.fecha_fin:
-                pedido.fecha_fin = timezone.make_aware(
-                    datetime.combine(pedido.fecha_fin, time())
-                )
+            for field in ("fecha_inicio", "fecha_fin"):
+                fecha = getattr(pedido, field)
+                if fecha:
+                    aware = timezone.make_aware(
+                        datetime.combine(fecha, time()),
+                        timezone.get_current_timezone()
+                    )
+                    setattr(pedido, field, aware)
 
-            form.save()
-            formset.save()
-
-            messages.success(request, '✅ Pedido actualizado correctamente.')
-            return redirect('pedidos:mis_pedidos')
-        else:
-            messages.error(request, 'Corrige los errores del formulario.')
-    else:
-        form = PedidoFormCliente(instance=pedido)
-        formset = MaletaFormSet(instance=pedido, prefix='maleta')
-
-    return render(request, 'pedidos/pedido_nuevo_cliente.html', {
-        "form": form,
-        "formset": formset,
-        "es_edicion": True,
-        "pedido": pedido, 
-    })
-
-# --- CREAR NUEVO PEDIDO (CLIENTE) ---
-
-@login_required
-def pedido_nuevo_cliente_view(request):
-    """
-    Crear un pedido. Si viene ?embed=1 (iframe/modal), al guardar
-    recarga la página padre en vez de mostrar la lista dentro del iframe.
-    """
-    if request.method == 'POST':
-        form = PedidoFormCliente(request.POST)
-        formset = MaletaFormSet(request.POST, prefix='maleta')
-
-        if form.is_valid() and formset.is_valid():
-            # ① Guardar sin commit para ajustar fechas
-            pedido = form.save(commit=False)
-
-            # ② Convertir a datetime aware
-            if pedido.fecha_inicio:
-                pedido.fecha_inicio = timezone.make_aware(
-                    datetime.combine(pedido.fecha_inicio, time())
-                )
-            if pedido.fecha_fin:
-                pedido.fecha_fin = timezone.make_aware(
-                    datetime.combine(pedido.fecha_fin, time())
-                )
-
-            pedido.usuario = request.user
             pedido.save()
-
-            # ③ Guardar formset
-            formset.instance = pedido
             formset.save()
-
-            # ④ Modo iframe: recarga la ventana padre
-            if request.GET.get('embed') == '1':
-                return HttpResponse(
-                    '<script>window.parent.location.reload();</script>'
-                )
-
-            # ⑤ Modo normal: feedback y redirección
-            messages.success(request, '✅ Pedido creado correctamente.')
-            return redirect('pedidos:mis_pedidos')
-        else:
-            messages.error(request, 'Corrige los errores del formulario.')
+            messages.success(request, "✅ Pedido actualizado correctamente.")
+            return redirect("pedidos:mis_pedidos")
+        messages.error(request, "Corrige los errores del formulario.")
     else:
-        form = PedidoFormCliente()
-        formset = MaletaFormSet(prefix='maleta')
+        form    = PedidoFormCliente(instance=pedido)
+        formset = MaletaFormSet(instance=pedido, prefix="maleta")
 
-    # Selección de plantilla según modo embed
-    if request.GET.get('embed') == '1':
-        template = "pedidos/pedido_nuevo_cliente_modal.html"
-    else:
-        template = "pedidos/pedido_nuevo_cliente.html"
-
-    return render(request, template, {"form": form, "formset": formset})
-
-
+    return render(
+        request,
+        "pedidos/pedido_nuevo_cliente.html",
+        {"form": form, "formset": formset, "es_edicion": True, "pedido": pedido},
+    )
 @login_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)

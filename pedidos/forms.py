@@ -86,7 +86,6 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 class PedidoFormCliente(forms.ModelForm):
-    # Campos de fecha que aceptan dd/mm/aaaa y muestran el valor inicial formateado
     fecha_inicio = forms.DateField(
         required=True,
         widget=forms.TextInput(attrs={
@@ -98,7 +97,7 @@ class PedidoFormCliente(forms.ModelForm):
         error_messages={
             'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
             'required': 'Este campo es obligatorio',
-        }
+        },
     )
     fecha_fin = forms.DateField(
         required=False,
@@ -110,42 +109,36 @@ class PedidoFormCliente(forms.ModelForm):
         input_formats=['%d/%m/%Y', ''],
         error_messages={
             'invalid': 'Introduce una fecha válida en formato dd/mm/aaaa',
-        }
+        },
     )
 
     class Meta:
         model = Pedido
         fields = [
-            'fecha_inicio',
-            'fecha_fin',
-            'empresa',
-            'excursion',
-            'lugar_entrega',
-            'lugar_recogida',
-            'estado_cliente',
-            'notas',
+            'fecha_inicio', 'fecha_fin',
+            'empresa', 'excursion',
+            'lugar_entrega', 'lugar_recogida',
+            'estado_cliente', 'notas',
         ]
         widgets = {
-            'empresa':        forms.TextInput(attrs={'class':'form-control'}),
-            'excursion':      forms.TextInput(attrs={'class':'form-control'}),
-            'lugar_entrega':  forms.TextInput(attrs={'class':'form-control'}),
-            'lugar_recogida': forms.TextInput(attrs={'class':'form-control'}),
-            'estado_cliente': forms.Select(attrs={'class':'form-select'}),
-            'notas':          forms.Textarea(attrs={'class':'form-control', 'rows':3}),
+            'empresa':        forms.TextInput(attrs={'class': 'form-control'}),
+            'excursion':      forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega':  forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
+            'estado_cliente': forms.Select(attrs={'class': 'form-select'}),
+            'notas':          forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Valor por defecto en Estado
         self.fields['estado_cliente'].initial = 'pagado'
 
-        # Si venimos editando, formateamos las fechas iniciales a dd/mm/aaaa
+        # Mostrar fechas en dd/mm/aaaa cuando editamos
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
-                self.initial['fecha_inicio'] = self.instance.fecha_inicio.strftime('%d/%m/%Y')
+                self.initial['fecha_inicio'] = self.instance.fecha_inicio.astimezone().strftime('%d/%m/%Y')
             if self.instance.fecha_fin:
-                self.initial['fecha_fin'] = self.instance.fecha_fin.strftime('%d/%m/%Y')
-
+                self.initial['fecha_fin'] = self.instance.fecha_fin.astimezone().strftime('%d/%m/%Y')
 
 class MaletaForm(forms.ModelForm):
     class Meta:
@@ -158,14 +151,15 @@ class MaletaForm(forms.ModelForm):
 
 
 MaletaFormSet = inlineformset_factory(
-    Pedido, Maleta,
-    fields=("guia", "cantidad_pax"),
+    Pedido,
+    Maleta,
+    fields=('guia', 'cantidad_pax'),
     widgets={
-        "guia": forms.TextInput(attrs={"class": "form-control"}),
-        "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+        'guia':         forms.TextInput(attrs={'class': 'form-control'}),
+        'cantidad_pax': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
     },
-    extra=0,
-    can_delete=True
+    extra=1,
+    can_delete=True,
 )
 # 
 # 
