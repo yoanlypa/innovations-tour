@@ -7,6 +7,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.utils import timezone
+from datetime import datetime, time
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'placeholder': 'Usuario'}))
@@ -88,7 +89,10 @@ class PedidoForm(forms.ModelForm):
 
 
 
+from .models import Pedido, Maleta
+
 class PedidoFormCliente(forms.ModelForm):
+    # Campos de fecha siguen siendo DateField (reciben date)
     fecha_inicio = forms.DateField(
         required=True,
         widget=forms.TextInput(attrs={
@@ -96,8 +100,8 @@ class PedidoFormCliente(forms.ModelForm):
             'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
-        # Ahora acepta tanto dd/mm/aaaa como YYYY-MM-DD
-        input_formats=['%d/%m/%Y', '%Y-%m-%d'],
+        # Aceptamos tanto el ISO de Flatpickr como dd/mm/aaaa
+        input_formats=['%Y-%m-%d', '%d/%m/%Y'],
         error_messages={
             'invalid': 'Introduce una fecha válida (dd/mm/aaaa)',
             'required': 'Este campo es obligatorio',
@@ -110,7 +114,7 @@ class PedidoFormCliente(forms.ModelForm):
             'placeholder': 'dd/mm/aaaa',
             'autocomplete': 'off',
         }),
-        input_formats=['%d/%m/%Y', '%Y-%m-%d', ''],
+        input_formats=['%Y-%m-%d', '%d/%m/%Y', ''],
         error_messages={
             'invalid': 'Introduce una fecha válida (dd/mm/aaaa)',
         },
@@ -119,10 +123,14 @@ class PedidoFormCliente(forms.ModelForm):
     class Meta:
         model = Pedido
         fields = [
-            'fecha_inicio', 'fecha_fin',
-            'empresa', 'excursion',
-            'lugar_entrega', 'lugar_recogida',
-            'estado_cliente', 'notas',
+            'fecha_inicio',
+            'fecha_fin',
+            'empresa',
+            'excursion',
+            'lugar_entrega',
+            'lugar_recogida',
+            'estado_cliente',
+            'notas',
         ]
         widgets = {
             'empresa':        forms.TextInput(attrs={'class': 'form-control'}),
@@ -135,18 +143,32 @@ class PedidoFormCliente(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Valor por defecto para estado_cliente
         self.fields['estado_cliente'].initial = 'pagado'
 
-        # Al editar, mostramos la parte de fecha en dd/mm/aaaa
+        # Al editar, mostramos dd/mm/aaaa para la pantalla
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
-                local_inicio = timezone.localtime(self.instance.fecha_inicio)
-                self.initial['fecha_inicio'] = local_inicio.strftime('%d/%m/%Y')
+                local_i = timezone.localtime(self.instance.fecha_inicio)
+                self.initial['fecha_inicio'] = local_i.strftime('%d/%m/%Y')
             if self.instance.fecha_fin:
-                local_fin = timezone.localtime(self.instance.fecha_fin)
-                self.initial['fecha_fin'] = local_fin.strftime('%d/%m/%Y')
+                local_f = timezone.localtime(self.instance.fecha_fin)
+                self.initial['fecha_fin'] = local_f.strftime('%d/%m/%Y')
 
+    def clean_fecha_inicio(self):
+        """Convierte la date a datetime aware antes de asignar al modelo."""
+        date = self.cleaned_data['fecha_inicio']
+        # Combina con hora 00:00 y haz aware
+        dt = datetime.combine(date, time())
+        return timezone.make_aware(dt, timezone.get_current_timezone())
 
+    def clean_fecha_fin(self):
+        """Mismo para fecha_fin, permitiendo vacío."""
+        date = self.cleaned_data.get('fecha_fin')
+        if date:
+            dt = datetime.combine(date, time())
+            return timezone.make_aware(dt, timezone.get_current_timezone())
+        return None
 MaletaFormSet = inlineformset_factory(
     Pedido,
     Maleta,

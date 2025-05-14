@@ -194,31 +194,24 @@ def pedidos_lista_view(request):
     })
 
 # ---------- NUEVO PEDIDO CLIENTE ----------
+
+from .forms import PedidoFormCliente, MaletaFormSet
+from .models import Pedido
+
 @login_required
 def pedido_nuevo_cliente_view(request):
     if request.method == "POST":
         form    = PedidoFormCliente(request.POST)
         formset = MaletaFormSet(request.POST, prefix="maleta")
-
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
-
-            # Ajustar fechas a aware sin shift de zona
-            for fld in ("fecha_inicio", "fecha_fin"):
-                val = getattr(pedido, fld)
-                if val:
-                    aware = timezone.make_aware(
-                        datetime.combine(val, time()),
-                        timezone.get_current_timezone()
-                    )
-                    setattr(pedido, fld, aware)
-
             pedido.save()
             formset.instance = pedido
             formset.save()
 
             if request.GET.get("embed") == "1":
+                # recarga la ventana padre y cierra modal
                 return HttpResponse("<script>window.parent.location.reload();</script>")
 
             messages.success(request, "✅ Pedido creado correctamente.")
@@ -228,10 +221,12 @@ def pedido_nuevo_cliente_view(request):
         form    = PedidoFormCliente()
         formset = MaletaFormSet(prefix="maleta")
 
-    tpl = ("pedidos/pedido_nuevo_cliente_modal.html"
-           if request.GET.get("embed") == "1"
-           else "pedidos/pedido_nuevo_cliente.html")
-    return render(request, tpl, {"form": form, "formset": formset})
+    template = (
+        "pedidos/pedido_nuevo_cliente_modal.html"
+        if request.GET.get("embed") == "1"
+        else "pedidos/pedido_nuevo_cliente.html"
+    )
+    return render(request, template, {"form": form, "formset": formset})
 
 @login_required
 def pedido_editar_cliente_view(request, pk):
@@ -244,14 +239,6 @@ def pedido_editar_cliente_view(request, pk):
         formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
-            for fld in ("fecha_inicio", "fecha_fin"):
-                val = getattr(pedido, fld)
-                if val:
-                    aware = timezone.make_aware(
-                        datetime.combine(val, time()),
-                        timezone.get_current_timezone()
-                    )
-                    setattr(pedido, fld, aware)
             pedido.save()
             formset.save()
             messages.success(request, "✅ Pedido actualizado correctamente.")
