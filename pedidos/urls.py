@@ -1,39 +1,80 @@
-from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views
-from .views import logout_view, acceso_view, pedido_nuevo_cliente_view, pedido_editar_cliente_view, HomeView  # Import the missing views
+from django.urls import path
 
-app_name = 'pedidos'
+from . import views
+from .views import (HomeView, acceso_view,  # Import the missing views
+                    logout_view, pedido_editar_cliente_view,
+                    pedido_nuevo_cliente_view)
+
+app_name = "pedidos"
 
 urlpatterns = [
     # TAREAS
-    path('tareas/', views.TareaListView.as_view(), name='tareas'),
-    path('tareas/nueva/', views.TareaCreateView.as_view(), name='tarea_nueva'),
-    path('tareas/editar/<int:pk>/', views.TareaUpdateView.as_view(), name='tarea_editar'),
-    path('tareas/eliminar/<int:pk>/', views.TareaDeleteView.as_view(), name='tarea_eliminar'),
-    path('tareas/cambiar-estado/<int:tarea_id>/', views.cambiar_estado_tarea, name='cambiar_estado_tarea'),
-
+    path("tareas/", views.TareaListView.as_view(), name="tareas"),
+    path("tareas/nueva/", views.TareaCreateView.as_view(), name="tarea_nueva"),
+    path(
+        "tareas/editar/<int:pk>/", views.TareaUpdateView.as_view(), name="tarea_editar"
+    ),
+    path(
+        "tareas/eliminar/<int:pk>/",
+        views.TareaDeleteView.as_view(),
+        name="tarea_eliminar",
+    ),
+    path(
+        "tareas/cambiar-estado/<int:tarea_id>/",
+        views.cambiar_estado_tarea,
+        name="cambiar_estado_tarea",
+    ),
     # PEDIDOS (nuevo flujo unificado)
     path("", HomeView.as_view(), name="home"),
-    path('pedidos/', views.pedidos_lista_view, name='pedidos_lista'),
-    path('nuevo/', views.pedido_nuevo_view, name='pedido_nuevo'),
-    path('editar/<int:pk>/', views.pedido_editar_view, name='pedido_editar'),
-    path('cargar_datos/', views.cargar_datos_pedido, name='cargar_datos_pedido'),
-    path('mis-pedidos/', views.pedidos_mios_view, name='mis_pedidos'),
-    path('mis-pedidos/nuevo/', views.pedido_nuevo_cliente_view, name='pedido_nuevo_cliente'),
-    path('mis-pedidos/editar/<int:pk>/', pedido_editar_cliente_view,name='pedido_editar_cliente'),
+    path("pedidos/", views.pedidos_lista_view, name="pedidos_lista"),
+    path("nuevo/", views.pedido_nuevo_view, name="pedido_nuevo"),
+    path("editar/<int:pk>/", views.pedido_editar_view, name="pedido_editar"),
+    path("cargar_datos/", views.cargar_datos_pedido, name="cargar_datos_pedido"),
+    path("mis-pedidos/", views.pedidos_mios_view, name="mis_pedidos"),
+    path(
+        "mis-pedidos/nuevo/",
+        views.pedido_nuevo_cliente_view,
+        name="pedido_nuevo_cliente",
+    ),
+    path(
+        "mis-pedidos/editar/<int:pk>/",
+        pedido_editar_cliente_view,
+        name="pedido_editar_cliente",
+    ),
     # LOGIN / REGISTRO
     path("acceso/", views.acceso_view, name="acceso"),
     path("logout/", views.logout_view, name="logout"),
-
     # PASSWORD RESET
-    path('password_reset/', auth_views.PasswordResetView.as_view(template_name='pedidos/password_reset.html'), name='password_reset'),
-    path('password_reset_done/', auth_views.PasswordResetDoneView.as_view(template_name='pedidos/password_reset_done.html'), name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(template_name='pedidos/password_reset_confirm.html'), name='password_reset_confirm'),
-    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='pedidos/password_reset_complete.html'), name='password_reset_complete'),
-
+    path(
+        "password_reset/",
+        auth_views.PasswordResetView.as_view(
+            template_name="pedidos/password_reset.html"
+        ),
+        name="password_reset",
+    ),
+    path(
+        "password_reset_done/",
+        auth_views.PasswordResetDoneView.as_view(
+            template_name="pedidos/password_reset_done.html"
+        ),
+        name="password_reset_done",
+    ),
+    path(
+        "reset/<uidb64>/<token>/",
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name="pedidos/password_reset_confirm.html"
+        ),
+        name="password_reset_confirm",
+    ),
+    path(
+        "reset/done/",
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name="pedidos/password_reset_complete.html"
+        ),
+        name="password_reset_complete",
+    ),
     # API / Sincronización
     # path('api/sincronizar-usuario/', views.SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
-    # 
-    
+    #
 ]

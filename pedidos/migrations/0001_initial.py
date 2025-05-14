@@ -16,66 +16,241 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Producto',
+            name="Producto",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nombre', models.CharField(max_length=100, verbose_name='Nombre')),
-                ('cantidad', models.IntegerField(default=0, verbose_name='Cantidad')),
-                ('almacen', models.CharField(max_length=100, verbose_name='Almacén')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("nombre", models.CharField(max_length=100, verbose_name="Nombre")),
+                ("cantidad", models.IntegerField(default=0, verbose_name="Cantidad")),
+                ("almacen", models.CharField(max_length=100, verbose_name="Almacén")),
             ],
         ),
         migrations.CreateModel(
-            name='RegistroCliente',
+            name="RegistroCliente",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nombre_usuario', models.CharField(max_length=150, verbose_name='Usuario')),
-                ('email', models.EmailField(max_length=254, verbose_name='Email')),
-                ('empresa', models.CharField(blank=True, max_length=255, null=True, verbose_name='Empresa')),
-                ('telefono', models.CharField(blank=True, max_length=50, null=True, verbose_name='Teléfono')),
-                ('fecha_registro', models.DateTimeField(auto_now_add=True, verbose_name='Registrado')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "nombre_usuario",
+                    models.CharField(max_length=150, verbose_name="Usuario"),
+                ),
+                ("email", models.EmailField(max_length=254, verbose_name="Email")),
+                (
+                    "empresa",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Empresa"
+                    ),
+                ),
+                (
+                    "telefono",
+                    models.CharField(
+                        blank=True, max_length=50, null=True, verbose_name="Teléfono"
+                    ),
+                ),
+                (
+                    "fecha_registro",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Registrado"),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Tarea',
+            name="Tarea",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('titulo', models.CharField(max_length=200, verbose_name='Título')),
-                ('descripcion', models.TextField(verbose_name='Descripción')),
-                ('prioridad', models.CharField(choices=[('alta', 'Alta'), ('media', 'Media'), ('baja', 'Baja')], max_length=20, verbose_name='Prioridad')),
-                ('completada', models.BooleanField(default=False, verbose_name='Completada')),
-                ('fecha_creacion', models.DateTimeField(auto_now_add=True, verbose_name='Creada')),
-                ('fecha_especifica', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Para')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("titulo", models.CharField(max_length=200, verbose_name="Título")),
+                ("descripcion", models.TextField(verbose_name="Descripción")),
+                (
+                    "prioridad",
+                    models.CharField(
+                        choices=[
+                            ("alta", "Alta"),
+                            ("media", "Media"),
+                            ("baja", "Baja"),
+                        ],
+                        max_length=20,
+                        verbose_name="Prioridad",
+                    ),
+                ),
+                (
+                    "completada",
+                    models.BooleanField(default=False, verbose_name="Completada"),
+                ),
+                (
+                    "fecha_creacion",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Creada"),
+                ),
+                (
+                    "fecha_especifica",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="Para"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Pedido',
+            name="Pedido",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fecha_inicio', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Fecha inicio')),
-                ('fecha_fin', models.DateField(blank=True, null=True, verbose_name='Fecha fin')),
-                ('fecha_creacion', models.DateField(default=django.utils.timezone.localdate, verbose_name='Fecha creación')),
-                ('fecha_modificacion', models.DateTimeField(auto_now=True, verbose_name='Última modificación')),
-                ('empresa', models.CharField(max_length=100, verbose_name='Empresa')),
-                ('excursion', models.CharField(blank=True, max_length=255, null=True, verbose_name='Excursión')),
-                ('guia_general', models.CharField(default='Sin asignar', max_length=100, verbose_name='Guía general')),
-                ('lugar_entrega', models.CharField(blank=True, default='', max_length=100, verbose_name='Lugar entrega')),
-                ('lugar_recogida', models.CharField(blank=True, default='', max_length=100, verbose_name='Lugar recogida')),
-                ('notas', models.TextField(blank=True, verbose_name='Notas')),
-                ('estado_cliente', models.CharField(choices=[('pendiente', '🟡 Pendiente'), ('pagado', '🟢 Pagado'), ('entregado', '🔵 Entregado')], default='pagado', max_length=20, verbose_name='Estado cliente')),
-                ('estado_equipo', models.CharField(choices=[('por_revisar', '🔍 Por revisar'), ('aprobado', '✅ Aprobado'), ('entregado', '📦 Entregado'), ('recogido', '📥 Recogido')], default='aprobado', max_length=20, verbose_name='Estado equipo')),
-                ('entregado', models.BooleanField(default=False, verbose_name='Entregado')),
-                ('recogido', models.BooleanField(default=False, verbose_name='Recogido')),
-                ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pedidos', to=settings.AUTH_USER_MODEL)),
-                ('productos', models.ManyToManyField(blank=True, related_name='pedidos', to='pedidos.producto')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "fecha_inicio",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="Fecha inicio"
+                    ),
+                ),
+                (
+                    "fecha_fin",
+                    models.DateField(blank=True, null=True, verbose_name="Fecha fin"),
+                ),
+                (
+                    "fecha_creacion",
+                    models.DateField(
+                        default=django.utils.timezone.localdate,
+                        verbose_name="Fecha creación",
+                    ),
+                ),
+                (
+                    "fecha_modificacion",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Última modificación"
+                    ),
+                ),
+                ("empresa", models.CharField(max_length=100, verbose_name="Empresa")),
+                (
+                    "excursion",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, verbose_name="Excursión"
+                    ),
+                ),
+                (
+                    "guia_general",
+                    models.CharField(
+                        default="Sin asignar",
+                        max_length=100,
+                        verbose_name="Guía general",
+                    ),
+                ),
+                (
+                    "lugar_entrega",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        max_length=100,
+                        verbose_name="Lugar entrega",
+                    ),
+                ),
+                (
+                    "lugar_recogida",
+                    models.CharField(
+                        blank=True,
+                        default="",
+                        max_length=100,
+                        verbose_name="Lugar recogida",
+                    ),
+                ),
+                ("notas", models.TextField(blank=True, verbose_name="Notas")),
+                (
+                    "estado_cliente",
+                    models.CharField(
+                        choices=[
+                            ("pendiente", "🟡 Pendiente"),
+                            ("pagado", "🟢 Pagado"),
+                            ("entregado", "🔵 Entregado"),
+                        ],
+                        default="pagado",
+                        max_length=20,
+                        verbose_name="Estado cliente",
+                    ),
+                ),
+                (
+                    "estado_equipo",
+                    models.CharField(
+                        choices=[
+                            ("por_revisar", "🔍 Por revisar"),
+                            ("aprobado", "✅ Aprobado"),
+                            ("entregado", "📦 Entregado"),
+                            ("recogido", "📥 Recogido"),
+                        ],
+                        default="aprobado",
+                        max_length=20,
+                        verbose_name="Estado equipo",
+                    ),
+                ),
+                (
+                    "entregado",
+                    models.BooleanField(default=False, verbose_name="Entregado"),
+                ),
+                (
+                    "recogido",
+                    models.BooleanField(default=False, verbose_name="Recogido"),
+                ),
+                (
+                    "usuario",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="pedidos",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "productos",
+                    models.ManyToManyField(
+                        blank=True, related_name="pedidos", to="pedidos.producto"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Maleta',
+            name="Maleta",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('guia', models.CharField(max_length=255, verbose_name='Guía')),
-                ('cantidad_pax', models.PositiveIntegerField(verbose_name='PAX')),
-                ('pedido', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='maletas', to='pedidos.pedido')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("guia", models.CharField(max_length=255, verbose_name="Guía")),
+                ("cantidad_pax", models.PositiveIntegerField(verbose_name="PAX")),
+                (
+                    "pedido",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="maletas",
+                        to="pedidos.pedido",
+                    ),
+                ),
             ],
         ),
     ]

@@ -7,18 +7,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pedidos', '0001_initial'),
+        ("pedidos", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='pedido',
-            name='fecha_creacion',
-            field=models.DateTimeField(default=django.utils.timezone.now, verbose_name='Fecha creación'),
+            model_name="pedido",
+            name="fecha_creacion",
+            field=models.DateTimeField(
+                default=django.utils.timezone.now, verbose_name="Fecha creación"
+            ),
         ),
         migrations.AlterField(
-            model_name='pedido',
-            name='fecha_fin',
-            field=models.DateTimeField(blank=True, null=True, verbose_name='Fecha fin'),
+            model_name="pedido",
+            name="fecha_fin",
+            field=models.DateTimeField(blank=True, null=True, verbose_name="Fecha fin"),
         ),
     ]

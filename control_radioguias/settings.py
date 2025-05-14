@@ -9,13 +9,14 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
 import os
 import sys
 from pathlib import Path
+
+import dj_database_url
 import django
 from django.contrib.auth import get_user_model
-import dj_database_url
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-$cs3fjxo2no#+2&au6n0(6ufqh6&t_ro_o@+=ft=3(39vzqm)g'
+# SECRET_KEY = 'django-insecure-$cs3fjxo2no#+2&au6n0(6ufqh6&t_ro_o@+=ft=3(39vzqm)g'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -33,61 +34,57 @@ DEBUG = False
 ALLOWED_HOSTS = ["*"]
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'pedidos', 
-    'django_extensions',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'corsheaders',  # ← Añadido para CORS
-    'crispy_forms',
-    'crispy_bootstrap5',
-         
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "pedidos",
+    "django_extensions",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "corsheaders",  # ← Añadido para CORS
+    "crispy_forms",
+    "crispy_bootstrap5",
 ]
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',  # ← Añadido para CSRF
-    'django.contrib.auth.middleware.AuthenticationMiddleware',  # ← Requerido para admin
-    'django.contrib.messages.middleware.MessageMiddleware',  # ← Requerido para admin
-    'django.middleware.clickjacking.XFrameOptionsMiddleware', 
-    'corsheaders.middleware.CorsMiddleware',  # ← Añadido para CORS        
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",  # ← Añadido para CSRF
+    "django.contrib.auth.middleware.AuthenticationMiddleware",  # ← Requerido para admin
+    "django.contrib.messages.middleware.MessageMiddleware",  # ← Requerido para admin
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # ← Añadido para CORS
 ]
 
-ROOT_URLCONF = 'control_radioguias.urls'
+ROOT_URLCONF = "control_radioguias.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'control_radioguias.wsgi.application'
-
-
+WSGI_APPLICATION = "control_radioguias.wsgi.application"
 
 
 # Database
@@ -112,16 +109,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -134,51 +131,51 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 # Añadir al final del archivo
 # Archivos estáticos
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 LOGIN_URL = "pedidos:acceso"
-LOGIN_REDIRECT_URL = ''  # URL a la que redirigir después de iniciar sesión
-MEDIA_URL = '/media/'
+LOGIN_REDIRECT_URL = ""  # URL a la que redirigir después de iniciar sesión
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Formato de fechas para toda la app
 USE_L10N = False
-DATE_INPUT_FORMATS = ['%d/%m/%Y', '%d/%m/%y']
-DATETIME_INPUT_FORMATS = ['%d/%m/%Y %H:%M']
-DATE_FORMAT = 'd/m/Y'
-DATETIME_FORMAT = 'd/m/Y H:i'
-SHORT_DATE_FORMAT = 'd/m/Y'
-SHORT_DATETIME_FORMAT = 'd/m/Y H:i'
-TIME_ZONE = 'Europe/Madrid'
+DATE_INPUT_FORMATS = ["%d/%m/%Y", "%d/%m/%y"]
+DATETIME_INPUT_FORMATS = ["%d/%m/%Y %H:%M"]
+DATE_FORMAT = "d/m/Y"
+DATETIME_FORMAT = "d/m/Y H:i"
+SHORT_DATE_FORMAT = "d/m/Y"
+SHORT_DATETIME_FORMAT = "d/m/Y H:i"
+TIME_ZONE = "Europe/Madrid"
 USE_TZ = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOWED_ORIGINS = [
     "https://yoawebdesigns.cloud",
     "https://innovations-tour-production.up.railway.app",
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.TokenAuthentication",
     ],
 }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.hostinger.com"
 EMAIL_PORT = 465
 EMAIL_USE_SSL = True
-EMAIL_HOST_USER = 'info@yoawebdesigns.cloud'
-EMAIL_HOST_PASSWORD = 'Infoyoawebsdesign00**'
-DEFAULT_FROM_EMAIL = 'Innovations Tours <info@yoawebdesigns.cloud>'
-FRONTEND_URL = 'https://yoawebdesigns.cloud'
+EMAIL_HOST_USER = "info@yoawebdesigns.cloud"
+EMAIL_HOST_PASSWORD = "Infoyoawebsdesign00**"
+DEFAULT_FROM_EMAIL = "Innovations Tours <info@yoawebdesigns.cloud>"
+FRONTEND_URL = "https://yoawebdesigns.cloud"
 
 
 # Configuración de django-allauth
@@ -190,24 +187,25 @@ ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_LOGOUT_ON_GET = True
-LOGOUT_REDIRECT_URL = "home"   
+LOGOUT_REDIRECT_URL = "home"
 
 if not DEBUG:
     LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'stream': sys.stdout,
+        "version": 1,
+        "disable_existing_loggers": False,
+        "handlers": {
+            "console": {
+                "class": "logging.StreamHandler",
+                "stream": sys.stdout,
             },
         },
-        'root': {
-            'handlers': ['console'],
-            'level': 'INFO',
+        "root": {
+            "handlers": ["console"],
+            "level": "INFO",
         },
     }
-    
+
+
 def create_superuser():
     try:
         User = get_user_model()
@@ -221,15 +219,15 @@ def create_superuser():
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_BROWSER_XSS_FILTER = True
 CSRF_COOKIE_HTTPONLY = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Necesario para Railway
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # Necesario para Railway
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 LOGGING_CONFIG = None
 SECURE_HSTS_SECONDS = 31536000  # 1 año en segundos (HSTS)
-SECURE_SSL_REDIRECT = True 
+SECURE_SSL_REDIRECT = True
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  
-SECRET_KEY = os.environ.get('SECRET_KEY', 'clave-por-defecto-solo-desarrollo') 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECRET_KEY = os.environ.get("SECRET_KEY", "clave-por-defecto-solo-desarrollo")
