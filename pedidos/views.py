@@ -197,27 +197,27 @@ def pedidos_lista_view(request):
 @login_required
 def pedido_nuevo_cliente_view(request):
     if request.method == "POST":
-        form     = PedidoFormCliente(request.POST)
-        formset  = MaletaFormSet(request.POST, prefix="maleta")
+        form    = PedidoFormCliente(request.POST)
+        formset = MaletaFormSet(request.POST, prefix="maleta")
+
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
 
-            # convertir a aware sin cambiar día
-            for field in ("fecha_inicio", "fecha_fin"):
-                fecha = getattr(pedido, field)
-                if fecha:
+            # Ajustar fechas a aware sin shift de zona
+            for fld in ("fecha_inicio", "fecha_fin"):
+                val = getattr(pedido, fld)
+                if val:
                     aware = timezone.make_aware(
-                        datetime.combine(fecha, time()),   # 00:00 local
+                        datetime.combine(val, time()),
                         timezone.get_current_timezone()
                     )
-                    setattr(pedido, field, aware)
+                    setattr(pedido, fld, aware)
 
             pedido.save()
             formset.instance = pedido
             formset.save()
 
-            # si viene desde iframe: recargar padre
             if request.GET.get("embed") == "1":
                 return HttpResponse("<script>window.parent.location.reload();</script>")
 
@@ -225,17 +225,14 @@ def pedido_nuevo_cliente_view(request):
             return redirect("pedidos:mis_pedidos")
         messages.error(request, "Corrige los errores del formulario.")
     else:
-        form = PedidoFormCliente()
+        form    = PedidoFormCliente()
         formset = MaletaFormSet(prefix="maleta")
 
-    template = (
-        "pedidos/pedido_nuevo_cliente_modal.html"
-        if request.GET.get("embed") == "1"
-        else "pedidos/pedido_nuevo_cliente.html"
-    )
-    return render(request, template, {"form": form, "formset": formset})
+    tpl = ("pedidos/pedido_nuevo_cliente_modal.html"
+           if request.GET.get("embed") == "1"
+           else "pedidos/pedido_nuevo_cliente.html")
+    return render(request, tpl, {"form": form, "formset": formset})
 
-# ---------- EDITAR PEDIDO CLIENTE----------
 @login_required
 def pedido_editar_cliente_view(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
@@ -247,16 +244,14 @@ def pedido_editar_cliente_view(request, pk):
         formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
-
-            for field in ("fecha_inicio", "fecha_fin"):
-                fecha = getattr(pedido, field)
-                if fecha:
+            for fld in ("fecha_inicio", "fecha_fin"):
+                val = getattr(pedido, fld)
+                if val:
                     aware = timezone.make_aware(
-                        datetime.combine(fecha, time()),
+                        datetime.combine(val, time()),
                         timezone.get_current_timezone()
                     )
-                    setattr(pedido, field, aware)
-
+                    setattr(pedido, fld, aware)
             pedido.save()
             formset.save()
             messages.success(request, "✅ Pedido actualizado correctamente.")

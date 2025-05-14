@@ -1,4 +1,11 @@
 {% extends "pedidos/base.html" %}
+{% load static %}
+
+{% block title %}Mis pedidos · Innovations Tours{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}">
+{% endblock %}
 {% block content %}
 <div class="container">
   <h2 class="mb-4">Mis pedidos</h2>
@@ -43,15 +50,12 @@
     </div>
 
     {# ---------- FAB “+” ---------- #}
-<a href="#"
-   class="btn btn-primary btn-lg rounded-circle fab"
+{# FAB que abre el modal #}
+<a href="#" class="btn btn-primary btn-lg rounded-circle fab"
    data-bs-toggle="modal"
    data-bs-target="#modalNuevoPedido"
-   title="Crear nuevo pedido">
-   <span class="fs-3 fw-bold">+</span>
-</a>
+   title="Crear nuevo pedido">+</a>
 
-{# ---------- Modal con iframe ---------- #}
 <div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
@@ -60,7 +64,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-0" style="height:80vh;">
-        <iframe src="{% url 'pedidos:pedido_nuevo_cliente' %}"
+        <iframe src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
                 class="w-100 h-100 border-0"
                 loading="lazy"></iframe>
       </div>

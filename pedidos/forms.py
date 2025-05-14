@@ -85,6 +85,7 @@ class PedidoForm(forms.ModelForm):
         fecha_str = self.cleaned_data['fecha_creacion']
         return convertir_fecha(fecha_str)
 
+
 class PedidoFormCliente(forms.ModelForm):
     fecha_inicio = forms.DateField(
         required=True,
@@ -133,13 +134,26 @@ class PedidoFormCliente(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['estado_cliente'].initial = 'pagado'
 
-        # Mostrar fechas en dd/mm/aaaa cuando editamos
+        # Al editar, sacamos la fecha sin desfase de zona
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
-                self.initial['fecha_inicio'] = self.instance.fecha_inicio.astimezone().strftime('%d/%m/%Y')
+                date = self.instance.fecha_inicio.date()
+                self.initial['fecha_inicio'] = date.strftime('%d/%m/%Y')
             if self.instance.fecha_fin:
-                self.initial['fecha_fin'] = self.instance.fecha_fin.astimezone().strftime('%d/%m/%Y')
-
+                date = self.instance.fecha_fin.date()
+                self.initial['fecha_fin'] = date.strftime('%d/%m/%Y')
+                
+MaletaFormSet = inlineformset_factory(
+    Pedido,
+    Maleta,
+    fields=('guia', 'cantidad_pax'),
+    widgets={
+        'guia':         forms.TextInput(attrs={'class': 'form-control'}),
+        'cantidad_pax': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+    },
+    extra=0,
+    can_delete=True,
+)
 class MaletaForm(forms.ModelForm):
     class Meta:
         model  = Maleta
@@ -150,17 +164,7 @@ class MaletaForm(forms.ModelForm):
         }
 
 
-MaletaFormSet = inlineformset_factory(
-    Pedido,
-    Maleta,
-    fields=('guia', 'cantidad_pax'),
-    widgets={
-        'guia':         forms.TextInput(attrs={'class': 'form-control'}),
-        'cantidad_pax': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-    },
-    extra=1,
-    can_delete=True,
-)
+
 # 
 # 
 # 
@@ -177,38 +181,3 @@ class ProductoForm(forms.ModelForm):
         }
 
 
-#
-# 
-# 
-# 
-# ========== FORMULARIO DE MALETAS ==========
-class MaletaForm(forms.ModelForm):
-    class Meta:
-        model = Maleta
-        fields = ['guia', 'cantidad_pax']
-        widgets = {
-            'guia': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre del guía'}),
-            'cantidad_pax': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Cantidad de pax'}),
-        }
-
-
-class BaseMaletaFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        total = 0
-        for form in self.forms:
-            if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
-                total += 1
-        if total < 1:
-            raise ValidationError('Debe incluir al menos una maleta.')
-
-
-# Inline formset entre Pedido y Maleta
-MaletaFormSet = inlineformset_factory(
-    parent_model=Pedido,
-    model=Maleta,
-    form=MaletaForm,
-    formset=BaseMaletaFormSet,
-    extra=1,
-    can_delete=True
-)

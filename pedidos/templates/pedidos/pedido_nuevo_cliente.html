@@ -11,22 +11,17 @@
     {% if es_edicion %}Editar pedido{% else %}Nuevo pedido{% endif %}
   </h1>
 
-  <form
-    id="pedido-form"
-    method="post"
-    novalidate
-    {% if es_edicion and pedido.pk %}
-      action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
-    {% else %}
-      action="{% url 'pedidos:pedido_nuevo_cliente' %}"
-    {% endif %}
+  <form id="pedido-form"
+        method="post"
+        novalidate
+        {% if es_edicion and pedido.pk %}
+          action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
+        {% else %}
+          action="{% url 'pedidos:pedido_nuevo_cliente' %}"
+        {% endif %}
   >
     {% csrf_token %}
     {% include "pedidos/_pedido_form.html" %}
   </form>
 </div>
-{% endblock %}
-
-{% block scripts %}
-  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}
