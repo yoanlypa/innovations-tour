@@ -264,6 +264,10 @@ def pedido_editar_cliente_view(request, pk):
             pedido.save()
             formset.save()
             print("── POST ──", request.POST.dict())
+            # views.py – dentro del branch POST de pedido_editar_cliente_view
+            print("VALID?", form.is_valid(), formset.is_valid())
+            print("Form errors:", form.errors)
+            print("Formset errors:", formset.non_form_errors(), [f.errors for f in formset])
             messages.success(request, "✅ Pedido actualizado correctamente.")
             return redirect("pedidos:mis_pedidos")
         messages.error(request, "Corrige los errores del formulario.")
