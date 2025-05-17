@@ -8,13 +8,10 @@
     --azul-oscuro: #004080;
     --naranja: #f78243;
   }
-  /* Fondo general con degradado suave */
   body {
     background: linear-gradient(135deg, var(--azul) 0%, var(--naranja) 100%);
     min-height: 100vh;
   }
-
-  /* Tarjeta contenedora */
   .form-card {
     width: 100%;
     max-width: 480px;
@@ -39,9 +36,7 @@
     background: var(--azul);
     border: none;
   }
-  .btn-primary:hover {
-    background: var(--azul-oscuro);
-  }
+  .btn-primary:hover { background: var(--azul-oscuro) }
   .form-footer {
     margin-top: 1rem;
     text-align: center;
@@ -55,17 +50,17 @@
 </style>
 
 <div class="d-flex justify-content-center align-items-center min-vh-100">
-  <div class="form-card card">
+  <div class="form-card card shadow-lg">
     {% if login_form.errors or register_form.errors %}
       <div class="alert alert-danger">
         Por favor corrige los errores en el formulario.
       </div>
     {% endif %}
 
-    {# ——— Registro ——— #}
+    {# ——— REGISTRO ——— #}
     {% if mode == 'register' %}
       <h2 class="form-title">Registro</h2>
-      <form method="post">
+      <form method="post" action="{% url 'pedidos:acceso' %}">
         {% csrf_token %}
         <input type="hidden" name="mode" value="register">
 
@@ -127,16 +122,17 @@
         ¿Ya tienes cuenta? <a onclick="cambiarModo('login')">Inicia sesión</a>
       </div>
 
-    {# ——— Recuperar contraseña ——— #}
+    {# ——— RECUPERAR CONTRASEÑA ——— #}
     {% elif mode == 'reset' %}
       <h2 class="form-title">Recuperar contraseña</h2>
-      <form method="post">
+      <form method="post" action="{% url 'pedidos:acceso' %}">
         {% csrf_token %}
         <input type="hidden" name="mode" value="reset">
 
         <div class="mb-3">
           <label for="id_email" class="form-label">Correo electrónico</label>
-          <input type="email" name="email" id="id_email" class="form-control" placeholder="Tu correo" required>
+          <input type="email" name="email" id="id_email"
+                 class="form-control" placeholder="Tu correo" required>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Enviar enlace</button>
@@ -145,7 +141,7 @@
         <a onclick="cambiarModo('login')">Volver al login</a>
       </div>
 
-    {# ——— Login ——— #}
+    {# ——— LOGIN ——— #}
     {% else %}
       <h2 class="form-title">Iniciar sesión</h2>
       <form method="post" action="{% url 'pedidos:acceso' %}">
@@ -193,7 +189,7 @@
   {{ block.super }}
 
   <script>
-    // Cambia el modo entre login / register / reset
+    // Cambia el modo (login/register/reset)
     function cambiarModo(modo) {
       const form = document.createElement('form');
       form.method = 'post';
@@ -208,11 +204,11 @@
   </script>
 
   <script>
-    // Toggle password eye
+    // Mostrar/ocultar contraseña
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.toggle-password').forEach(btn => {
         btn.addEventListener('click', () => {
-          const input = document.querySelector(btn.getAttribute('data-target'));
+          const input = document.querySelector(btn.dataset.target);
           const icon = btn.querySelector('i');
           if (input.type === 'password') {
             input.type = 'text';
