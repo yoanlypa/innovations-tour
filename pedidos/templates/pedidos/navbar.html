@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pedidos:tareas' %}">📻 Control Radioguías</a>
+            <div class="navbar-nav">
+                <a class="nav-link" href="{% url 'pedidos:tareas' %}">📋 Tareas</a>
+                <a class="nav-link" href="{% url 'pedidos:pedidos_lista' %}">📦 Pedidos</a>
+            </div>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                {% if user.is_authenticated %}
+                    <span class="text-white">Hola, {{ user.username }}</span>
+            
+                    {% if not user.is_staff %}
+                        <a href="{% url 'pedidos:mis_pedidos' %}" class="btn btn-outline-warning btn-sm">
+                            🧾 Mis pedidos
+                        </a>
+                    {% endif %}
+            
+                    <a href="{% url 'pedidos:logout' %}" class="btn btn-outline-light btn-sm">Cerrar sesión</a>
+                {% else %}
+                    <a href="{% url 'pedidos:acceso' %}" class="btn btn-outline-primary btn-sm">Iniciar sesión</a>
+                {% endif %}
+            </div>
+            
+        </div>
+    </nav>
+    
+    <div class="container mt-4">

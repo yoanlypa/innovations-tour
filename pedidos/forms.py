@@ -31,19 +31,59 @@ class RegistroForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"placeholder": "Correo electrónico"}),
         }
 
-
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Usuario", widget=forms.TextInput(attrs={"class": "form-control"})
+        label="Usuario",
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Usuario",
+            "autocomplete": "username"
+        })
     )
     password = forms.CharField(
-        label="Contraseña", widget=forms.PasswordInput(attrs={"class": "form-control"})
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Contraseña",
+            "autocomplete": "current-password",
+            "id": "id_login_password"
+        })
     )
 
-
 class CustomRegisterForm(UserCreationForm):
+    username = forms.CharField(
+        label="Usuario",
+        widget=forms.TextInput(attrs={
+            "class": "form-control",
+            "placeholder": "Usuario",
+            "autocomplete": "username"
+        })
+    )
     email = forms.EmailField(
-        required=True, widget=forms.EmailInput(attrs={"class": "form-control"})
+        label="Correo electrónico",
+        widget=forms.EmailInput(attrs={
+            "class": "form-control",
+            "placeholder": "Correo electrónico",
+            "autocomplete": "email"
+        })
+    )
+    password1 = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Contraseña",
+            "autocomplete": "new-password",
+            "id": "id_register_password1"
+        })
+    )
+    password2 = forms.CharField(
+        label="Confirmar contraseña",
+        widget=forms.PasswordInput(attrs={
+            "class": "form-control",
+            "placeholder": "Repite la contraseña",
+            "autocomplete": "new-password",
+            "id": "id_register_password2"
+        })
     )
 
     class Meta:
@@ -53,10 +93,8 @@ class CustomRegisterForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Este email ya está en uso.")
+            raise ValidationError("Este correo ya está en uso.")
         return email
-
-
 #
 #
 #

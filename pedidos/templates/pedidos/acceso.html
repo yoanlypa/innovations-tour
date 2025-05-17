@@ -3,117 +3,226 @@
 
 {% block content %}
 <style>
-  :root{
-    --azul:#005dab;
-    --azul-oscuro:#004080;
-    --naranja:#f78243;
+  :root {
+    --azul: #005dab;
+    --azul-oscuro: #004080;
+    --naranja: #f78243;
   }
   /* Fondo general con degradado suave */
-  body{
-    background: linear-gradient(135deg,var(--azul) 0%,var(--naranja) 100%);
-    min-height:100vh;
-      }
+  body {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--naranja) 100%);
+    min-height: 100vh;
+  }
 
   /* Tarjeta contenedora */
-  .form-card{
-    width:100%;
-    max-width:480px;
-    background:#fff;
-    border-radius:1.25rem;
-    padding:2rem 2.25rem;
-    box-shadow:0 8px 24px rgb(0 0 0 / .15);
-    animation:slideDown .5s ease;
+  .form-card {
+    width: 100%;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 2rem 2.25rem;
+    box-shadow: 0 8px 24px rgb(0 0 0 / .15);
+    animation: slideDown .5s ease;
   }
-  @keyframes slideDown{
-    from{opacity:0;transform:translateY(-15px)}
-    to{opacity:1;transform:translateY(0)}
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-15px) }
+    to   { opacity: 1; transform: translateY(0) }
   }
-  .form-title{
-    font-size:1.6rem;
-    font-weight:600;
-    color:var(--azul);
-    text-align:center;
-    margin-bottom:1.25rem;
+  .form-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--azul);
+    text-align: center;
+    margin-bottom: 1.25rem;
   }
-  .btn-primary{
-    background:var(--azul);
-    border:none;
+  .btn-primary {
+    background: var(--azul);
+    border: none;
   }
-  .btn-primary:hover{background:var(--azul-oscuro)}
-  /* Enlaces inferiores */
-  .form-footer{
-    margin-top:1rem;
-    text-align:center;
-    font-size:.9rem;
+  .btn-primary:hover {
+    background: var(--azul-oscuro);
   }
-  .form-footer a{
-    color:var(--azul);
-    cursor:pointer;
-    text-decoration:underline;
+  .form-footer {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: .9rem;
   }
-  
+  .form-footer a {
+    color: var(--azul);
+    cursor: pointer;
+    text-decoration: underline;
+  }
 </style>
-<div class="d-flex justify-content-center align-items-center min-vh-100 login-bg">
 
-    <div class="form_card card shadow-lg p-4 p-md-5" style="max-width: 420px; width: 100%;">
-  {% if login_form.errors or register_form.errors %}
-    <div class="alert alert-danger">Por favor revisa los errores en el formulario.</div>
-  {% endif %}
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+  <div class="form-card card">
+    {% if login_form.errors or register_form.errors %}
+      <div class="alert alert-danger">
+        Por favor corrige los errores en el formulario.
+      </div>
+    {% endif %}
 
-  {# ------ REGISTRO ------ #}
-  {% if mode == 'register' %}
-    <h2 class="form-title">Registro</h2>
-    <form method="post">
-      {% csrf_token %}
-      {{ register_form.as_p }}
-      <input type="hidden" name="mode" value="register">
-      <button class="btn btn-primary w-100">Crear cuenta</button>
-    </form>
-    <div class="form-footer">
-      ¿Ya tienes cuenta? <a onclick="cambiarModo('login')">Inicia sesión</a>
-    </div>
+    {# ——— Registro ——— #}
+    {% if mode == 'register' %}
+      <h2 class="form-title">Registro</h2>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="register">
 
-  {# ------ RESET PASSWORD ------ #}
-  {% elif mode == 'reset' %}
-    <h2 class="form-title">Recuperar contraseña</h2>
-    <form method="post">
-      {% csrf_token %}
-      <input type="email" name="email" class="form-control" placeholder="Tu correo" required>
-      <input type="hidden" name="mode" value="reset">
-      <button class="btn btn-primary w-100">Enviar enlace</button>
-    </form>
-    <div class="form-footer">
-      <a onclick="cambiarModo('login')">Volver al login</a>
-    </div>
+        <div class="mb-3">
+          {{ register_form.username.label_tag }}
+          {{ register_form.username }}
+          {% if register_form.username.errors %}
+            <div class="invalid-feedback d-block">
+              {{ register_form.username.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
 
-  {# ------ LOGIN (por defecto) ------ #}
-  {% else %}
-    <h2 class="form-title">Iniciar sesión</h2>
-    <form method="post" action="{% url 'pedidos:acceso' %}">
-      {% csrf_token %}
-      {{ login_form.as_p }}
-      <input type="hidden" name="next" value="{{ request.GET.next }}">
-      <button class="btn btn-primary w-100">Ingresar</button>
-    </form>
-    <div class="form-footer">
-      <a onclick="cambiarModo('register')">Crear cuenta</a> |
-      <a onclick="cambiarModo('reset')">Olvidé mi contraseña</a>
-    </div>
-  {% endif %}
+        <div class="mb-3">
+          {{ register_form.email.label_tag }}
+          {{ register_form.email }}
+          {% if register_form.email.errors %}
+            <div class="invalid-feedback d-block">
+              {{ register_form.email.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3 position-relative">
+          {{ register_form.password1.label_tag }}
+          {{ register_form.password1 }}
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
+                  data-target="#id_register_password1"
+                  aria-label="Mostrar contraseña">
+            <i class="bi bi-eye-slash"></i>
+          </button>
+          {% if register_form.password1.errors %}
+            <div class="invalid-feedback d-block">
+              {{ register_form.password1.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3 position-relative">
+          {{ register_form.password2.label_tag }}
+          {{ register_form.password2 }}
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
+                  data-target="#id_register_password2"
+                  aria-label="Mostrar contraseña">
+            <i class="bi bi-eye-slash"></i>
+          </button>
+          {% if register_form.password2.errors %}
+            <div class="invalid-feedback d-block">
+              {{ register_form.password2.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Crear cuenta</button>
+      </form>
+      <div class="form-footer">
+        ¿Ya tienes cuenta? <a onclick="cambiarModo('login')">Inicia sesión</a>
+      </div>
+
+    {# ——— Recuperar contraseña ——— #}
+    {% elif mode == 'reset' %}
+      <h2 class="form-title">Recuperar contraseña</h2>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="reset">
+
+        <div class="mb-3">
+          <label for="id_email" class="form-label">Correo electrónico</label>
+          <input type="email" name="email" id="id_email" class="form-control" placeholder="Tu correo" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Enviar enlace</button>
+      </form>
+      <div class="form-footer">
+        <a onclick="cambiarModo('login')">Volver al login</a>
+      </div>
+
+    {# ——— Login ——— #}
+    {% else %}
+      <h2 class="form-title">Iniciar sesión</h2>
+      <form method="post" action="{% url 'pedidos:acceso' %}">
+        {% csrf_token %}
+        <input type="hidden" name="mode" value="login">
+
+        <div class="mb-3">
+          {{ login_form.username.label_tag }}
+          {{ login_form.username }}
+          {% if login_form.username.errors %}
+            <div class="invalid-feedback d-block">
+              {{ login_form.username.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="mb-3 position-relative">
+          {{ login_form.password.label_tag }}
+          {{ login_form.password }}
+          <button type="button"
+                  class="btn btn-sm btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-2 toggle-password"
+                  data-target="#id_login_password"
+                  aria-label="Mostrar contraseña">
+            <i class="bi bi-eye-slash"></i>
+          </button>
+          {% if login_form.password.errors %}
+            <div class="invalid-feedback d-block">
+              {{ login_form.password.errors.0 }}
+            </div>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+      </form>
+      <div class="form-footer">
+        <a onclick="cambiarModo('register')">Crear cuenta</a> |
+        <a onclick="cambiarModo('reset')">Olvidé mi contraseña</a>
+      </div>
+    {% endif %}
+  </div>
 </div>
+{% endblock %}
 
-<script>
-/* Envía un POST oculto cambiando el modo (login / register / reset) */
-function cambiarModo(modo){
-  const form=document.createElement('form');
-  form.method='post';
-  form.style.display='none';
-  const csrf=document.querySelector('[name=csrfmiddlewaretoken]').cloneNode();
-  const mode=document.createElement('input');
-  mode.type='hidden';mode.name='mode';mode.value=modo;
-  form.append(csrf,mode);
-  document.body.append(form);
-  form.submit();
-}
-</script>
+{% block scripts %}
+  {{ block.super }}
+
+  <script>
+    // Cambia el modo entre login / register / reset
+    function cambiarModo(modo) {
+      const form = document.createElement('form');
+      form.method = 'post';
+      form.style.display = 'none';
+      const csrf = document.querySelector('[name=csrfmiddlewaretoken]').cloneNode();
+      const m = document.createElement('input');
+      m.type = 'hidden'; m.name = 'mode'; m.value = modo;
+      form.append(csrf, m);
+      document.body.append(form);
+      form.submit();
+    }
+  </script>
+
+  <script>
+    // Toggle password eye
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = document.querySelector(btn.getAttribute('data-target'));
+          const icon = btn.querySelector('i');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+          } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+          }
+        });
+      });
+    });
+  </script>
 {% endblock %}
