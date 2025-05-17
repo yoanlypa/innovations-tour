@@ -124,7 +124,7 @@ from .models import Maleta, Pedido
 
 
 class PedidoFormCliente(forms.ModelForm):
-    # Campos de fecha siguen siendo DateField (reciben date)
+    # ──────────────────── Widgets de fecha ────────────────────
     fecha_inicio = forms.DateField(
         required=True,
         widget=forms.TextInput(
@@ -134,15 +134,15 @@ class PedidoFormCliente(forms.ModelForm):
                 "autocomplete": "off",
             }
         ),
-        # Aceptamos tanto el ISO de Flatpickr como dd/mm/aaaa
         input_formats=["%Y-%m-%d", "%d/%m/%Y"],
         error_messages={
             "invalid": "Introduce una fecha válida (dd/mm/aaaa)",
             "required": "Este campo es obligatorio",
         },
     )
+
     fecha_fin = forms.DateField(
-        required=False,
+        required=False,  # puede quedar vacío
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
@@ -151,11 +151,10 @@ class PedidoFormCliente(forms.ModelForm):
             }
         ),
         input_formats=["%Y-%m-%d", "%d/%m/%Y", ""],
-        error_messages={
-            "invalid": "Introduce una fecha válida (dd/mm/aaaa)",
-        },
+        error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
     )
 
+    # ──────────────────── Meta ────────────────────
     class Meta:
         model = Pedido
         fields = [
@@ -174,51 +173,70 @@ class PedidoFormCliente(forms.ModelForm):
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
             "estado_cliente": forms.Select(attrs={"class": "form-select"}),
-            "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "notas": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3}
+            ),
         }
 
+    # ──────────────────── Inicialización ────────────────────
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Valor por defecto para estado_cliente
         self.fields["estado_cliente"].initial = "pagado"
 
-        # Al editar, mostramos dd/mm/aaaa para la pantalla
+        # Mostrar dd/mm/aaaa cuando editamos
         if self.instance and self.instance.pk:
             if self.instance.fecha_inicio:
-                local_i = timezone.localtime(self.instance.fecha_inicio)
-                self.initial["fecha_inicio"] = local_i.strftime("%d/%m/%Y")
+                self.initial["fecha_inicio"] = timezone.localtime(
+                    self.instance.fecha_inicio
+                ).strftime("%d/%m/%Y")
             if self.instance.fecha_fin:
-                local_f = timezone.localtime(self.instance.fecha_fin)
-                self.initial["fecha_fin"] = local_f.strftime("%d/%m/%Y")
+                self.initial["fecha_fin"] = timezone.localtime(
+                    self.instance.fecha_fin
+                ).strftime("%d/%m/%Y")
 
-    def clean_fecha_inicio(self):
-        """Convierte la date a datetime aware antes de asignar al modelo."""
-        date = self.cleaned_data["fecha_inicio"]
-        # Combina con hora 00:00 y haz aware
-        dt = datetime.combine(date, time())
+    # ──────────────────── Limpieza de campos individuales ────────────────────
+    def _make_aware(self, date_obj):
+        """Convierte un date en datetime aware (00:00)."""
+        dt = datetime.combine(date_obj, time())
         return timezone.make_aware(dt, timezone.get_current_timezone())
 
+    def clean_fecha_inicio(self):
+        date = self.cleaned_data["fecha_inicio"]
+        return self._make_aware(date)
+
     def clean_fecha_fin(self):
-        """Mismo para fecha_fin, permitiendo vacío."""
         date = self.cleaned_data.get("fecha_fin")
-        if date:
-            dt = datetime.combine(date, time())
-            return timezone.make_aware(dt, timezone.get_current_timezone())
-        return None
+        return self._make_aware(date) if date else None
+
+    # ──────────────────── Validación cruzada ────────────────────
+    def clean(self):
+        cleaned = super().clean()
+        inicio = cleaned.get("fecha_inicio")
+        fin = cleaned.get("fecha_fin")
+
+        if inicio and fin and inicio > fin:
+            raise ValidationError(
+                {
+                    "fecha_fin": "La fecha de fin debe ser igual o posterior a la fecha de inicio."
+                }
+            )
+        return cleaned
 
 
+# ──────────────────── Formset de maletas ────────────────────
 MaletaFormSet = inlineformset_factory(
     Pedido,
     Maleta,
     fields=("guia", "cantidad_pax"),
     widgets={
         "guia": forms.TextInput(attrs={"class": "form-control"}),
-        "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+        "cantidad_pax": forms.NumberInput(
+            attrs={"class": "form-control", "min": 1}
+        ),
     },
-    extra=0,
+    extra=1,
     can_delete=True,
 )
-
 
 class MaletaForm(forms.ModelForm):
     class Meta:
