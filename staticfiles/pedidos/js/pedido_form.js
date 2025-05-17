@@ -45,6 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const tpl = idx => `
     <div class="card mb-3 p-3 position-relative">
       <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-maleta"></button>
+       <!-- 🔽 campo id oculto (vacío) -->
+    <input type="hidden" name="${prefix}-${idx}-id" id="id_${prefix}-${idx}-id">
       <div class="row g-3">
         <div class="col-md-6">
           <label for="id_${prefix}-${idx}-guia" class="form-label">Guía *</label>
