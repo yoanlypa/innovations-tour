@@ -143,6 +143,10 @@
           {% endif %}
         </div>
       </div>
+      <button type="button"
+        name="remove_maleta"
+        class="btn-close position-absolute top-0 end-0 eliminar-maleta"
+        aria-label="Eliminar maleta"></button>
       <input type="checkbox"
              name="{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
              id="id_{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
@@ -151,9 +155,11 @@
   {% endfor %}
 </div>
 <div class="text-center mb-4">
-  <button type="button" id="add-maleta" class="btn btn-outline-secondary">
-    + Añadir maleta
-  </button>
+  <button type="button" id="add-maleta"
+        name="add_maleta"
+        class="btn btn-outline-secondary">
+  + Añadir maleta
+</button>
 </div>
 
 {# —— submit —— #}

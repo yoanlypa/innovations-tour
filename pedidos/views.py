@@ -263,7 +263,7 @@ def pedido_editar_cliente_view(request, pk):
             pedido = form.save(commit=False)
             pedido.save()
             formset.save()
-            print("POST:", request.POST)
+            print("── POST ──", request.POST.dict())
             messages.success(request, "✅ Pedido actualizado correctamente.")
             return redirect("pedidos:mis_pedidos")
         messages.error(request, "Corrige los errores del formulario.")
