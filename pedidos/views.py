@@ -167,30 +167,34 @@ def acceso_view(request):
                     if request.user.is_staff
                     else "pedidos:mis_pedidos"
                 )
-            messages.error(request, "Credenciales inválidas.")
+        messages.error(request, "Credenciales inválidas.")
     # ---------- REGISTRO ----------
-    elif mode == "register":
-        register_form = CustomRegisterForm(request.POST)
+    elif mode == 'register':
+        # Importante pasar el POST con keyword 'data' para claridad
+        register_form = CustomRegisterForm(data=request.POST)
         if register_form.is_valid():
             user = register_form.save()
             RegistroCliente.objects.create(
-                nombre_usuario=user.username, email=user.email
+                nombre_usuario=user.username,
+                email=user.email
             )
             login(request, user)
-            return redirect("pedidos:mis_pedidos")
-        messages.error(request, "Corrige los errores del formulario.")
+            return redirect('pedidos:mis_pedidos')
+        else:
+            # Esto te mostrará en la consola qué errores dio el formulario
+            print("❌ Registro inválido:", register_form.errors.as_json())
+            messages.error(request, 'Corrige los errores del formulario.')
 
-    # ---------- RESET ----------
     elif mode == "reset":
         email = request.POST.get("email")
         # … lógica de envío de enlace (omitida aquí) …
         messages.success(request, "Te enviamos un enlace a tu correo.")
 
     context = {
-        "login_form": login_form,
-        "register_form": register_form,
-        "mode": mode,  # para que la plantilla sepa qué pestaña mostrar
-    }
+    "login_form": login_form,
+    "register_form": register_form,
+    "mode": mode,  # para que la plantilla sepa qué pestaña mostrar
+}
     return render(request, "pedidos/acceso.html", context)
 
 

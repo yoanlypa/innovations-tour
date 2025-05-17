@@ -95,6 +95,14 @@ class CustomRegisterForm(UserCreationForm):
         if User.objects.filter(email=email).exists():
             raise ValidationError("Este correo ya está en uso.")
         return email
+
+    def save(self, commit=True):
+        # Super guarda username y password, pero no siempre email
+        user = super().save(commit=False)
+        user.email = self.cleaned_data["email"]
+        if commit:
+            user.save()
+        return user
 #
 #
 #
