@@ -212,19 +212,11 @@
 
   <script>
     function cambiarModo(modo) {
-      const form = document.createElement('form');
-      form.method = 'post';
-      form.action = "{% url 'pedidos:acceso' %}";
-      form.style.display = 'none';
-      const csrf = document.querySelector('[name=csrfmiddlewaretoken]').cloneNode();
-      const inputModo = document.createElement('input');
-      inputModo.type = 'hidden';
-      inputModo.name = 'mode';
-      inputModo.value = modo;
-      form.append(csrf, inputModo);
-      document.body.append(form);
-      form.submit();
-    }
+    const url = new URL(window.location);
+    url.searchParams.set("mode", modo);
+    // Reseteamos cualquier POST previo
+    window.location.href = url.toString();
+  }
   </script>
 
   <script>

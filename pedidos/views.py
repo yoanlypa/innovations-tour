@@ -117,8 +117,9 @@ class TareaDeleteView(DeleteView):
 @csrf_protect
 def acceso_view(request):
     # Determinamos el modo desde POST o por defecto "login"
-    mode = request.POST.get("mode", "login")
-
+    mode = request.POST.get("mode")
+    if not mode:
+        mode = request.GET.get("mode", "login")
     # Formularios vacíos para GET
     login_form = CustomLoginForm()
     register_form = CustomRegisterForm()
