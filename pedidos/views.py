@@ -1,5 +1,4 @@
 # pedidos/views.py
-
 import csv
 from datetime import datetime, time
 
@@ -17,7 +16,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
-from django.views.decorators.http import require_http_methods, require_GET
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 
 from .forms import (
@@ -31,32 +30,18 @@ from .forms import (
 from .models import Maleta, Pedido, RegistroCliente, Tarea
 
 
-# ────────── MIXINS ──────────
-
-class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
-    login_url = reverse_lazy("pedidos:acceso")
-
-    def test_func(self):
-        return self.request.user.is_staff
-
-
-# ────────── HOME ──────────
+# ——————— Home ———————
 
 class HomeView(TemplateView):
-    """
-    Landing público. Si el usuario está logueado, redirige según su rol.
-    """
     template_name = "pedidos/home.html"
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
-            if request.user.is_staff:
-                return redirect("pedidos:pedidos_lista")
-            return redirect("pedidos:mis_pedidos")
+            return redirect("pedidos:pedidos_lista" if request.user.is_staff else "pedidos:mis_pedidos")
         return super().dispatch(request, *args, **kwargs)
 
 
-# ────────── TAREAS ──────────
+# ——————— Tareas ———————
 
 @require_http_methods(["POST"])
 @login_required
@@ -88,7 +73,6 @@ class TareaCreateView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        # Si es AJAX, devolvemos JSON
         if self.request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return JsonResponse({
                 "id": self.object.id,
@@ -112,35 +96,28 @@ class TareaDeleteView(DeleteView):
     success_url = reverse_lazy("pedidos:tareas")
 
 
-# ────────── ACCESO Y REGISTRO ──────────
+# ——————— Acceso / Registro ———————
 
 @csrf_protect
 def acceso_view(request):
-    # Determinamos el modo desde POST o por defecto "login"
-    mode = request.POST.get("mode")
-    if not mode:
-        mode = request.GET.get("mode", "login")
-    # Formularios vacíos para GET
+    mode = request.POST.get("mode") or request.GET.get("mode", "login")
     login_form = CustomLoginForm()
     register_form = CustomRegisterForm()
 
     if request.method == "POST":
-        # —— LOGIN ——
         if mode == "login":
             login_form = CustomLoginForm(request, data=request.POST)
             if login_form.is_valid():
                 user = login_form.get_user()
                 login(request, user)
                 next_url = request.POST.get("next") or request.GET.get("next")
-                if next_url:
-                    return redirect(next_url)
-                return redirect("pedidos:pedidos_lista" if user.is_staff else "pedidos:mis_pedidos")
+                return redirect(next_url) if next_url else redirect(
+                    "pedidos:pedidos_lista" if user.is_staff else "pedidos:mis_pedidos"
+                )
             messages.error(request, "Credenciales inválidas.")
 
-        # —— REGISTRO ——
         elif mode == "register":
-            register_form = CustomRegisterForm(data=request.POST)
-            print(">>> REGISTRO REQUEST.POST:", request.POST.dict())
+            register_form = CustomRegisterForm(request.POST)
             if register_form.is_valid():
                 user = register_form.save()
                 RegistroCliente.objects.create(
@@ -149,27 +126,60 @@ def acceso_view(request):
                 )
                 login(request, user)
                 return redirect("pedidos:mis_pedidos")
-            print("❌ ERRORES EN REGISTER_FORM:", register_form.errors.as_json())
             messages.error(request, "Corrige los errores del formulario.")
 
-        # —— RESET PASSWORD ——
         elif mode == "reset":
-            # Aquí pones tu lógica de envío de enlace…
+            # lógica envío enlace…
             messages.success(request, "Te enviamos un enlace a tu correo.")
 
-    # Al final renderizamos siempre con los formularios actualizados
     return render(request, "pedidos/acceso.html", {
         "login_form": login_form,
         "register_form": register_form,
         "mode": mode,
     })
 
+
 def logout_view(request):
     logout(request)
     return redirect("pedidos:acceso")
 
 
-# ────────── PEDIDOS ──────────
+# ——————— Pedidos ———————
+
+@staff_member_required
+def pedidos_lista_view(request):
+    pedidos = Pedido.objects.all().order_by("-fecha_inicio")
+    return render(request, "pedidos/pedidos_lista.html", {"pedidos": pedidos})
+
+
+@staff_member_required
+@require_POST
+def pedido_eliminar_view(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    pedido.delete()
+    messages.success(request, "Pedido eliminado correctamente.")
+    return redirect("pedidos:pedidos_lista")
+
+
+@staff_member_required
+@require_POST
+def pedido_eliminar_masivo_view(request):
+    ids = request.POST.getlist("selected_ids")
+    if not ids:
+        messages.error(request, "No seleccionaste ningún pedido.")
+    else:
+        qs = Pedido.objects.filter(pk__in=ids)
+        count = qs.count()
+        qs.delete()
+        messages.success(request, f"Se eliminaron {count} pedidos seleccionados.")
+    return redirect("pedidos:pedidos_lista")
+
+
+@login_required
+def pedidos_mios_view(request):
+    pedidos = Pedido.objects.filter(usuario=request.user).order_by("-fecha_inicio")
+    return render(request, "pedidos/pedidos_mios.html", {"pedidos": pedidos})
+
 
 @staff_member_required
 def pedidos_lista_view(request):
