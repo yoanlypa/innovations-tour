@@ -81,7 +81,8 @@
                 <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm" style="background-color:#f78243; color:white;">
                   ✏️ Editar
                 </a>
-                <!-- Eliminar individual -->
+              </td>
+                  <td> <!-- Eliminar individual -->
             <form method="post"
                   action="{% url 'pedidos:pedido_eliminar' p.pk %}"
                   style="display:inline"
@@ -89,7 +90,7 @@
               {% csrf_token %}
               <button class="btn btn-sm btn-danger">🗑️</button>
             </form>
-              </td>
+            </td>
             </tr>
           {% endfor %}
         </tbody>
