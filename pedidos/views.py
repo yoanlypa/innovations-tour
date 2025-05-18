@@ -116,12 +116,15 @@ class TareaDeleteView(DeleteView):
 
 @csrf_protect
 def acceso_view(request):
-    login_form = CustomLoginForm()
-    register_form = CustomRegisterForm()
+    # Determinamos el modo desde POST o por defecto "login"
     mode = request.POST.get("mode", "login")
 
+    # Formularios vacíos para GET
+    login_form = CustomLoginForm()
+    register_form = CustomRegisterForm()
+
     if request.method == "POST":
-        # — LOGIN —
+        # —— LOGIN ——
         if mode == "login":
             login_form = CustomLoginForm(request, data=request.POST)
             if login_form.is_valid():
@@ -133,9 +136,9 @@ def acceso_view(request):
                 return redirect("pedidos:pedidos_lista" if user.is_staff else "pedidos:mis_pedidos")
             messages.error(request, "Credenciales inválidas.")
 
-        # — REGISTRO —
+        # —— REGISTRO ——
         elif mode == "register":
-            register_form = CustomRegisterForm(request.POST)
+            register_form = CustomRegisterForm(data=request.POST)
             print(">>> REGISTRO REQUEST.POST:", request.POST.dict())
             if register_form.is_valid():
                 user = register_form.save()
@@ -148,23 +151,17 @@ def acceso_view(request):
             print("❌ ERRORES EN REGISTER_FORM:", register_form.errors.as_json())
             messages.error(request, "Corrige los errores del formulario.")
 
-        # — RESET PASSWORD —
+        # —— RESET PASSWORD ——
         elif mode == "reset":
-            email = request.POST.get("email")
-            # Lógica de envío de enlace…
+            # Aquí pones tu lógica de envío de enlace…
             messages.success(request, "Te enviamos un enlace a tu correo.")
 
-    context = {
+    # Al final renderizamos siempre con los formularios actualizados
+    return render(request, "pedidos/acceso.html", {
         "login_form": login_form,
         "register_form": register_form,
         "mode": mode,
-    }
-    return render(request, "pedidos/acceso.html", context)
-
-
-def logout_view(request):
-    logout(request)
-    return redirect("pedidos:acceso")
+    })
 
 
 # ────────── PEDIDOS ──────────
