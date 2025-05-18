@@ -163,6 +163,10 @@ def acceso_view(request):
         "mode": mode,
     })
 
+def logout_view(request):
+    logout(request)
+    return redirect("pedidos:acceso")
+
 
 # ────────── PEDIDOS ──────────
 
