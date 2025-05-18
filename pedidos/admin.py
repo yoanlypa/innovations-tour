@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils import timezone
 from datetime import timedelta
-from object_actions import DjangoObjectActions 
+from django_object_actions import DjangoObjectActions, action
 
 from .models import Maleta, Pedido, Producto, RegistroCliente, Tarea
 
