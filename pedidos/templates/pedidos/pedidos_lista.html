@@ -5,15 +5,10 @@
 
   {% if not user.is_staff %}
     <div class="alert alert-warning">
-      ⚠️ No tienes permiso para ver esta página.
+      <strong>⚠️ AVISO:</strong> No tienes permiso para ver esta página.
     </div>
   {% else %}
-    <a href="{% url 'pedidos:pedido_nuevo' %}"
-       class="btn btn-primary btn-lg rounded-circle position-fixed"
-       style="bottom:2rem; right:2rem; z-index:1000;">
-      <span class="fs-3 fw-bold">+</span>
-    </a>
-
+    {# —— Borrado masivo —— #}
     <form id="mass-delete-form"
           method="post"
           action="{% url 'pedidos:pedido_eliminar_masivo' %}">
@@ -27,24 +22,34 @@
       {% if pedidos %}
         <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
           <table class="table table-striped align-middle text-center">
-            <thead class="table-light" style="background-color:#005dab;color:white;">
+            <thead class="table-light" style="background-color: #005dab; color: white;">
               <tr>
                 <th><input type="checkbox" id="select-all"></th>
-                <th>Fecha Inicio</th><th>Fecha Fin</th><th>Empresa</th>
-                <th>Excursión</th><th>Lugar Entrega</th><th>Lugar Recogida</th>
-                <th>Maletas</th><th>Estado Cliente</th><th>Estado Equipo</th>
-                <th>Notas</th><th>Editar</th><th>Eliminar</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Empresa</th>
+                <th>Excursión</th>
+                <th>Lugar Entrega</th>
+                <th>Lugar Recogida</th>
+                <th>Maletas</th>
+                <th>Estado Cliente</th>
+                <th>Estado Equipo</th>
+                <th>Notas</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
               </tr>
             </thead>
             <tbody>
               {% for p in pedidos %}
                 <tr>
+                  {# Checkbox de selección #}
                   <td>
                     <input type="checkbox"
                            name="selected_ids"
                            value="{{ p.pk }}"
                            class="select-checkbox">
                   </td>
+
                   <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
                   <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
                   <td>{{ p.empresa }}</td>
@@ -60,58 +65,23 @@
                       —
                     {% endfor %}
                   </td>
-
-                  {# Estado Cliente con if correctamente espaciado #}
                   <td>
                     <span class="badge 
                       {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark
-                      {% elif p.estado_cliente == 'pagado'    %}bg-success
-                      {% else %}bg-primary{% endif %}"
-                      id="badge-cliente-{{ p.pk }}">
+                      {% elif p.estado_cliente == 'pagado'  %}bg-success
+                      {% else %}bg-primary{% endif %}">
                       {{ p.get_estado_cliente_display }}
                     </span>
-                    <select class="form-select form-select-sm mt-1 d-none"
-                            id="select-cliente-{{ p.pk }}"
-                            data-pk="{{ p.pk }}">
-                      {% for code,label in p._meta.get_field('estado_cliente').choices %}
-                        <option value="{{ code }}" {% if code == p.estado_cliente %}selected{% endif %}>
-                          {{ label }}
-                        </option>
-                      {% endfor %}
-                    </select>
-                    <button class="btn btn-sm btn-outline-secondary mt-1"
-                            onclick="toggleSelect('cliente', {{ p.pk }})"
-                            title="Cambiar estado">
-                      🔄
-                    </button>
                   </td>
-
-                  {# Estado Equipo con if correctamente espaciado #}
                   <td>
                     <span class="badge 
                       {% if p.estado_equipo == 'por_revisar' %}bg-secondary
                       {% elif p.estado_equipo == 'aprobado'   %}bg-info text-dark
                       {% elif p.estado_equipo == 'entregado'  %}bg-success
-                      {% else %}bg-dark{% endif %}"
-                      id="badge-equipo-{{ p.pk }}">
+                      {% else %}bg-dark{% endif %}">
                       {{ p.get_estado_equipo_display }}
                     </span>
-                    <select class="form-select form-select-sm mt-1 d-none"
-                            id="select-equipo-{{ p.pk }}"
-                            data-pk="{{ p.pk }}">
-                      {% for code,label in p._meta.get_field('estado_equipo').choices %}
-                        <option value="{{ code }}" {% if code == p.estado_equipo %}selected{% endif %}>
-                          {{ label }}
-                        </option>
-                      {% endfor %}
-                    </select>
-                    <button class="btn btn-sm btn-outline-secondary mt-1"
-                            onclick="toggleSelect('equipo', {{ p.pk }})"
-                            title="Cambiar estado">
-                      🔄
-                    </button>
                   </td>
-
                   <td>
                     {% if p.notas %}
                       <button class="btn btn-sm btn-outline-info"
@@ -123,15 +93,13 @@
                       —
                     {% endif %}
                   </td>
-
                   <td>
                     <a href="{% url 'pedidos:pedido_editar' p.pk %}"
                        class="btn btn-sm"
-                       style="background-color:#f78243;color:white;">
+                       style="background-color:#f78243; color:white;">
                       ✏️ Editar
                     </a>
                   </td>
-
                   <td>
                     <button type="submit"
                             class="btn btn-sm btn-danger"
@@ -152,7 +120,7 @@
       {% endif %}
     </form>
 
-    {# Formularios ocultos para cada eliminación individual #}
+    {# —— Formularios ocultos para borrado individual —— #}
     {% for p in pedidos %}
       <form id="delete-form-{{ p.pk }}"
             method="post"
@@ -165,49 +133,21 @@
   {% endif %}
 {% endblock %}
 
+
 {% block scripts %}
   {{ block.super }}
   <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      // Tooltips
-      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    document.addEventListener('DOMContentLoaded', function () {
+      // Inicializar tooltips de Bootstrap
+      const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      triggers.forEach(el => new bootstrap.Tooltip(el));
 
-      // Select all
+      // Checkbox “Seleccionar todos”
       const selectAll = document.getElementById('select-all');
-      selectAll?.addEventListener('change', ()=> {
-        document.querySelectorAll('.select-checkbox').forEach(cb => cb.checked = selectAll.checked);
+      selectAll && selectAll.addEventListener('change', () => {
+        document.querySelectorAll('.select-checkbox')
+                .forEach(cb => cb.checked = selectAll.checked);
       });
     });
-
-    function toggleSelect(type, pk) {
-      const span   = document.getElementById(`badge-${type}-${pk}`);
-      const select = document.getElementById(`select-${type}-${pk}`);
-      span.classList.toggle('d-none');
-      select.classList.toggle('d-none');
-      if (!select.classList.contains('d-none')) {
-        select.focus();
-        select.onchange = () => {
-          const url = "{% url 'pedidos:ajax_estado_cliente' 0 %}".replace('0', pk);
-          if (type === 'equipo') {
-            url = "{% url 'pedidos:ajax_estado_equipo' 0 %}".replace('0', pk);
-          }
-          fetch(url, {
-            method: 'POST',
-            headers: {
-              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `state=${select.value}`
-          })
-          .then(r=>r.json())
-          .then(data=>{
-            span.textContent = data.display;
-            span.className   = 'badge ' + data.badge_class;
-            span.classList.remove('d-none');
-            select.classList.add('d-none');
-          });
-        };
-      }
-    }
   </script>
 {% endblock %}
