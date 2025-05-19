@@ -1,153 +1,197 @@
 {% extends 'pedidos/base.html' %}
-
 {% block content %}
-  <h2 class="mb-4" style="color:#005dab;">📦 Lista de Pedidos</h2>
+<h2 class="mb-4" style="color:#005dab;">📦 Lista de Pedidos</h2>
 
-  {% if not user.is_staff %}
-    <div class="alert alert-warning">
-      <strong>⚠️ AVISO:</strong> No tienes permiso para ver esta página.
-    </div>
-  {% else %}
-    {# —— Borrado masivo —— #}
-    <form id="mass-delete-form"
-          method="post"
-          action="{% url 'pedidos:pedido_eliminar_masivo' %}">
-      {% csrf_token %}
-      <button type="submit"
-              class="btn btn-danger mb-3"
-              onclick="return confirm('¿Eliminar todos los seleccionados?');">
-        🗑️ Eliminar seleccionados
-      </button>
+{% if not user.is_staff %}
+  <div class="alert alert-warning">
+    ⚠️ No tienes permiso para ver esta página.
+  </div>
+{% else %}
 
-      {% if pedidos %}
-        <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
-          <table class="table table-striped align-middle text-center">
-            <thead class="table-light" style="background-color: #005dab; color: white;">
+  {# —— Botón flotante “+ Nuevo” —— #}
+  <a href="{% url 'pedidos:pedido_nuevo' %}"
+     class="btn btn-primary btn-lg rounded-circle position-fixed"
+     style="bottom:2rem; right:2rem; z-index:1000;">
+    <span class="fs-3 fw-bold">+</span>
+  </a>
+
+  {# —— Formulario masivo —— #}
+  <form id="mass-delete-form" method="post" action="{% url 'pedidos:pedido_eliminar_masivo' %}">
+    {% csrf_token %}
+    <button type="submit"
+            class="btn btn-danger mb-3"
+            onclick="return confirm('¿Eliminar todos los seleccionados?');">
+      🗑️ Eliminar seleccionados
+    </button>
+
+    {% if pedidos %}
+      <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
+        <table class="table table-striped align-middle text-center">
+          <thead class="table-light" style="background-color:#005dab;color:white;">
+            <tr>
+              <th><input type="checkbox" id="select-all"></th>
+              <th>Fecha Inicio</th><th>Fecha Fin</th><th>Empresa</th>
+              <th>Excursión</th><th>Lugar Entrega</th><th>Lugar Recogida</th>
+              <th>Maletas</th><th>Estado Cliente</th><th>Estado Equipo</th>
+              <th>Notas</th><th>Editar</th><th>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pedidos %}
               <tr>
-                <th><input type="checkbox" id="select-all"></th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
-                <th>Empresa</th>
-                <th>Excursión</th>
-                <th>Lugar Entrega</th>
-                <th>Lugar Recogida</th>
-                <th>Maletas</th>
-                <th>Estado Cliente</th>
-                <th>Estado Equipo</th>
-                <th>Notas</th>
-                <th>Editar</th>
-                <th>Eliminar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for p in pedidos %}
-                <tr>
-                  {# Checkbox de selección #}
-                  <td>
-                    <input type="checkbox"
-                           name="selected_ids"
-                           value="{{ p.pk }}"
-                           class="select-checkbox">
-                  </td>
+                <td><input type="checkbox" name="selected_ids" value="{{ p.pk }}" class="select-checkbox"></td>
+                <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+                <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+                <td>{{ p.empresa }}</td>
+                <td>{{ p.excursion|default:"—" }}</td>
+                <td>{{ p.lugar_entrega }}</td>
+                <td>{{ p.lugar_recogida|default:"—" }}</td>
+                <td>
+                  {% for m in p.maletas.all %}
+                    <span class="badge rounded-pill text-bg-light border shadow-sm d-block mb-1">
+                      🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+                    </span>
+                  {% empty %} — {% endfor %}
+                </td>
 
-                  <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-                  <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
-                  <td>{{ p.empresa }}</td>
-                  <td>{{ p.excursion|default:"—" }}</td>
-                  <td>{{ p.lugar_entrega }}</td>
-                  <td>{{ p.lugar_recogida|default:"—" }}</td>
-                  <td>
-                    {% for m in p.maletas.all %}
-                      <span class="badge rounded-pill text-bg-light border shadow-sm d-block mb-1">
-                        🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-                      </span>
-                    {% empty %}
-                      —
+                {# — Estado Cliente — #}
+                <td>
+                  <span class="badge 
+                    {% if p.estado_cliente=='pendiente' %}bg-warning text-dark
+                    {% elif p.estado_cliente=='pagado' %}bg-success
+                    {% else %}bg-primary{% endif %}"
+                    id="badge-cliente-{{ p.pk }}">
+                    {{ p.get_estado_cliente_display }}
+                  </span>
+                  <select class="form-select form-select-sm mt-1 d-none"
+                          id="select-cliente-{{ p.pk }}"
+                          data-pk="{{ p.pk }}">
+                    {% for code,label in p._meta.get_field('estado_cliente').choices %}
+                      <option value="{{ code }}" {% if code==p.estado_cliente %}selected{% endif %}>
+                        {{ label }}
+                      </option>
                     {% endfor %}
-                  </td>
-                  <td>
-                    <span class="badge 
-                      {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark
-                      {% elif p.estado_cliente == 'pagado'  %}bg-success
-                      {% else %}bg-primary{% endif %}">
-                      {{ p.get_estado_cliente_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge 
-                      {% if p.estado_equipo == 'por_revisar' %}bg-secondary
-                      {% elif p.estado_equipo == 'aprobado'   %}bg-info text-dark
-                      {% elif p.estado_equipo == 'entregado'  %}bg-success
-                      {% else %}bg-dark{% endif %}">
-                      {{ p.get_estado_equipo_display }}
-                    </span>
-                  </td>
-                  <td>
-                    {% if p.notas %}
-                      <button class="btn btn-sm btn-outline-info"
-                              data-bs-toggle="tooltip"
-                              title="{{ p.notas }}">
-                        📝
-                      </button>
-                    {% else %}
-                      —
-                    {% endif %}
-                  </td>
-                  <td>
-                    <a href="{% url 'pedidos:pedido_editar' p.pk %}"
-                       class="btn btn-sm"
-                       style="background-color:#f78243; color:white;">
-                      ✏️ Editar
-                    </a>
-                  </td>
-                  <td>
-                    <button type="submit"
-                            class="btn btn-sm btn-danger"
-                            form="delete-form-{{ p.pk }}"
-                            onclick="return confirm('¿Eliminar este pedido?');">
-                      🗑️
-                    </button>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="alert alert-info text-center">
-          No hay pedidos registrados.
-        </div>
-      {% endif %}
+                  </select>
+                  <button class="btn btn-sm btn-outline-secondary mt-1"
+                          onclick="toggleSelect('cliente', {{ p.pk }})"
+                          title="Cambiar estado">
+                    🔄
+                  </button>
+                </td>
+
+                {# — Estado Equipo — #}
+                <td>
+                  <span class="badge 
+                    {% if p.estado_equipo=='por_revisar' %}bg-secondary
+                    {% elif p.estado_equipo=='aprobado' %}bg-info text-dark
+                    {% elif p.estado_equipo=='entregado' %}bg-success
+                    {% else %}bg-dark{% endif %}"
+                    id="badge-equipo-{{ p.pk }}">
+                    {{ p.get_estado_equipo_display }}
+                  </span>
+                  <select class="form-select form-select-sm mt-1 d-none"
+                          id="select-equipo-{{ p.pk }}"
+                          data-pk="{{ p.pk }}">
+                    {% for code,label in p._meta.get_field('estado_equipo').choices %}
+                      <option value="{{ code }}" {% if code==p.estado_equipo %}selected{% endif %}>
+                        {{ label }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  <button class="btn btn-sm btn-outline-secondary mt-1"
+                          onclick="toggleSelect('equipo', {{ p.pk }})"
+                          title="Cambiar estado">
+                    🔄
+                  </button>
+                </td>
+
+                <td>
+                  {% if p.notas %}
+                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ p.notas }}">📝</button>
+                  {% else %} — {% endif %}
+                </td>
+
+                <td>
+                  <a href="{% url 'pedidos:pedido_editar' p.pk %}"
+                     class="btn btn-sm"
+                     style="background-color:#f78243;color:white;">
+                    ✏️ Editar
+                  </a>
+                </td>
+
+                <td>
+                  <button type="submit"
+                          class="btn btn-sm btn-danger"
+                          form="delete-form-{{ p.pk }}"
+                          onclick="return confirm('¿Eliminar este pedido?');">
+                    🗑️
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center">
+        No hay pedidos registrados.
+      </div>
+    {% endif %}
+  </form>
+
+  {# Formularios ocultos para cada pedido #}
+  {% for p in pedidos %}
+    <form id="delete-form-{{ p.pk }}" method="post" action="{% url 'pedidos:pedido_eliminar' p.pk %}" style="display:none;">
+      {% csrf_token %}
     </form>
-
-    {# —— Formularios ocultos para borrado individual —— #}
-    {% for p in pedidos %}
-      <form id="delete-form-{{ p.pk }}"
-            method="post"
-            action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-            style="display:none;">
-        {% csrf_token %}
-      </form>
-    {% endfor %}
-
-  {% endif %}
+  {% endfor %}
+{% endif %}
 {% endblock %}
-
 
 {% block scripts %}
   {{ block.super }}
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Inicializar tooltips de Bootstrap
-      const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      triggers.forEach(el => new bootstrap.Tooltip(el));
+    document.addEventListener('DOMContentLoaded', function(){
+      // Tooltips
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
 
-      // Checkbox “Seleccionar todos”
+      // Select all
       const selectAll = document.getElementById('select-all');
-      selectAll && selectAll.addEventListener('change', () => {
-        document.querySelectorAll('.select-checkbox')
-                .forEach(cb => cb.checked = selectAll.checked);
+      selectAll?.addEventListener('change', ()=> {
+        document.querySelectorAll('.select-checkbox').forEach(cb => cb.checked = selectAll.checked);
       });
     });
+
+    // Muestra u oculta el select y badge
+    function toggleSelect(type, pk) {
+      const span   = document.getElementById(`badge-${type}-${pk}`);
+      const select = document.getElementById(`select-${type}-${pk}`);
+      span.classList.toggle('d-none');
+      select.classList.toggle('d-none');
+      if (!select.classList.contains('d-none')) {
+        select.focus();
+        // Cuando cambie, lo guardamos vía AJAX:
+        select.onchange = () => {
+          const url = "{% url 'pedidos:ajax_estado_%s' 0 %}".replace('0', pk).replace('%s', type);
+          fetch(url, {
+            method: 'POST',
+            headers: {
+              'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `state=${select.value}`
+          })
+          .then(r=>r.json())
+          .then(data=>{
+            // Actualizamos badge
+            span.textContent = data.display;
+            span.className   = 'badge ' + data.badge_class;
+            // Ocultamos select, mostramos badge
+            span.classList.remove('d-none');
+            select.classList.add('d-none');
+          });
+        };
+      }
+    }
   </script>
 {% endblock %}

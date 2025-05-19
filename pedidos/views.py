@@ -147,6 +147,42 @@ def logout_view(request):
 # ——————— Pedidos ———————
 
 @staff_member_required
+@require_POST
+def ajax_estado_cliente(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    nuevo = request.POST.get('state')
+    pedido.estado_cliente = nuevo
+    pedido.save()
+    # Calcula la clase del badge según el nuevo estado
+    cl = {
+      'pendiente': 'bg-warning text-dark',
+      'pagado':    'bg-success',
+    }.get(nuevo, 'bg-primary')
+    return JsonResponse({
+      'state': nuevo,
+      'display': pedido.get_estado_cliente_display(),
+      'badge_class': cl,
+    })
+
+@staff_member_required
+@require_POST
+def ajax_estado_equipo(request, pk):
+    pedido = get_object_or_404(Pedido, pk=pk)
+    nuevo = request.POST.get('state')
+    pedido.estado_equipo = nuevo
+    pedido.save()
+    cl = {
+      'por_revisar':'bg-secondary',
+      'aprobado':   'bg-info text-dark',
+      'entregado':  'bg-success',
+    }.get(nuevo, 'bg-dark')
+    return JsonResponse({
+      'state': nuevo,
+      'display': pedido.get_estado_equipo_display(),
+      'badge_class': cl,
+    })
+    
+@staff_member_required
 def pedidos_lista_view(request):
     pedidos = Pedido.objects.all().order_by("-fecha_inicio")
     return render(request, "pedidos/pedidos_lista.html", {"pedidos": pedidos})
