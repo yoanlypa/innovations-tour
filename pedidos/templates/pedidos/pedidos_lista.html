@@ -1,125 +1,152 @@
 {% extends 'pedidos/base.html' %}
 
 {% block content %}
-<h2 class="mb-4" style="color:#005dab;">📦 Lista de Pedidos</h2>
-  <!-- Form para borrado masivo -->
-  <form method="post" action="{% url 'pedidos:pedido_eliminar_masivo' %}">
-    {% csrf_token %}
-    <button type="submit"
-            class="btn btn-danger mb-3"
-            onclick="return confirm('¿Eliminar todos los seleccionados?');">
-      🗑️ Eliminar seleccionados
-    </button>
-{% if not user.is_staff %}
-  <div class="alert alert-warning">
-    <strong>⚠️ AVISO:</strong> No tienes permiso para ver esta página.
-  </div>
-{% else %}
+  <h2 class="mb-4" style="color:#005dab;">📦 Lista de Pedidos</h2>
 
-  {% if pedidos %}
-    <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
-      <table class="table table-striped align-middle">
-        <thead class="table-light text-center" style="background-color: #005dab; color: white;">
-          <tr>
-            <th>Fecha Inicio</th>
-            <th>Fecha Fin</th>
-            <th>Empresa</th>
-            <th>Excursión</th>
-            <th>Lugar Entrega</th>
-            <th>Lugar Recogida</th>
-            <th>Maletas</th>
-            <th>Estado Cliente</th>
-            <th>Estado Equipo</th>
-            <th>Notas</th>
-            <th>Editar</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in pedidos %}
-            <tr class="text-center">
-              <td>
-            <input type="checkbox"
-                   name="selected_ids"
-                   value="{{ p.pk }}"
-                   class="select-checkbox">
-          </td>
-              <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-              <td>{{ p.fecha_fin|date:"d/m/Y" }}</td>
-              <td>{{ p.empresa }}</td>
-              <td>{{ p.excursion }}</td>
-              <td>{{ p.lugar_entrega }}</td>
-              <td>{{ p.lugar_recogida|default:"—" }}</td>
-              <td>
-                {% for m in p.maletas.all %}
-                  <span class="badge rounded-pill text-bg-light border shadow-sm d-block mb-1">
-                    🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-                  </span>
-                {% empty %}
-                  —
-                {% endfor %}
-              </td>
-              <td>
-                <span class="badge {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark{% elif p.estado_cliente == 'pagado' %}bg-success{% else %}bg-primary{% endif %}">
-                  {{ p.get_estado_cliente_display }}
-                </span>
-              </td>
-              <td>
-                <span class="badge {% if p.estado_equipo == 'por_revisar' %}bg-secondary{% elif p.estado_equipo == 'aprobado' %}bg-info text-dark{% elif p.estado_equipo == 'entregado' %}bg-success{% else %}bg-dark{% endif %}">
-                  {{ p.get_estado_equipo_display }}
-                </span>
-              </td>
-              <td>
-                {% if p.notas %}
-                  <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ p.notas }}">
-                    📝
-                  </button>
-                {% else %}
-                  —
-                {% endif %}
-              </td>
-              <td>
-                <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm" style="background-color:#f78243; color:white;">
-                  ✏️ Editar
-                </a>
-              </td>
-                  <td> <!-- Eliminar individual -->
-            <form method="post"
-                  action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-                  style="display:inline"
-                  onsubmit="return confirm('¿Eliminar este pedido?');">
-              {% csrf_token %}
-              <button class="btn btn-sm btn-danger">🗑️</button>
-            </form>
-            </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  {% if not user.is_staff %}
+    <div class="alert alert-warning">
+      <strong>⚠️ AVISO:</strong> No tienes permiso para ver esta página.
     </div>
   {% else %}
-    <div class="alert alert-info text-center">
-      No hay pedidos registrados.
-    </div>
-  {% endif %}
+    {# —— Borrado masivo —— #}
+    <form id="mass-delete-form"
+          method="post"
+          action="{% url 'pedidos:pedido_eliminar_masivo' %}">
+      {% csrf_token %}
+      <button type="submit"
+              class="btn btn-danger mb-3"
+              onclick="return confirm('¿Eliminar todos los seleccionados?');">
+        🗑️ Eliminar seleccionados
+      </button>
 
-{% endif %}
+      {% if pedidos %}
+        <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
+          <table class="table table-striped align-middle text-center">
+            <thead class="table-light" style="background-color: #005dab; color: white;">
+              <tr>
+                <th><input type="checkbox" id="select-all"></th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Fin</th>
+                <th>Empresa</th>
+                <th>Excursión</th>
+                <th>Lugar Entrega</th>
+                <th>Lugar Recogida</th>
+                <th>Maletas</th>
+                <th>Estado Cliente</th>
+                <th>Estado Equipo</th>
+                <th>Notas</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in pedidos %}
+                <tr>
+                  {# Checkbox de selección #}
+                  <td>
+                    <input type="checkbox"
+                           name="selected_ids"
+                           value="{{ p.pk }}"
+                           class="select-checkbox">
+                  </td>
+
+                  <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+                  <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+                  <td>{{ p.empresa }}</td>
+                  <td>{{ p.excursion|default:"—" }}</td>
+                  <td>{{ p.lugar_entrega }}</td>
+                  <td>{{ p.lugar_recogida|default:"—" }}</td>
+                  <td>
+                    {% for m in p.maletas.all %}
+                      <span class="badge rounded-pill text-bg-light border shadow-sm d-block mb-1">
+                        🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+                      </span>
+                    {% empty %}
+                      —
+                    {% endfor %}
+                  </td>
+                  <td>
+                    <span class="badge 
+                      {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark
+                      {% elif p.estado_cliente == 'pagado'  %}bg-success
+                      {% else %}bg-primary{% endif %}">
+                      {{ p.get_estado_cliente_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge 
+                      {% if p.estado_equipo == 'por_revisar' %}bg-secondary
+                      {% elif p.estado_equipo == 'aprobado'   %}bg-info text-dark
+                      {% elif p.estado_equipo == 'entregado'  %}bg-success
+                      {% else %}bg-dark{% endif %}">
+                      {{ p.get_estado_equipo_display }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if p.notas %}
+                      <button class="btn btn-sm btn-outline-info"
+                              data-bs-toggle="tooltip"
+                              title="{{ p.notas }}">
+                        📝
+                      </button>
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                  <td>
+                    <a href="{% url 'pedidos:pedido_editar' p.pk %}"
+                       class="btn btn-sm"
+                       style="background-color:#f78243; color:white;">
+                      ✏️ Editar
+                    </a>
+                  </td>
+                  <td>
+                    <button type="submit"
+                            class="btn btn-sm btn-danger"
+                            form="delete-form-{{ p.pk }}"
+                            onclick="return confirm('¿Eliminar este pedido?');">
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="alert alert-info text-center">
+          No hay pedidos registrados.
+        </div>
+      {% endif %}
+    </form>
+
+    {# —— Formularios ocultos para borrado individual —— #}
+    {% for p in pedidos %}
+      <form id="delete-form-{{ p.pk }}"
+            method="post"
+            action="{% url 'pedidos:pedido_eliminar' p.pk %}"
+            style="display:none;">
+        {% csrf_token %}
+      </form>
+    {% endfor %}
+
+  {% endif %}
 {% endblock %}
 
+
 {% block scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-      new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-  });
-    // Checkbox "Seleccionar todos"
-    document.addEventListener('DOMContentLoaded', () => {
+  {{ block.super }}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // Inicializar tooltips de Bootstrap
+      const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+      triggers.forEach(el => new bootstrap.Tooltip(el));
+
+      // Checkbox “Seleccionar todos”
       const selectAll = document.getElementById('select-all');
       selectAll && selectAll.addEventListener('change', () => {
-        document.querySelectorAll('.select-checkbox').forEach(cb => {
-          cb.checked = selectAll.checked;
-        });
+        document.querySelectorAll('.select-checkbox')
+                .forEach(cb => cb.checked = selectAll.checked);
       });
     });
   </script>
