@@ -27,9 +27,8 @@ urlpatterns = [
     path("cargar_datos/", views.cargar_datos_pedido, name="cargar_datos_pedido"),
     path("pedidos/eliminar/<int:pk>/", views.pedido_eliminar_view, name="pedido_eliminar"),
     path("pedidos/eliminar-multiple/", views.pedido_eliminar_masivo_view, name="pedido_eliminar_masivo"),
-    path('pedidos/ajax/estado-cliente/<int:pk>/', views.ajax_estado_cliente, name='ajax_estado_cliente'),
-    path('pedidos/ajax/estado-equipo/<int:pk>/',  views.ajax_estado_equipo,  name='ajax_estado_equipo'),
-
+    path('pedidos/ajax/cambiar-estado/<int:pk>/',views.cambiar_estado,name='pedidos_cambiar_estado'),
+    
     # Cliente: mis pedidos
     path("mis-pedidos/", views.pedidos_mios_view, name="mis_pedidos"),
     path("mis-pedidos/nuevo/",views.pedido_nuevo_cliente_view,name="pedido_nuevo_cliente",),

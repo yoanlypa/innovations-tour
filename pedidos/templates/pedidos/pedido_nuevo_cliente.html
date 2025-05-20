@@ -1,30 +1,74 @@
+{# templates/pedidos/pedido_nuevo_cliente.html #}
 {% extends "pedidos/base_blank.html" %}
-{% load static %}
-
-{% block title %}
-  {% if es_edicion %}Editar pedido{% else %}Nuevo pedido{% endif %} · Innovations Tours
-{% endblock %}
-
+{% block title %}Nuevo pedido{% endblock %}
 {% block content %}
 <div class="container my-5">
- 
+  <h1 class="h4 mb-4">Nuevo pedido</h1>
 
-  <form
-    id="pedido-form"
-    method="post"
-    novalidate
-    {% if es_edicion %}
-      action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
-    {% else %}
-      action="{% url 'pedidos:pedido_nuevo_cliente' %}"
-    {% endif %}
-  >
+  <form method="post">
     {% csrf_token %}
-    {% include "pedidos/_pedido_form.html" %}
+    {{ form.non_field_errors }}
+
+    <div class="mb-3">
+      {{ form.empresa.label_tag }}
+      {{ form.empresa }}
+      {{ form.empresa.errors }}
+    </div>
+
+    <div class="mb-3">
+      {{ form.excursion.label_tag }}
+      {{ form.excursion }}
+      {{ form.excursion.errors }}
+    </div>
+
+    {# —— Radios de estado de pago —— #}
+    <div class="mb-4">
+      <label class="form-label">{{ form.estado_cliente.label }}</label>
+      <div>
+        {% for radio in form.estado_cliente %}
+          <div class="form-check form-check-inline">
+            {{ radio.tag }}
+            <label class="form-check-label" for="{{ radio.id_for_label }}">
+              {{ radio.choice_label }}
+            </label>
+          </div>
+        {% endfor %}
+        {% if form.estado_cliente.errors %}
+          <div class="invalid-feedback d-block">
+            {{ form.estado_cliente.errors.0 }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      {{ form.fecha_inicio.label_tag }}
+      {{ form.fecha_inicio }}
+      {{ form.fecha_inicio.errors }}
+    </div>
+    <div class="mb-3">
+      {{ form.fecha_fin.label_tag }}
+      {{ form.fecha_fin }}
+      {{ form.fecha_fin.errors }}
+    </div>
+
+    {# Aquí tu sección de Maletas como ya la tienes… #}
+    <h5 class="mt-4">Maletas</h5>
+    {{ formset.management_form }}
+    <div id="maletas-container">
+      {% for f in formset %}
+        <!-- … tu código de maleta … -->
+      {% endfor %}
+    </div>
+    <button type="button" id="add-maleta" class="btn btn-outline-secondary mb-3">➕ Añadir maleta</button>
+
+    <button class="btn btn-primary w-100">
+      {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+    </button>
   </form>
 </div>
 {% endblock %}
-
 {% block scripts %}
-  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
+  {{ block.super }}
+  <!-- tu JS de maletas aquí -->
 {% endblock %}

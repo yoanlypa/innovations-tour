@@ -66,21 +66,12 @@
                     {% endfor %}
                   </td>
                   <td>
-                    <span class="badge 
-                      {% if p.estado_cliente == 'pendiente' %}bg-warning text-dark
-                      {% elif p.estado_cliente == 'pagado'  %}bg-success
-                      {% else %}bg-primary{% endif %}">
-                      {{ p.get_estado_cliente_display }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge 
-                      {% if p.estado_equipo == 'por_revisar' %}bg-secondary
-                      {% elif p.estado_equipo == 'aprobado'   %}bg-info text-dark
-                      {% elif p.estado_equipo == 'entregado'  %}bg-success
-                      {% else %}bg-dark{% endif %}">
-                      {{ p.get_estado_equipo_display }}
-                    </span>
+                  <button
+                    class="btn {{ p.estado=='pagado' and 'btn-success' or p.estado=='aprobado' and 'btn-primary' or p.estado=='entregado' and 'btn-info text-dark' or p.estado=='recogido' and 'btn-dark' or 'btn-outline-secondary' }} btn-estado"
+                    data-pk="{{ p.pk }}"
+                    data-url="{% url 'pedidos_cambiar_estado' p.pk %}">
+                    {{ p.get_estado_display }}
+                  </button>
                   </td>
                   <td>
                     {% if p.notas %}
@@ -149,5 +140,40 @@
                 .forEach(cb => cb.checked = selectAll.checked);
       });
     });
+  </script>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.btn-estado').forEach(boton => {
+      boton.addEventListener('click', async function () {
+        const url = this.dataset.url;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        // Pregunta de confirmación:
+        const { isConfirmed } = await Swal.fire({
+          title: '¿Estás seguro?',
+          text: `Cambiar estado de "${this.textContent.trim()}" al siguiente paso?`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, cambiar',
+          cancelButtonText: 'Cancelar'
+        });
+        if (!isConfirmed) return;
+
+        // Si confirma, llamamos al AJAX:
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken }
+          });
+          const data = await res.json();
+          // Actualiza texto y clases
+          this.textContent = data.display;
+          this.className = 'btn ' + data.badge_class + ' btn-estado';
+        } catch (err) {
+          console.error('Error cambiando estado:', err);
+          Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+        }
+      });
+    });
+  });
   </script>
 {% endblock %}

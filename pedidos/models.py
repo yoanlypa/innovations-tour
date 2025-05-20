@@ -13,16 +13,12 @@ class Producto(models.Model):
 
 
 class Pedido(models.Model):
-    ESTADO_CLIENTE = [
-        ("pendiente", "🟡 Pendiente"),
-        ("pagado", "🟢 Pagado"),
-        ("entregado", "🔵 Entregado"),
-    ]
-    ESTADO_EQUIPO = [
-        ("por_revisar", "🔍 Por revisar"),
-        ("aprobado", "✅ Aprobado"),
-        ("entregado", "📦 Entregado"),
-        ("recogido", "📥 Recogido"),
+    ESTADOS= [
+        ('pendiente_pago', 'Pendiente de pago'),
+        ('pagado',         'Pagado'),
+        ('aprobado',       'Aprobado'),
+        ('entregado',      'Entregado'),
+        ('recogido',       'Recogido'),
     ]
 
     fecha_inicio = models.DateTimeField("Fecha inicio", default=timezone.now)
@@ -40,12 +36,8 @@ class Pedido(models.Model):
     )
     notas = models.TextField("Notas", blank=True)
 
-    estado_cliente = models.CharField(
-        "Estado cliente", max_length=20, choices=ESTADO_CLIENTE, default="pagado"
-    )
-    estado_equipo = models.CharField(
-        "Estado equipo", max_length=20, choices=ESTADO_EQUIPO, default="aprobado"
-    )
+    estado = models.CharField("Estado", max_length=20, choices=ESTADOS, default='pagado')
+    
     entregado = models.BooleanField("Entregado", default=False)
     recogido = models.BooleanField("Recogido", default=False)
 

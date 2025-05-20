@@ -148,38 +148,29 @@ def logout_view(request):
 
 @staff_member_required
 @require_POST
-def ajax_estado_cliente(request, pk):
+def cambiar_estado(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
-    nuevo = request.POST.get('state')
-    pedido.estado_cliente = nuevo
+    # Define el orden de la máquina de estados
+    siguiente = {
+        'pendiente_pago': 'pagado',
+        'pagado':         'aprobado',
+        'aprobado':       'entregado',
+        'entregado':      'recogido',
+        'recogido':       'recogido',  # permanece en recogido si ya está en el último
+    }[pedido.estado]
+    pedido.estado = siguiente
     pedido.save()
-    # Calcula la clase del badge según el nuevo estado
-    cl = {
-      'pendiente': 'bg-warning text-dark',
-      'pagado':    'bg-success',
-    }.get(nuevo, 'bg-primary')
     return JsonResponse({
-      'state': nuevo,
-      'display': pedido.get_estado_cliente_display(),
-      'badge_class': cl,
-    })
-
-@staff_member_required
-@require_POST
-def ajax_estado_equipo(request, pk):
-    pedido = get_object_or_404(Pedido, pk=pk)
-    nuevo = request.POST.get('state')
-    pedido.estado_equipo = nuevo
-    pedido.save()
-    cl = {
-      'por_revisar':'bg-secondary',
-      'aprobado':   'bg-info text-dark',
-      'entregado':  'bg-success',
-    }.get(nuevo, 'bg-dark')
-    return JsonResponse({
-      'state': nuevo,
-      'display': pedido.get_estado_equipo_display(),
-      'badge_class': cl,
+        'nuevo':    siguiente,
+        'display':  pedido.get_estado_display(),
+        # opcional: clases para el badge o el botón
+        'badge_class': {
+            'pendiente_pago': 'btn-outline-secondary',
+            'pagado':         'btn-success',
+            'aprobado':       'btn-primary',
+            'entregado':      'btn-info text-dark',
+            'recogido':       'btn-dark',
+        }[siguiente]
     })
     
 @staff_member_required
