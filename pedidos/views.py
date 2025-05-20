@@ -148,7 +148,7 @@ def logout_view(request):
 
 @staff_member_required
 @require_POST
-def cambiar_estado(request, pk):
+def pedidos_cambiar_estado(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     # Define el orden de la máquina de estados
     siguiente = {
