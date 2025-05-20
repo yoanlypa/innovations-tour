@@ -36,7 +36,26 @@
                 —
               {% endfor %}
             </td>
-            <td>{{ p.get_estado_cliente_display }}</td>
+            <td>
+              <button
+                      class="btn
+                        {% if p.estado == 'pendiente_pago' %}
+                          btn-outline-secondary
+                        {% elif p.estado == 'pagado' %}
+                          btn-success
+                        {% elif p.estado == 'aprobado' %}
+                          btn-primary
+                        {% elif p.estado == 'entregado' %}
+                          btn-info text-dark
+                        {% elif p.estado == 'recogido' %}
+                          btn-dark
+                        {% else %}
+                          btn-outline-secondary
+                        {% endif %}
+                      btn-estado"
+                      data-pk="{{ p.pk }}">
+                      {{ p.get_estado_display }}
+                    </button></td>
             <td>{{ p.notas|default:"—" }}</td>
             <td>
               <a class="btn btn-sm btn-warning"
