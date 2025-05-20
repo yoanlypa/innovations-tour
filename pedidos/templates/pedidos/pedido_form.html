@@ -1,40 +1,42 @@
-{% extends "pedidos/base.html" %}
-{% load static %}
-
-{% block content %}
+{% extends "pedidos/base.html" %} {% load static %} {% block content %}
 <div class="container mt-4">
-  <h2 style="color:#005dab;">📝 {% if pedido %}Editar{% else %}Nuevo{% endif %} Pedido</h2>
+  <h2 style="color: #005dab">
+    📝 {% if pedido %}Editar{% else %}Nuevo{% endif %} Pedido
+  </h2>
 
   <form method="post" novalidate>
-    {% csrf_token %}
-    {% if messages %}
-    {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
-  
-  {% if form.errors %}
-    <div class="alert alert-danger">
-      {{ form.errors }}
-    </div>
-  {% endif %}
-  {% if formset.non_form_errors %}
-    <div class="alert alert-danger">
-      {{ formset.non_form_errors }}
-    </div>
-  {% endif %}
+    {% csrf_token %} {% if messages %} {% for msg in messages %}
+    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %} {% endif %} {% if form.errors %}
+    <div class="alert alert-danger">{{ form.errors }}</div>
+    {% endif %} {% if formset.non_form_errors %}
+    <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+    {% endif %}
     <!-- Formulario de Pedido -->
     <div class="row g-3 mb-4">
-      <div class="col-md-6">{{ form.empresa.label_tag }} {{ form.empresa }}</div>
-      <div class="col-md-6">{{ form.excursion.label_tag }} {{ form.excursion }}</div>
-      <div class="col-md-6">{{ form.lugar_entrega.label_tag }} {{ form.lugar_entrega }}</div>
-      <div class="col-md-6">{{ form.lugar_recogida.label_tag }} {{ form.lugar_recogida }}</div>
-      <div class="col-md-6">{{ form.fecha_inicio.label_tag }} {{ form.fecha_inicio }}</div>
-      <div class="col-md-6">{{ form.fecha_fin.label_tag }} {{ form.fecha_fin }}</div>
-      <div class="col-md-6">{{ form.estado_cliente.label_tag }} {{ form.estado_cliente }}</div>
-      <div class="col-md-6">{{ form.estado_equipo.label_tag }} {{ form.estado_equipo }}</div>
+      <div class="col-md-6">
+        {{ form.empresa.label_tag }} {{ form.empresa }}
+      </div>
+      <div class="col-md-6">
+        {{ form.excursion.label_tag }} {{ form.excursion }}
+      </div>
+      <div class="col-md-6">
+        {{ form.lugar_entrega.label_tag }} {{ form.lugar_entrega }}
+      </div>
+      <div class="col-md-6">
+        {{ form.lugar_recogida.label_tag }} {{ form.lugar_recogida }}
+      </div>
+      <div class="col-md-6">
+        {{ form.fecha_inicio.label_tag }} {{ form.fecha_inicio }}
+      </div>
+      <div class="col-md-6">
+        {{ form.fecha_fin.label_tag }} {{ form.fecha_fin }}
+      </div>
+      <div class="col-md-6">{{ form.estado.label_tag }} {{ form.estado }}</div>
       <div class="col-12">{{ form.notas.label_tag }} {{ form.notas }}</div>
-      <div class="col-12">{{ form.productos.label_tag }} {{ form.productos }}</div>
+      <div class="col-12">
+        {{ form.productos.label_tag }} {{ form.productos }}
+      </div>
     </div>
 
     <!-- Formset de Maletas -->
@@ -43,66 +45,89 @@
       {{ formset.management_form }}
       <div id="maletas-container">
         {% for mform in formset %}
-          <div class="maleta-form mb-3 p-2 border rounded">
-            {{ mform.id }}
-            <div class="row g-2">
-              <div class="col-md-6">{{ mform.guia.label_tag }} {{ mform.guia }}</div>
-              <div class="col-md-5">{{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}</div>
-              <div class="col-md-1 d-flex align-items-center">
-                <button type="button" class="btn btn-danger btn-sm eliminar-maleta">🗑️</button>
-              </div>
+        <div class="maleta-form mb-3 p-2 border rounded">
+          {{ mform.id }}
+          <div class="row g-2">
+            <div class="col-md-6">
+              {{ mform.guia.label_tag }} {{ mform.guia }}
+            </div>
+            <div class="col-md-5">
+              {{ mform.cantidad_pax.label_tag }} {{ mform.cantidad_pax }}
+            </div>
+            <div class="col-md-1 d-flex align-items-center">
+              <button
+                type="button"
+                class="btn btn-danger btn-sm eliminar-maleta"
+              >
+                🗑️
+              </button>
             </div>
           </div>
+        </div>
         {% endfor %}
       </div>
-      <button type="button" id="add-maleta" class="btn btn-secondary mt-2">➕ Añadir Maleta</button>
+      <button type="button" id="add-maleta" class="btn btn-secondary mt-2">
+        ➕ Añadir Maleta
+      </button>
     </div>
 
     <div class="text-end">
-      <button type="submit" name="action" value="guardar" class="btn btn-success">💾 Guardar</button>
-      <button type="submit" name="action" value="guardar_otro" class="btn btn-outline-primary">➕ Guardar y otro</button>
+      <button
+        type="submit"
+        name="action"
+        value="guardar"
+        class="btn btn-success"
+      >
+        💾 Guardar
+      </button>
+      <button
+        type="submit"
+        name="action"
+        value="guardar_otro"
+        class="btn btn-outline-primary"
+      >
+        ➕ Guardar y otro
+      </button>
     </div>
   </form>
 </div>
-{% endblock %}
-
-{% block scripts %}
+{% endblock %} {% block scripts %}
 <script src="{% static 'pedidos/js/maletas_form.js' %}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-  let totalForms = document.getElementById('id_maleta-TOTAL_FORMS');
-  let formIndex = parseInt(totalForms.value);
-  const template = document.querySelector('.maleta-form').cloneNode(true);
-  const container = document.getElementById('maletas-container');
+  document.addEventListener("DOMContentLoaded", function () {
+    let totalForms = document.getElementById("id_maleta-TOTAL_FORMS");
+    let formIndex = parseInt(totalForms.value);
+    const template = document.querySelector(".maleta-form").cloneNode(true);
+    const container = document.getElementById("maletas-container");
 
-  document.getElementById('add-maleta').addEventListener('click', () => {
-    const nuevo = template.cloneNode(true);
-    nuevo.querySelectorAll('input').forEach(input => {
-      const name = input.name.replace(/maleta-\d+-/, `maleta-${formIndex}-`);
-      const id = input.id.replace(/maleta-\d+-/, `maleta-${formIndex}-`);
-      input.name = name;
-      input.id = id;
-      input.value = '';
+    document.getElementById("add-maleta").addEventListener("click", () => {
+      const nuevo = template.cloneNode(true);
+      nuevo.querySelectorAll("input").forEach((input) => {
+        const name = input.name.replace(/maleta-\d+-/, `maleta-${formIndex}-`);
+        const id = input.id.replace(/maleta-\d+-/, `maleta-${formIndex}-`);
+        input.name = name;
+        input.id = id;
+        input.value = "";
+      });
+      container.appendChild(nuevo);
+      formIndex++;
+      totalForms.value = formIndex;
     });
-    container.appendChild(nuevo);
-    formIndex++;
-    totalForms.value = formIndex;
-  });
 
-  document.addEventListener('click', function (e) {
-    if (e.target.classList.contains('eliminar-maleta')) {
-      const formDiv = e.target.closest('.maleta-form');
-      const deleteInput = formDiv.querySelector('input[name$="-DELETE"]');
-      if (deleteInput) {
-        deleteInput.value = 'on';
-        formDiv.style.display = 'none';
-      } else {
-        formDiv.remove();
-        formIndex--;
-        totalForms.value = formIndex;
+    document.addEventListener("click", function (e) {
+      if (e.target.classList.contains("eliminar-maleta")) {
+        const formDiv = e.target.closest(".maleta-form");
+        const deleteInput = formDiv.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) {
+          deleteInput.value = "on";
+          formDiv.style.display = "none";
+        } else {
+          formDiv.remove();
+          formIndex--;
+          totalForms.value = formIndex;
+        }
       }
-    }
+    });
   });
-});
 </script>
 {% endblock %}
