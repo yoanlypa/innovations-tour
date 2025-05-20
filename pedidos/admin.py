@@ -27,7 +27,7 @@ class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
     )
     readonly_fields = ("fecha_creacion",)
     list_editable = ("estado",)  # permite cambiar el estado directamente desde la lista
-    list_filter = ( "fecha_inicio")
+    list_filter = ("estado", "empresa")
     search_fields = ("empresa", "excursion", "usuario__username")
     ordering = ["-fecha_inicio"]
     inlines = [MaletaInline]
