@@ -82,7 +82,7 @@
                         {% endif %}
                       btn-estado"
                       data-pk="{{ p.pk }}"
-                      data-url="{% url 'pedidos_cambiar_estado' p.pk %}">
+                      data-url="{% url 'pedidos:cambiar_estado' p.pk %}">
                       {{ p.get_estado_display }}
                     </button>
                               </td>
