@@ -28,7 +28,6 @@
         <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
         <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
         <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
-
         <p><strong>Maletas:</strong></p>
         {% if p.maletas.exists %} {% for m in p.maletas.all %}
         <span class="badge bg-light text-dark border d-inline-block mb-1">
@@ -41,11 +40,7 @@
         {% endif %}
       </div>
       <div class="card-footer text-end">
-        <a
-          href="{% url 'pedidos:pedido_editar_cliente' p.pk %}"
-          class="btn btn-sm btn-warning me-1"
-          >✏️ Editar</a
-        >
+      <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
       </div>
     </div>
     {% endfor %}
@@ -104,11 +99,7 @@
             {% else %} — {% endif %}
           </td>
           <td>
-            <a
-              href="{% url 'pedidos:pedido_editar' p.pk %}"
-              class="btn btn-sm btn-warning"
-              >✏️</a
-            >
+          <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
           </td>
           <td>
             <form

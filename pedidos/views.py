@@ -96,6 +96,11 @@ class TareaDeleteView(DeleteView):
     success_url = reverse_lazy("pedidos:tareas")
 
 
+#
+# 
+# 
+# 
+# 
 # ——————— Acceso / Registro ———————
 
 @csrf_protect
@@ -144,6 +149,11 @@ def logout_view(request):
     return redirect("pedidos:acceso")
 
 
+#
+# 
+# 
+# 
+# 
 # ——————— Pedidos ———————
 
 @staff_member_required
@@ -301,7 +311,7 @@ def pedido_nuevo_view(request):
     return render(request, "pedidos/pedido_form.html", {"form": form, "formset": formset, "pedido": None})
 
 
-@staff_member_required
+@login_required
 def pedido_editar_view(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     if request.method == "POST":
@@ -321,7 +331,7 @@ def pedido_editar_view(request, pk):
 
 
 @require_GET
-@staff_member_required
+@login_required
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get("pedido_id")
     pedido = get_object_or_404(Pedido, pk=pedido_id)

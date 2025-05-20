@@ -32,8 +32,7 @@ urlpatterns = [
     # Cliente: mis pedidos
     path("mis-pedidos/", views.pedidos_mios_view, name="mis_pedidos"),
     path("mis-pedidos/nuevo/",views.pedido_nuevo_cliente_view,name="pedido_nuevo_cliente",),
-    path("mis-pedidos/editar/<int:pk>/",pedido_editar_cliente_view,name="pedido_editar_cliente",),
-    
+path('mis-pedidos/editar/<int:pk>/', views.pedido_editar_cliente_view, name='pedido_editar_cliente'),    
     # LOGIN / REGISTRO
     path("acceso/", views.acceso_view, name="acceso"),
     path("logout/", views.logout_view, name="logout"),
