@@ -10,12 +10,6 @@
 {% block content %}
 <div class="container my-4">
   <h2 class="mb-4" style="color:#005dab;">📦 Mis pedidos</h2>
-
-  {% if not user.is_staff %}
-    <div class="alert alert-warning">
-      ⚠️ No tienes permiso para ver esta página.
-    </div>
-
   {% else %}
     {# —— Botón “+ Nuevo” móvil —— #}
     <div class="d-block d-md-none text-end mb-3">
