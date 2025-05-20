@@ -36,11 +36,43 @@
 </div>
 
 {# —— empresa, excursión, estado —— #}
+<div class="row">
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.empresa.id_for_label }}" class="form-label">
+      Empresa <span class="text-danger">*</span>
+    </label>
+    {{ form.empresa }}
+    {% if form.empresa.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.empresa.errors.0 }}
+      </div>
+    {% endif %}
+  </div>
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.excursion.id_for_label }}" class="form-label">
+      Excursión
+    </label>
+    {{ form.excursion }}
+    {% if form.excursion.errors %}
+      <div class="invalid-feedback d-block">
+        {{ form.excursion.errors.0 }}
+      </div>
+    {% endif %}
+  </div>
+  <div class="col-md-4 mb-3">
+    <label for="{{ form.estado_cliente.id_for_label }}" class="form-label">
+      Estado <span class="text-danger">*</span>
+    </label>
+    {{ form.estado }}
+    <small class="form-text text-muted">
+      Si no ha pagado, elige “Pendiente”.
+    </small>
+
 {# Estado de pago (radios) #}
 <div class="mb-4">
-  <label class="form-label">{{ form.estado_cliente.label }}</label>
+  <label class="form-label">{{ form.estado.label }}</label>
   <div>
-    {% for radio in form.estado_cliente %}
+    {% for radio in form.estado %}
       <div class="form-check form-check-inline">
         {{ radio.tag }}
         <label class="form-check-label" for="{{ radio.id_for_label }}">
@@ -48,9 +80,9 @@
         </label>
       </div>
     {% endfor %}
-    {% if form.estado_cliente.errors %}
+    {% if form.estado.errors %}
       <div class="invalid-feedback d-block">
-        {{ form.estado_cliente.errors.0 }}
+        {{ form.estado.errors.0 }}
       </div>
     {% endif %}
   </div>
