@@ -17,15 +17,17 @@ class MaletaInline(admin.TabularInline):
 
 class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
     list_display = (
-        'id',
+        "id",
         "empresa",
-        "excursion",
         "fecha_inicio",
-        "estado_cliente",
-        "estado_equipo",
+        "fecha_fin",
+        "estado",
+        "usuario",
+        "acciones",
     )
     readonly_fields = ("fecha_creacion",)
-    list_filter = ("estado_cliente", "estado_equipo", "fecha_inicio")
+    list_editable = ("estado",)  # permite cambiar el estado directamente desde la lista
+    list_filter = ( "fecha_inicio")
     search_fields = ("empresa", "excursion", "usuario__username")
     ordering = ["-fecha_inicio"]
     inlines = [MaletaInline]
@@ -36,6 +38,24 @@ class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
         qs = super().get_queryset(request)
         return qs.select_related("usuario")
     
+    def usuario(self, obj):
+        return obj.usuario.username
+    usuario.short_description = "Usuario"
+
+    def acciones(self, obj):
+        """
+        Botones de Editar y Eliminar en cada fila.
+        """
+        editar_url = reverse("admin:pedidos_pedido_change", args=[obj.pk])
+        borrar_url = reverse("admin:pedidos_pedido_delete", args=[obj.pk])
+        return format_html(
+            '<a class="button btn-sm btn-warning me-1" href="{}">✏️</a>'
+            '<a class="button btn-sm btn-danger" href="{}" '
+            'onclick="return confirm(\'¿Eliminar este pedido?\');">🗑️</a>',
+            editar_url,
+            borrar_url,
+        )
+    acciones.short_description = "Acciones"
     def borrar_antiguos(self, request, queryset):
         limite = timezone.now() - timedelta(days=60)
         antiguos = queryset.filter(fecha_inicio__lt=limite)

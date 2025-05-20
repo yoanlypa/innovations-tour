@@ -159,7 +159,7 @@ from .models import Pedido
 class PedidoFormCliente(forms.ModelForm):
     # El cliente elige aquí sólo entre “Pagado” y “Pendiente de pago”
     estado = forms.ChoiceField(
-        label="Estado de pago",
+        label="Estado",
         choices=[
             ('pagado', 'Pagado'),
             ('pendiente_pago', 'Pendiente de pago'),

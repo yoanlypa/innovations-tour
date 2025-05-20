@@ -24,8 +24,7 @@ class PedidoSerializer(serializers.ModelSerializer):
             "lugar_recogida",
             "fecha_inicio",
             "fecha_fin",
-            "estado_cliente",
-            "estado_equipo",
+            'estado',
             "notas",
             "maletas",
         ]
