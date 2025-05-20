@@ -1,67 +1,67 @@
 {% extends 'pedidos/base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}Lista de Pedidos · Innovations Tours{% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css"/>
+{% endblock %}
 
 {% block content %}
+<div class="container my-4">
   <h2 class="mb-4" style="color:#005dab;">📦 Lista de Pedidos</h2>
 
   {% if not user.is_staff %}
     <div class="alert alert-warning">
-      <strong>⚠️ AVISO:</strong> No tienes permiso para ver esta página.
+      ⚠️ No tienes permiso para ver esta página.
     </div>
   {% else %}
-    {# —— Borrado masivo —— #}
-    <form id="mass-delete-form"
-          method="post"
-          action="{% url 'pedidos:pedido_eliminar_masivo' %}">
-      {% csrf_token %}
-      <button type="submit"
-              class="btn btn-danger mb-3"
-              onclick="return confirm('¿Eliminar todos los seleccionados?');">
-        🗑️ Eliminar seleccionados
-      </button>
-     <div class="row mb-3 gx-2 align-items-end">
-  <div class="col-sm-4">
-    <label for="state-filter" class="form-label">Filtrar por Estado</label>
-    <select id="state-filter" class="form-select">
-      <option value="">Todos</option>
-      <option value="Pendiente de pago">Pendiente de pago</option>
-      <option value="Pagado">Pagado</option>
-      <option value="Aprobado">Aprobado</option>
-      <option value="Entregado">Entregado</option>
-      <option value="Recogido">Recogido</option>
-    </select>
-  </div>
-  <div class="col-sm-4">
-    <label for="search-box" class="form-label">Buscar texto</label>
-    <input type="text" id="search-box" class="form-control" placeholder="Empresa, Excursión, …">
-  </div>
-  <div class="col-sm-4 text-end">
-    <label class="form-label d-block">&nbsp;</label>
-    <button id="bulk-delete-btn" class="btn btn-danger">🗑️ Eliminar seleccionados</button>
-    <div class="btn-group">
-      <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-        🔄 Cambiar estado
-      </button>
-      <ul class="dropdown-menu">
-        <li><a class="dropdown-item bulk-state" data-state="pendiente_pago">Pendiente de pago</a></li>
-        <li><a class="dropdown-item bulk-state" data-state="pagado">Pagado</a></li>
-        <li><a class="dropdown-item bulk-state" data-state="aprobado">Aprobado</a></li>
-        <li><a class="dropdown-item bulk-state" data-state="entregado">Entregado</a></li>
-        <li><a class="dropdown-item bulk-state" data-state="recogido">Recogido</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
 
-    <!-- ➕ Nuevo Pedido (móvil) -->
+    {# —— Filtros y bulk-actions —— #}
+    <div class="row mb-3 gx-2 align-items-end">
+      <div class="col-sm-4">
+        <label for="state-filter" class="form-label">Filtrar por Estado</label>
+        <select id="state-filter" class="form-select">
+          <option value="">Todos</option>
+          <option value="Pendiente de pago">Pendiente de pago</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Aprobado">Aprobado</option>
+          <option value="Entregado">Entregado</option>
+          <option value="Recogido">Recogido</option>
+        </select>
+      </div>
+      <div class="col-sm-4">
+        <label for="search-box" class="form-label">Buscar texto</label>
+        <input type="text" id="search-box" class="form-control" placeholder="Empresa, Excursión…">
+      </div>
+      <div class="col-sm-4 text-end">
+        <label class="form-label d-block">&nbsp;</label>
+        <button id="bulk-delete-btn" class="btn btn-danger">🗑️ Eliminar seleccionados</button>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            🔄 Cambiar estado
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item bulk-state" data-state="pendiente_pago">Pendiente de pago</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="pagado">Pagado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="aprobado">Aprobado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="entregado">Entregado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="recogido">Recogido</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    {# —— Botón “+ Nuevo” móvil —— #}
     <div class="d-block d-md-none text-end mb-3">
-      <a href="{% url 'pedidos:pedido_nuevo' %}"
-         class="btn btn-primary btn-floating">
+      <a href="{% url 'pedidos:pedido_nuevo' %}" class="btn btn-primary btn-floating">
         ➕
       </a>
     </div>
 
-    <!-- ===== Cards para móvil ===== -->
+    {# ===== Cards para móvil ===== #}
     <div class="d-block d-md-none">
       {% for p in pedidos %}
         <div class="card mb-3 shadow-sm">
@@ -70,14 +70,14 @@
           </div>
           <div class="card-body">
             <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
-            <p><strong>Fin:</strong> {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
+            <p><strong>Fin:</strong>    {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
             <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
             <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
             <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
-            <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
+            <p><strong>Estado:</strong>   {{ p.get_estado_display }}</p>
 
             <p><strong>Maletas:</strong></p>
-            {% if p.maletas.all %}
+            {% if p.maletas.exists %}
               {% for m in p.maletas.all %}
                 <span class="badge bg-light text-dark border d-inline-block mb-1">
                   🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
@@ -92,13 +92,10 @@
             {% endif %}
           </div>
           <div class="card-footer text-end">
-            <a href="{% url 'pedidos:pedido_editar' p.pk %}"
-               class="btn btn-sm btn-warning me-1">✏️</a>
-            <form action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-                  method="post" class="d-inline">
+            <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
+            <form action="{% url 'pedidos:pedido_eliminar' p.pk %}" method="post" class="d-inline">
               {% csrf_token %}
-              <button class="btn btn-sm btn-danger"
-                      onclick="return confirm('¿Eliminar este pedido?');">
+              <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este pedido?');">
                 🗑️
               </button>
             </form>
@@ -106,250 +103,205 @@
         </div>
       {% endfor %}
     </div>
-    <!-- ===== Fin Cards para móvil ===== -->
+    {# ===== Fin cards móvil ===== #}
 
-  {% if pedidos %}
-  <div
-    class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
-  >
-              <table id="tabla-pedidos" class="table table-striped">  
-              <thead class="table-light" style="background-color: #005dab; color: white;">
+    {% if pedidos %}
+      {# ===== Tabla para tablet/escritorio ===== #}
+      <div class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden">
+        <table id="tabla-pedidos" class="table table-striped align-middle text-center mb-0">
+          <thead class="table-light" style="background-color:#005dab;color:white;">
+            <tr>
+              <th><input type="checkbox" id="select-all"></th>
+              <th>Inicio</th>
+              <th>Fin</th>
+              <th>Empresa</th>
+              <th>Excursión</th>
+              <th>Entrega</th>
+              <th>Recogida</th>
+              <th>Maletas</th>
+              <th>Estado</th>
+              <th>Notas</th>
+              <th>Editar</th>
+              <th>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in pedidos %}
               <tr>
-                <th><input type="checkbox" id="select-all"></th>
-                <th>Fecha Inicio</th>
-                <th>Fecha Fin</th>
-                <th>Empresa</th>
-                <th>Excursión</th>
-                <th>Lugar Entrega</th>
-                <th>Lugar Recogida</th>
-                <th>Maletas</th>
-                <th>Estado</th>
-                <th>Notas</th>
-                <th>Editar</th>
-                <th>Eliminar</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for p in pedidos %}
-                <tr>
-                  {# Checkbox de selección #}
-                  <td>
-                    <input type="checkbox"
-                           name="selected_ids"
-                           value="{{ p.pk }}"
-                           class="select-checkbox">
-                  </td>
-
-                  <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-                  <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
-                  <td>{{ p.empresa }}</td>
-                  <td>{{ p.excursion|default:"—" }}</td>
-                  <td>{{ p.lugar_entrega }}</td>
-                  <td>{{ p.lugar_recogida|default:"—" }}</td>
-                  <td>
-                    {% for m in p.maletas.all %}
-                      <span class="badge rounded-pill text-bg-light border shadow-sm d-block mb-1">
-                        🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-                      </span>
-                    {% empty %}
-                      —
-                    {% endfor %}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      class="btn
-                        {% if p.estado == 'pendiente_pago' %}
-                          btn-outline-secondary
-                        {% elif p.estado == 'pagado' %}
-                          btn-success
-                        {% elif p.estado == 'aprobado' %}
-                          btn-primary
-                        {% elif p.estado == 'entregado' %}
-                          btn-info text-dark
-                        {% elif p.estado == 'recogido' %}
-                          btn-dark
-                        {% else %}
-                          btn-outline-secondary
-                        {% endif %}
-                      btn-estado"
-                      data-pk="{{ p.pk }}"
-                      data-url="{% url 'pedidos:cambiar_estado' p.pk %}">
-                      {{ p.get_estado_display }}
+                <td><input class="select-checkbox" type="checkbox" value="{{ p.pk }}"></td>
+                <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+                <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+                <td>{{ p.empresa }}</td>
+                <td>{{ p.excursion|default:"—" }}</td>
+                <td>{{ p.lugar_entrega }}</td>
+                <td>{{ p.lugar_recogida|default:"—" }}</td>
+                <td>
+                  {% for m in p.maletas.all %}
+                    <span class="badge bg-light text-dark border mb-1 d-block">
+                      🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
+                    </span>
+                  {% empty %}
+                    —
+                  {% endfor %}
+                </td>
+                <td>{{ p.get_estado_display }}</td>
+                <td>
+                  {% if p.notas %}
+                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ p.notas }}">
+                      📝
                     </button>
-                              </td>
-                  <td>
-                    {% if p.notas %}
-                      <button class="btn btn-sm btn-outline-info"
-                              data-bs-toggle="tooltip"
-                              title="{{ p.notas }}">
-                        📝
-                      </button>
-                    {% else %}
-                      —
-                    {% endif %}
-                  </td>
-                  <td>
-                    <a href="{% url 'pedidos:pedido_editar' p.pk %}"
-                       class="btn btn-sm"
-                       style="background-color:#f78243; color:white;">
-                      ✏️ Editar
-                    </a>
-                  </td>
-                  <td>
-                    <button type="submit"
-                            class="btn btn-sm btn-danger"
-                            form="delete-form-{{ p.pk }}"
-                            onclick="return confirm('¿Eliminar este pedido?');">
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm btn-warning">✏️</a>
+                </td>
+                <td>
+                  <form action="{% url 'pedidos:pedido_eliminar' p.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este pedido?');">
                       🗑️
                     </button>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="alert alert-info text-center">
-          No hay pedidos registrados.
-        </div>
-      {% endif %}
-    </form>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
 
-    {# —— Formularios ocultos para borrado individual —— #}
-    {% for p in pedidos %}
-      <form id="delete-form-{{ p.pk }}"
-            method="post"
-            action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-            style="display:none;">
-        {% csrf_token %}
-      </form>
-    {% endfor %}
-
+      {# —— FAB desktop —— #}
+      <a href="#" class="btn btn-primary btn-lg rounded-circle fab d-none d-md-block"
+         data-bs-toggle="modal" data-bs-target="#modalNuevoPedido" title="Crear nuevo pedido">
+        <span class="fs-3 fw-bold">+</span>
+      </a>
+      <div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Nuevo pedido</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="height:80vh;">
+              <iframe src="{% url 'pedidos:pedido_nuevo' %}?embed=1"
+                      class="w-100 h-100 border-0" loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info text-center">
+        No hay pedidos registrados.
+        <a href="{% url 'pedidos:pedido_nuevo' %}" class="btn btn-primary mt-3">
+          ➕ Crear mi primer pedido
+        </a>
+      </div>
+    {% endif %}
   {% endif %}
+</div>
 {% endblock %}
-
 
 {% block scripts %}
   {{ block.super }}
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      // Inicializar tooltips de Bootstrap
-      const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      triggers.forEach(el => new bootstrap.Tooltip(el));
-       // “Seleccionar todos” para DataTables
-  $('#select-all').on('click', function(){
-    const checked = this.checked;
-    $('.select-checkbox').prop('checked', checked);
-  });
+    document.addEventListener('DOMContentLoaded', function(){
+      // tooltips
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el=>
+        new bootstrap.Tooltip(el)
+      );
 
-      // Checkbox “Seleccionar todos”
-      const selectAll = document.getElementById('select-all');
-      selectAll && selectAll.addEventListener('change', () => {
-        document.querySelectorAll('.select-checkbox')
-                .forEach(cb => cb.checked = selectAll.checked);
+      // DataTables init
+      const table = $('#tabla-pedidos').DataTable({
+        order: [[1,'desc']],
+        paging: true,
+        info: true,
+        dom: 'Bfrtip',
+        buttons: [
+          { text: 'Eliminar seleccionados', action: () => bulkAction('eliminar') },
+          {
+            extend: 'collection',
+            text: '🔄 Cambiar estado',
+            buttons: [
+              { text: 'Pendiente de pago', action: () => bulkAction('pendiente_pago') },
+              { text: 'Pagado',            action: () => bulkAction('pagado') },
+              { text: 'Aprobado',          action: () => bulkAction('aprobado') },
+              { text: 'Entregado',         action: () => bulkAction('entregado') },
+              { text: 'Recogido',          action: () => bulkAction('recogido') },
+            ]
+          }
+        ],
+        columnDefs: [
+          { orderable: false, targets: [0, -1] }
+        ]
+      });
+
+      // filtros estado y búsqueda
+      $('#state-filter').on('change', function(){
+        table.column(8).search(this.value).draw();
+      });
+      $('#search-box').on('keyup', function(){
+        table.search(this.value).draw();
+      });
+
+      // seleccionar todos
+      $('#select-all').on('click', function(){
+        const checked = this.checked;
+        $('.select-checkbox').prop('checked', checked);
+      });
+
+      // bulk actions
+      function bulkAction(action){
+        const ids = table.$('.select-checkbox:checked').map((i,el)=>el.value).get();
+        if(!ids.length) return Swal.fire('Aviso','Selecciona primero.','info');
+        if(action==='eliminar'){
+          if(!confirm('¿Eliminar los pedidos seleccionados?')) return;
+          ajaxBulk("{% url 'pedidos:bulk_delete' %}", { ids });
+        } else {
+          Swal.fire({
+            title: `Cambiar a "${action.replace('_',' ')}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí'
+          }).then(({isConfirmed})=>{
+            if(isConfirmed) ajaxBulk("{% url 'pedidos:bulk_change_estado' %}", { ids, estado: action });
+          });
+        }
+      }
+      function ajaxBulk(url, data){
+        $.post(url, {...data, csrfmiddlewaretoken:$('[name=csrfmiddlewaretoken]').val()})
+         .done(()=> location.reload());
+      }
+    });
+  </script>
+
+  <script>
+    // cambio rápido estado via AJAX
+    document.querySelectorAll('.btn-estado').forEach(boton=>{
+      boton.addEventListener('click', async e=>{
+        e.preventDefault();
+        const url = boton.dataset.url;
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const oldText = boton.textContent.trim();
+        const {isConfirmed} = await Swal.fire({
+          title: '¿Cambiar estado?',
+          text: `Actual: "${oldText}"`,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Sí'
+        });
+        if(!isConfirmed) return;
+        try {
+          const res = await fetch(url, { method:'POST', headers:{'X-CSRFToken':csrftoken} });
+          const data = await res.json();
+          boton.textContent = data.display;
+          boton.className = 'btn '+data.badge_class+' btn-estado';
+        } catch {
+          Swal.fire('Error','No se pudo cambiar.','error');
+        }
       });
     });
   </script>
-  <script>
-$(document).ready(function(){
-  const table = $('#tabla-pedidos').DataTable({
-    paging:   true,
-    ordering: true,
-    info:     true,
-    dom: 'Bfrtip',
-    buttons: [
-      {
-        text: 'Eliminar seleccionados',
-        action: function () { bulkAction('eliminar') }
-      },
-      {
-        extend: 'collection',
-        text: 'Cambiar estado',
-        buttons: [
-          { text: 'Pendiente de pago', action: () => bulkAction('pendiente_pago') },
-          { text: 'Pagado',            action: () => bulkAction('pagado') },
-          { text: 'Aprobado',          action: () => bulkAction('aprobado') },
-          { text: 'Entregado',         action: () => bulkAction('entregado') },
-          { text: 'Recogido',          action: () => bulkAction('recogido') }
-        ]
-      }
-    ],
-    columnDefs: [
-      { orderable: false, targets: [0, -1] }  // desactivar orden on checkbox y acciones
-    ]
-  });
-
-  function bulkAction(action){
-    const ids = [];
-    table.$('.select-checkbox:checked').each(function(){
-      ids.push($(this).val());
-    });
-    if(!ids.length) { return alert('Selecciona al menos un pedido.'); }
-
-    if(action==='eliminar'){
-      if(!confirm('¿Eliminar los pedidos seleccionados?')) return;
-      ajaxBulk('/pedidos/bulk-delete/', { ids });
-    } else {
-      Swal.fire({
-        title: `¿Cambiar a "${action.replace('_',' ')}"?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cambiar',
-      }).then(({ isConfirmed })=>{
-        if(isConfirmed) ajaxBulk('/pedidos/bulk-change-estado/', { ids, estado: action });
-      });
-    }
-  }
-
-  function ajaxBulk(url, data){
-    $.post(url, {
-      ...data,
-      csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
-    }).done(() => location.reload());
-  }
-});
- // “Seleccionar todos” para DataTables
-  $('#select-all').on('click', function(){
-    const checked = this.checked;
-    $('.select-checkbox').prop('checked', checked);
-  });
-</script>
-  <script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.btn-estado').forEach(boton => {
-    boton.addEventListener('click', async function (event) {
-      event.preventDefault();  // ← evita el submit inmediato
-
-      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-      const url       = this.dataset.url;
-      const textoViejo= this.textContent.trim();
-
-      const { isConfirmed } = await Swal.fire({
-        title: '¿Seguro que quieres cambiar el estado?',
-        text: `Estado actual: "${textoViejo}"`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cambiar',
-        cancelButtonText: 'No, cancelar'
-      });
-      if (!isConfirmed) return;
-
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'X-CSRFToken': csrftoken }
-        });
-        const data = await res.json();
-        // Actualiza botón
-        this.textContent = data.display;
-        this.className   = 'btn ' + data.badge_class + ' btn-estado';
-      } catch (err) {
-        console.error(err);
-        Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
-      }
-    });
-  });
-});
-</script>
 {% endblock %}
