@@ -1,4 +1,8 @@
-{% extends 'pedidos/base.html' %} {% load static %} {% block title %}Mis pedidos
+{% extends 'pedidos/base.html' %}
+{% load crispy_forms_tags %}
+
+
+ {% load static %} {% block title %}Mis pedidos
 · Innovations Tours{% endblock %} {% block styles %}
 <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
 {% endblock %} {% block content %}
