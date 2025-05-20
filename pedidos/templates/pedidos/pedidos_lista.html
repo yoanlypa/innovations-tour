@@ -19,16 +19,40 @@
               onclick="return confirm('¿Eliminar todos los seleccionados?');">
         🗑️ Eliminar seleccionados
       </button>
-      <form method="get" class="row g-3 mb-3">
-        {{ filter.form.empresa|as_crispy_field }}
-        {{ filter.form.estado|as_crispy_field }}
-        {{ filter.form.fecha_inicio|as_crispy_field }}
-        {{ filter.form.fecha_fin|as_crispy_field }}
-        <div class="col-auto">
-          <button class="btn btn-primary">Filtrar</button>
-        </div>
-      </form>
-  
+     <div class="row mb-3 gx-2 align-items-end">
+  <div class="col-sm-4">
+    <label for="state-filter" class="form-label">Filtrar por Estado</label>
+    <select id="state-filter" class="form-select">
+      <option value="">Todos</option>
+      <option value="Pendiente de pago">Pendiente de pago</option>
+      <option value="Pagado">Pagado</option>
+      <option value="Aprobado">Aprobado</option>
+      <option value="Entregado">Entregado</option>
+      <option value="Recogido">Recogido</option>
+    </select>
+  </div>
+  <div class="col-sm-4">
+    <label for="search-box" class="form-label">Buscar texto</label>
+    <input type="text" id="search-box" class="form-control" placeholder="Empresa, Excursión, …">
+  </div>
+  <div class="col-sm-4 text-end">
+    <label class="form-label d-block">&nbsp;</label>
+    <button id="bulk-delete-btn" class="btn btn-danger">🗑️ Eliminar seleccionados</button>
+    <div class="btn-group">
+      <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+        🔄 Cambiar estado
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item bulk-state" data-state="pendiente_pago">Pendiente de pago</a></li>
+        <li><a class="dropdown-item bulk-state" data-state="pagado">Pagado</a></li>
+        <li><a class="dropdown-item bulk-state" data-state="aprobado">Aprobado</a></li>
+        <li><a class="dropdown-item bulk-state" data-state="entregado">Entregado</a></li>
+        <li><a class="dropdown-item bulk-state" data-state="recogido">Recogido</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
     <!-- ➕ Nuevo Pedido (móvil) -->
     <div class="d-block d-md-none text-end mb-3">
       <a href="{% url 'pedidos:pedido_nuevo' %}"

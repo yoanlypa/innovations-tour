@@ -1,19 +1,21 @@
 {% extends 'pedidos/base.html' %}
-{% load crispy_forms_tags %}
+{% load static %}
 
+{% block title %}Mis pedidos · Innovations Tours{% endblock %}
 
- {% load static %} {% block title %}Mis pedidos
-· Innovations Tours{% endblock %} {% block styles %}
-<link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
-{% endblock %} {% block content %}
+{% block styles %}
+  <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.3.6/css/buttons.dataTables.min.css"/>
+{% endblock %}
+
+{% block content %}
 <div class="container my-4">
-  <h2 class="mb-4" style="color: #005dab">📦 Mis pedidos</h2>
+  <h2 class="mb-4" style="color:#005dab;">📦 Mis pedidos</h2>
+
   {# —— Botón “+ Nuevo” móvil —— #}
   <div class="d-block d-md-none text-end mb-3">
-    <a
-      href="{% url 'pedidos:pedido_nuevo_cliente' %}"
-      class="btn btn-primary btn-floating"
-    >
+    <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary btn-floating">
       ➕
     </a>
   </div>
@@ -21,229 +23,202 @@
   {# ===== Cards para móvil ===== #}
   <div class="d-block d-md-none">
     {% for p in pedidos %}
-    <div class="card mb-3 shadow-sm">
-      <div class="card-header bg-primary text-white">
-        <strong>#{{ p.id }}</strong> – {{ p.empresa }}
+      <div class="card mb-3 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <strong>#{{ p.id }}</strong> – {{ p.empresa }}
+        </div>
+        <div class="card-body">
+          <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
+          <p><strong>Fin:</strong>    {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
+          <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
+          <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
+          <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
+          <p><strong>Estado:</strong>   {{ p.get_estado_display }}</p>
+
+          <p><strong>Maletas:</strong></p>
+          {% if p.maletas.exists %}
+            {% for m in p.maletas.all %}
+              <span class="badge bg-light text-dark border d-inline-block mb-1">
+                🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+              </span>
+            {% endfor %}
+          {% else %}
+            <p>—</p>
+          {% endif %}
+
+          {% if p.notas %}
+            <p><strong>Notas:</strong> {{ p.notas }}</p>
+          {% endif %}
+        </div>
+        <div class="card-footer text-end">
+          <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}"
+             class="btn btn-sm btn-warning">✏️ Editar</a>
+        </div>
       </div>
-      <div class="card-body">
-        <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
-        <p><strong>Fin:</strong> {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
-        <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
-        <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
-        <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
-        <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
-        <p><strong>Maletas:</strong></p>
-        {% if p.maletas.exists %} {% for m in p.maletas.all %}
-        <span class="badge bg-light text-dark border d-inline-block mb-1">
-          🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-        </span>
-        {% endfor %} {% else %}
-        <p>—</p>
-        {% endif %} {% if p.notas %}
-        <p><strong>Notas:</strong> {{ p.notas }}</p>
-        {% endif %}
-      </div>
-      <div class="card-footer text-end">
-      <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
-      </div>
-    </div>
     {% endfor %}
   </div>
-  {# ===== Fin cards móvil ===== #} 
-  {% if pedidos %} 
-  {# ===== Tabla paratablet/escritorio ===== #}
-  <div
-    class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
-  >
-    <table id="tabla-pedidos" class="table table-striped">
-        <thead
-        class="table-light"
-        style="background-color: #005dab; color: white"
-      >
-        <tr>
-          <th><input type="checkbox" id="select-all"></th>
-          <th>Fecha Inicio</th>
-          <th>Fecha Fin</th>
-          <th>Empresa</th>
-          <th>Excursión</th>
-          <th>Entrega</th>
-          <th>Recogida</th>
-          <th>Maletas</th>
-          <th>Estado</th>
-          <th>Notas</th>
-          <th>Editar</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for p in pedidos %}
-        <tr>
-          <td><input class="select-checkbox" type="checkbox" value="{{ p.pk }}"></td>
-          <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-          <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
-          <td>{{ p.empresa }}</td>
-          <td>{{ p.excursion|default:"—" }}</td>
-          <td>{{ p.lugar_entrega }}</td>
-          <td>{{ p.lugar_recogida|default:"—" }}</td>
-          <td>
-            {% for m in p.maletas.all %}
-            <span class="badge bg-light text-dark border mb-1 d-block">
-              🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
-            </span>
-            {% empty %} — {% endfor %}
-          </td>
-          <td>{{ p.get_estado_display }}</td>
-          <td>
-            {% if p.notas %}
-            <button
-              class="btn btn-sm btn-outline-info"
-              data-bs-toggle="tooltip"
-              title="{{ p.notas }}"
-            >
-              📝
-            </button>
-            {% else %} — {% endif %}
-          </td>
-          <td>
-          <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}" class="btn btn-sm btn-warning">✏️ Editar</a>
-          </td>
-          <td>
-            <form
-              action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-              method="post"
-              class="d-inline"
-            >
-              {% csrf_token %}
-              <button
-                class="btn btn-sm btn-danger"
-                onclick="return confirm('¿Eliminar este pedido?');"
-              >
-                🗑️
-              </button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {# ===== Fin tabla ===== #} {# —— FAB para desktop que abre modal —— #}
-  <a
-    href="#"
-    class="btn btn-primary btn-lg rounded-circle fab d-none d-md-block"
-    data-bs-toggle="modal"
-    data-bs-target="#modalNuevoPedido"
-    title="Crear nuevo pedido"
-  >
-    <span class="fs-3 fw-bold">+</span>
-  </a>
-  <div
-    class="modal fade"
-    id="modalNuevoPedido"
-    tabindex="-1"
-    aria-hidden="true"
-  >
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Nuevo pedido</h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-          ></button>
-        </div>
-        <div class="modal-body p-0" style="height: 80vh">
-          <iframe
-            src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
-            class="w-100 h-100 border-0"
-            loading="lazy"
-          ></iframe>
+  {# ===== Fin cards móvil ===== #}
+
+  {% if pedidos %}
+    {# ===== Filtros y bulk-actions ===== #}
+    <div class="row mb-3 gx-2 align-items-end">
+      <div class="col-sm-4">
+        <label for="state-filter" class="form-label">Filtrar por Estado</label>
+        <select id="state-filter" class="form-select">
+          <option value="">Todos</option>
+          <option value="Pendiente de pago">Pendiente de pago</option>
+          <option value="Pagado">Pagado</option>
+          <option value="Aprobado">Aprobado</option>
+          <option value="Entregado">Entregado</option>
+          <option value="Recogido">Recogido</option>
+        </select>
+      </div>
+      <div class="col-sm-4">
+        <label for="search-box" class="form-label">Buscar texto</label>
+        <input type="text" id="search-box" class="form-control" placeholder="Empresa, Excursión…">
+      </div>
+      <div class="col-sm-4 text-end">
+        <label class="form-label d-block">&nbsp;</label>
+        <button id="bulk-delete-btn" class="btn btn-danger">🗑️ Eliminar seleccionados</button>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            🔄 Cambiar estado
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item bulk-state" data-state="pendiente_pago">Pendiente de pago</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="pagado">Pagado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="aprobado">Aprobado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="entregado">Entregado</a></li>
+            <li><a class="dropdown-item bulk-state" data-state="recogido">Recogido</a></li>
+          </ul>
         </div>
       </div>
     </div>
-  </div>
+
+    {# ===== Tabla para tablet/escritorio ===== #}
+    <div class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden">
+      <table id="tabla-pedidos" class="table table-striped align-middle text-center mb-0">
+        <thead class="table-light" style="background-color:#005dab;color:white;">
+          <tr>
+            <th><input type="checkbox" id="select-all"></th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Empresa</th>
+            <th>Excursión</th>
+            <th>Entrega</th>
+            <th>Recogida</th>
+            <th>Maletas</th>
+            <th>Estado</th>
+            <th>Notas</th>
+            <th>Editar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pedidos %}
+            <tr>
+              <td><input class="select-row" type="checkbox" value="{{ p.pk }}"></td>
+              <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+              <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+              <td>{{ p.empresa }}</td>
+              <td>{{ p.excursion|default:"—" }}</td>
+              <td>{{ p.lugar_entrega }}</td>
+              <td>{{ p.lugar_recogida|default:"—" }}</td>
+              <td>
+                {% for m in p.maletas.all %}
+                  <span class="badge bg-light text-dark border mb-1 d-block">
+                    🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
+                  </span>
+                {% empty %}
+                  —
+                {% endfor %}
+              </td>
+              <td>{{ p.get_estado_display }}</td>
+              <td>
+                {% if p.notas %}
+                  <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ p.notas }}">
+                    📝
+                  </button>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td>
+                <a href="{% url 'pedidos:pedido_editar_cliente' p.pk %}"
+                   class="btn btn-sm btn-warning">✏️ Editar</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   {% else %}
-  <div class="alert alert-info text-center">
-    Aún no tienes pedidos registrados.
-    <a
-      href="{% url 'pedidos:pedido_nuevo_cliente' %}"
-      class="btn btn-primary mt-3"
-    >
-      ➕ Crear mi primer pedido
-    </a>
-  </div>
+    <div class="alert alert-info text-center">
+      Aún no tienes pedidos registrados.
+      <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary mt-3">
+        ➕ Crear mi primer pedido
+      </a>
+    </div>
   {% endif %}
 </div>
-{% endblock %} {% block scripts %} {{ block.super }}
-<script>
-  // Inicializa tooltips de Bootstrap
-  document
-    .querySelectorAll('[data-bs-toggle="tooltip"]')
-    .forEach((el) => new bootstrap.Tooltip(el));
-</script>
-<script>
-$(document).ready(function(){
-  const table = $('#tabla-pedidos').DataTable({
-    paging:   true,
-    ordering: true,
-    info:     true,
-    dom: 'Bfrtip',
-    buttons: [
-      {
-        text: 'Eliminar seleccionados',
-        action: function () { bulkAction('eliminar') }
-      },
-      {
-        extend: 'collection',
-        text: 'Cambiar estado',
-        buttons: [
-          { text: 'Pendiente de pago', action: () => bulkAction('pendiente_pago') },
-          { text: 'Pagado',            action: () => bulkAction('pagado') },
-          { text: 'Aprobado',          action: () => bulkAction('aprobado') },
-          { text: 'Entregado',         action: () => bulkAction('entregado') },
-          { text: 'Recogido',          action: () => bulkAction('recogido') }
-        ]
-      }
-    ],
-    columnDefs: [
-      { orderable: false, targets: [0, -1] }  // desactivar orden on checkbox y acciones
-    ]
-  });
+{% endblock %}
 
-  function bulkAction(action){
-    const ids = [];
-    table.$('.select-checkbox:checked').each(function(){
-      ids.push($(this).val());
-    });
-    if(!ids.length) { return alert('Selecciona al menos un pedido.'); }
+{% block scripts %}
+  {{ block.super }}
+  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/buttons/2.3.6/js/dataTables.buttons.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function(){
+      // Inicializa tooltips de Bootstrap
+      document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el=>
+        new bootstrap.Tooltip(el)
+      );
 
-    if(action==='eliminar'){
-      if(!confirm('¿Eliminar los pedidos seleccionados?')) return;
-      ajaxBulk('/pedidos/bulk-delete/', { ids });
-    } else {
-      Swal.fire({
-        title: `¿Cambiar a "${action.replace('_',' ')}"?`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, cambiar',
-      }).then(({ isConfirmed })=>{
-        if(isConfirmed) ajaxBulk('/pedidos/bulk-change-estado/', { ids, estado: action });
+      // Inicializa DataTables
+      const table = $('#tabla-pedidos').DataTable({
+        order: [[1,'desc']],
+        paging: true,
+        info: true,
+        dom: 'lrtip'
       });
-    }
-  }
-   // “Seleccionar todos” para DataTables
-    $('#select-all').on('click', function(){
-      const checked = this.checked;
-      $('.select-checkbox').prop('checked', checked);
-    });
 
-  function ajaxBulk(url, data){
-    $.post(url, {
-      ...data,
-      csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
-    }).done(() => location.reload());
-  }
-});
-</script>
+      // Filtro por Estado
+      $('#state-filter').on('change', function(){
+        table.column(8).search(this.value).draw();
+      });
+
+      // Buscador libre
+      $('#search-box').on('keyup', function(){
+        table.search(this.value).draw();
+      });
+
+      // Seleccionar todos
+      $('#select-all').on('click', function(){
+        $('.select-row').prop('checked', this.checked);
+      });
+
+      // Bulk Delete
+      $('#bulk-delete-btn').on('click', function(){
+        const ids = $('.select-row:checked').map((_,cb)=>cb.value).get();
+        if (!ids.length) return alert('Selecciona primero.');
+        if (!confirm('Eliminar seleccionados?')) return;
+        $.post("{% url 'pedidos:bulk_delete' %}", {
+          ids: ids,
+          csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        }).done(()=> location.reload());
+      });
+
+      // Bulk Change Estado
+      $('.bulk-state').on('click', function(){
+        const estado = this.dataset.state;
+        const ids    = $('.select-row:checked').map((_,cb)=>cb.value).get();
+        if (!ids.length) return alert('Selecciona primero.');
+        if (!confirm(`Cambiar estado a "${estado}"?`)) return;
+        $.post("{% url 'pedidos:bulk_change_estado' %}", {
+          ids: ids,
+          estado: estado,
+          csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+        }).done(()=> location.reload());
+      });
+    });
+  </script>
 {% endblock %}
