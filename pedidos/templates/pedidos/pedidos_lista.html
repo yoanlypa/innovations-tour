@@ -65,13 +65,27 @@
                     {% endfor %}
                   </td>
                   <td>
-                  <button
-                    class="btn {{ p.estado=='pagado' and 'btn-success' or p.estado=='aprobado' and 'btn-primary' or p.estado=='entregado' and 'btn-info text-dark' or p.estado=='recogido' and 'btn-dark' or 'btn-outline-secondary' }} btn-estado"
-                    data-pk="{{ p.pk }}"
-                    data-url="{% url 'pedidos_cambiar_estado' p.pk %}">
-                    {{ p.get_estado_display }}
-                  </button>
-                  </td>
+                    <button
+                      class="btn
+                        {% if p.estado == 'pendiente_pago' %}
+                          btn-outline-secondary
+                        {% elif p.estado == 'pagado' %}
+                          btn-success
+                        {% elif p.estado == 'aprobado' %}
+                          btn-primary
+                        {% elif p.estado == 'entregado' %}
+                          btn-info text-dark
+                        {% elif p.estado == 'recogido' %}
+                          btn-dark
+                        {% else %}
+                          btn-outline-secondary
+                        {% endif %}
+                      btn-estado"
+                      data-pk="{{ p.pk }}"
+                      data-url="{% url 'pedidos_cambiar_estado' p.pk %}">
+                      {{ p.get_estado_display }}
+                    </button>
+                              </td>
                   <td>
                     {% if p.notas %}
                       <button class="btn btn-sm btn-outline-info"
