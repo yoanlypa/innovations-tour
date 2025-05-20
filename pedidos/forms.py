@@ -178,9 +178,6 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 
-from .models import Maleta, Pedido
-
-
 class PedidoFormCliente(forms.ModelForm):
     # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
     estado = forms.ChoiceField(

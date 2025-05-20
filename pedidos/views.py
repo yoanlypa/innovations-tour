@@ -279,6 +279,7 @@ def pedido_editar_cliente_view(request, pk):
         "form": form,
         "formset": formset,
         "es_edicion": True,
+        "pedido": pedido, 
     })
 
 @staff_member_required
