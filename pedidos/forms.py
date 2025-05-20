@@ -149,88 +149,67 @@ class PedidoForm(forms.ModelForm):
 from .models import Maleta, Pedido
 
 
+from django import forms
+from .models import Pedido
+# pedidos/forms.py
+
+from django import forms
+from .models import Pedido
+
 class PedidoFormCliente(forms.ModelForm):
+    # El cliente elige aquí sólo entre “Pagado” y “Pendiente de pago”
     estado = forms.ChoiceField(
-        label="Estado",
+        label="Estado de pago",
         choices=[
             ('pagado', 'Pagado'),
             ('pendiente_pago', 'Pendiente de pago'),
         ],
         widget=forms.RadioSelect,
         initial='pagado',
-        
-        error_messages={
-            "required": "Este campo es obligatorio",
-        },
     )
-    # ──────────────────── Widgets de fecha ────────────────────
-    fecha_inicio = forms.DateField(
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "dd/mm/aaaa",
-                "autocomplete": "off",
-            }
-        ),
-        input_formats=["%Y-%m-%d", "%d/%m/%Y"],
-        error_messages={
-            "invalid": "Introduce una fecha válida (dd/mm/aaaa)",
-            "required": "Este campo es obligatorio",
-        },
-    )
-
-    fecha_fin = forms.DateField(
-        required=False,  # puede quedar vacío
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "dd/mm/aaaa",
-                "autocomplete": "off",
-            }
-        ),
-        input_formats=["%Y-%m-%d", "%d/%m/%Y", ""],
-        error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
-    )
-
 
     class Meta:
         model = Pedido
         fields = [
-            "fecha_inicio",
-            "fecha_fin",
-            "empresa",
-            "excursion",
-            "lugar_entrega",
-            "lugar_recogida",
-            "estado_cliente",
-            "notas",
+            'empresa',
+            'excursion',
+            'lugar_entrega',
+            'lugar_recogida',
+            'fecha_inicio',
+            'fecha_fin',
+            'estado',     # tu único campo de estado
         ]
         widgets = {
-            "empresa": forms.TextInput(attrs={"class": "form-control"}),
-            "excursion": forms.TextInput(attrs={"class": "form-control"}),
-            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
-            "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "notas": forms.Textarea(
-                attrs={"class": "form-control", "rows": 3}
-            ),
+            'empresa':        forms.TextInput(attrs={'class': 'form-control'}),
+            'excursion':      forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega':  forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_inicio':   forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_fin':      forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
         }
 
-    # ──────────────────── Inicialización ────────────────────
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["estado_cliente"].initial = "pagado"
-
-        # Mostrar dd/mm/aaaa cuando editamos
-        if self.instance and self.instance.pk:
-            if self.instance.fecha_inicio:
-                self.initial["fecha_inicio"] = timezone.localtime(
-                    self.instance.fecha_inicio
-                ).strftime("%d/%m/%Y")
-            if self.instance.fecha_fin:
-                self.initial["fecha_fin"] = timezone.localtime(
-                    self.instance.fecha_fin
-                ).strftime("%d/%m/%Y")
+class PedidoForm(forms.ModelForm):
+    # Para staff: puede editar cualquier estado
+    class Meta:
+        model = Pedido
+        fields = [
+            'empresa',
+            'excursion',
+            'lugar_entrega',
+            'lugar_recogida',
+            'fecha_inicio',
+            'fecha_fin',
+            'estado',     # mismo campo unificado
+        ]
+        widgets = {
+            'empresa':        forms.TextInput(attrs={'class': 'form-control'}),
+            'excursion':      forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega':  forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_recogida': forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_inicio':   forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'fecha_fin':      forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'estado':         forms.Select(attrs={'class': 'form-select'}),
+        }
 
     # ──────────────────── Limpieza de campos individuales ────────────────────
     def _make_aware(self, date_obj):
