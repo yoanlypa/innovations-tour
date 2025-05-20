@@ -66,6 +66,7 @@
                   </td>
                   <td>
                     <button
+                      type="button"
                       class="btn
                         {% if p.estado == 'pendiente_pago' %}
                           btn-outline-secondary
@@ -155,38 +156,40 @@
     });
   </script>
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.btn-estado').forEach(boton => {
-      boton.addEventListener('click', async function () {
-        const url = this.dataset.url;
-        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-        // Pregunta de confirmación:
-        const { isConfirmed } = await Swal.fire({
-          title: '¿Estás seguro?',
-          text: `Cambiar estado de "${this.textContent.trim()}" al siguiente paso?`,
-          icon: 'question',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, cambiar',
-          cancelButtonText: 'Cancelar'
-        });
-        if (!isConfirmed) return;
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.btn-estado').forEach(boton => {
+    boton.addEventListener('click', async function (event) {
+      event.preventDefault();  // ← evita el submit inmediato
 
-        // Si confirma, llamamos al AJAX:
-        try {
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': csrftoken }
-          });
-          const data = await res.json();
-          // Actualiza texto y clases
-          this.textContent = data.display;
-          this.className = 'btn ' + data.badge_class + ' btn-estado';
-        } catch (err) {
-          console.error('Error cambiando estado:', err);
-          Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
-        }
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      const url       = this.dataset.url;
+      const textoViejo= this.textContent.trim();
+
+      const { isConfirmed } = await Swal.fire({
+        title: '¿Seguro que quieres cambiar el estado?',
+        text: `Estado actual: "${textoViejo}"`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cambiar',
+        cancelButtonText: 'No, cancelar'
       });
+      if (!isConfirmed) return;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken }
+        });
+        const data = await res.json();
+        // Actualiza botón
+        this.textContent = data.display;
+        this.className   = 'btn ' + data.badge_class + ' btn-estado';
+      } catch (err) {
+        console.error(err);
+        Swal.fire('Error', 'No se pudo cambiar el estado.', 'error');
+      }
     });
   });
-  </script>
+});
+</script>
 {% endblock %}
