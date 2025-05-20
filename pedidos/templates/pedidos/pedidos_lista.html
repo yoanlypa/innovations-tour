@@ -18,9 +18,66 @@
               onclick="return confirm('¿Eliminar todos los seleccionados?');">
         🗑️ Eliminar seleccionados
       </button>
+  
+    <!-- ➕ Nuevo Pedido (móvil) -->
+    <div class="d-block d-md-none text-end mb-3">
+      <a href="{% url 'pedidos:pedido_nuevo' %}"
+         class="btn btn-primary btn-floating">
+        ➕
+      </a>
+    </div>
 
-      {% if pedidos %}
-        <div class="table-responsive shadow-sm rounded-3 overflow-hidden">
+    <!-- ===== Cards para móvil ===== -->
+    <div class="d-block d-md-none">
+      {% for p in pedidos %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <strong>#{{ p.id }}</strong> – {{ p.empresa }}
+          </div>
+          <div class="card-body">
+            <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
+            <p><strong>Fin:</strong> {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
+            <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
+            <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
+            <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
+            <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
+
+            <p><strong>Maletas:</strong></p>
+            {% if p.maletas.all %}
+              {% for m in p.maletas.all %}
+                <span class="badge bg-light text-dark border d-inline-block mb-1">
+                  🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+                </span>
+              {% endfor %}
+            {% else %}
+              <p>—</p>
+            {% endif %}
+
+            {% if p.notas %}
+              <p><strong>Notas:</strong> {{ p.notas }}</p>
+            {% endif %}
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'pedidos:pedido_editar' p.pk %}"
+               class="btn btn-sm btn-warning me-1">✏️</a>
+            <form action="{% url 'pedidos:pedido_eliminar' p.pk %}"
+                  method="post" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger"
+                      onclick="return confirm('¿Eliminar este pedido?');">
+                🗑️
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- ===== Fin Cards para móvil ===== -->
+
+  {% if pedidos %}
+  <div
+    class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
+  >
           <table class="table table-striped align-middle text-center">
             <thead class="table-light" style="background-color: #005dab; color: white;">
               <tr>
