@@ -1,168 +1,200 @@
-{% extends 'pedidos/base.html' %}
-{% load static %}
-
-{% block title %}Mis pedidos · Innovations Tours{% endblock %}
-
-{% block styles %}
+{% extends 'pedidos/base.html' %} {% load static %} {% block title %}Mis pedidos
+· Innovations Tours{% endblock %} {% block styles %}
 <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
-{% endblock %}
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="container my-4">
-  <h2 class="mb-4" style="color:#005dab;">📦 Mis pedidos</h2>
-    {# —— Botón “+ Nuevo” móvil —— #}
-    <div class="d-block d-md-none text-end mb-3">
-      <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary btn-floating">
-        ➕
-      </a>
+  <h2 class="mb-4" style="color: #005dab">📦 Mis pedidos</h2>
+  {# —— Botón “+ Nuevo” móvil —— #}
+  <div class="d-block d-md-none text-end mb-3">
+    <a
+      href="{% url 'pedidos:pedido_nuevo_cliente' %}"
+      class="btn btn-primary btn-floating"
+    >
+      ➕
+    </a>
+  </div>
+
+  {# ===== Cards para móvil ===== #}
+  <div class="d-block d-md-none">
+    {% for p in pedidos %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-header bg-primary text-white">
+        <strong>#{{ p.id }}</strong> – {{ p.empresa }}
+      </div>
+      <div class="card-body">
+        <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
+        <p><strong>Fin:</strong> {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
+        <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
+        <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
+        <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
+        <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
+
+        <p><strong>Maletas:</strong></p>
+        {% if p.maletas.exists %} {% for m in p.maletas.all %}
+        <span class="badge bg-light text-dark border d-inline-block mb-1">
+          🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+        </span>
+        {% endfor %} {% else %}
+        <p>—</p>
+        {% endif %} {% if p.notas %}
+        <p><strong>Notas:</strong> {{ p.notas }}</p>
+        {% endif %}
+      </div>
+      <div class="card-footer text-end">
+        <a
+          href="{% url 'pedidos:pedido_editar' p.pk %}"
+          class="btn btn-sm btn-warning me-1"
+          >✏️ Editar</a
+        >
+        <form
+          action="{% url 'pedidos:pedido_eliminar' p.pk %}"
+          method="post"
+          class="d-inline"
+        >
+          {% csrf_token %}
+          <button
+            class="btn btn-sm btn-danger"
+            onclick="return confirm('¿Eliminar este pedido?');"
+          >
+            🗑️
+          </button>
+        </form>
+      </div>
     </div>
-
-    {# ===== Cards para móvil ===== #}
-    <div class="d-block d-md-none">
-      {% for p in pedidos %}
-        <div class="card mb-3 shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <strong>#{{ p.id }}</strong> – {{ p.empresa }}
-          </div>
-          <div class="card-body">
-            <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
-            <p><strong>Fin:</strong>    {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
-            <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
-            <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
-            <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
-            <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
-
-            <p><strong>Maletas:</strong></p>
-            {% if p.maletas.exists %}
-              {% for m in p.maletas.all %}
-                <span class="badge bg-light text-dark border d-inline-block mb-1">
-                  🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-                </span>
-              {% endfor %}
-            {% else %}
-              <p>—</p>
-            {% endif %}
-
+    {% endfor %}
+  </div>
+  {# ===== Fin cards móvil ===== #} {% if pedidos %} {# ===== Tabla para
+  tablet/escritorio ===== #}
+  <div
+    class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
+  >
+    <table class="table table-striped align-middle text-center mb-0">
+      <thead
+        class="table-light"
+        style="background-color: #005dab; color: white"
+      >
+        <tr>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <th>Empresa</th>
+          <th>Excursión</th>
+          <th>Entrega</th>
+          <th>Recogida</th>
+          <th>Maletas</th>
+          <th>Estado</th>
+          <th>Notas</th>
+          <th>Editar</th>
+          <th>Eliminar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr>
+          <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+          <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+          <td>{{ p.empresa }}</td>
+          <td>{{ p.excursion|default:"—" }}</td>
+          <td>{{ p.lugar_entrega }}</td>
+          <td>{{ p.lugar_recogida|default:"—" }}</td>
+          <td>
+            {% for m in p.maletas.all %}
+            <span class="badge bg-light text-dark border mb-1 d-block">
+              🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
+            </span>
+            {% empty %} — {% endfor %}
+          </td>
+          <td>{{ p.get_estado_display }}</td>
+          <td>
             {% if p.notas %}
-              <p><strong>Notas:</strong> {{ p.notas }}</p>
-            {% endif %}
-          </div>
-          <div class="card-footer text-end">
-            <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm btn-warning me-1">✏️ Editar</a>
-            <form action="{% url 'pedidos:pedido_eliminar' p.pk %}" method="post" class="d-inline">
+            <button
+              class="btn btn-sm btn-outline-info"
+              data-bs-toggle="tooltip"
+              title="{{ p.notas }}"
+            >
+              📝
+            </button>
+            {% else %} — {% endif %}
+          </td>
+          <td>
+            <a
+              href="{% url 'pedidos:pedido_editar' p.pk %}"
+              class="btn btn-sm btn-warning"
+              >✏️</a
+            >
+          </td>
+          <td>
+            <form
+              action="{% url 'pedidos:pedido_eliminar' p.pk %}"
+              method="post"
+              class="d-inline"
+            >
               {% csrf_token %}
-              <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este pedido?');">
+              <button
+                class="btn btn-sm btn-danger"
+                onclick="return confirm('¿Eliminar este pedido?');"
+              >
                 🗑️
               </button>
             </form>
-          </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {# ===== Fin tabla ===== #} {# —— FAB para desktop que abre modal —— #}
+  <a
+    href="#"
+    class="btn btn-primary btn-lg rounded-circle fab d-none d-md-block"
+    data-bs-toggle="modal"
+    data-bs-target="#modalNuevoPedido"
+    title="Crear nuevo pedido"
+  >
+    <span class="fs-3 fw-bold">+</span>
+  </a>
+  <div
+    class="modal fade"
+    id="modalNuevoPedido"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo pedido</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
         </div>
-      {% endfor %}
+        <div class="modal-body p-0" style="height: 80vh">
+          <iframe
+            src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
+            class="w-100 h-100 border-0"
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
     </div>
-    {# ===== Fin cards móvil ===== #}
-
-    {% if pedidos %}
-      {# ===== Tabla para tablet/escritorio ===== #}
-      <div class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden">
-        <table class="table table-striped align-middle text-center mb-0">
-          <thead class="table-light" style="background-color:#005dab;color:white;">
-            <tr>
-              <th>Fecha Inicio</th>
-              <th>Fecha Fin</th>
-              <th>Empresa</th>
-              <th>Excursión</th>
-              <th>Entrega</th>
-              <th>Recogida</th>
-              <th>Maletas</th>
-              <th>Estado</th>
-              <th>Notas</th>
-              <th>Editar</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in pedidos %}
-              <tr>
-                <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-                <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
-                <td>{{ p.empresa }}</td>
-                <td>{{ p.excursion|default:"—" }}</td>
-                <td>{{ p.lugar_entrega }}</td>
-                <td>{{ p.lugar_recogida|default:"—" }}</td>
-                <td>
-                  {% for m in p.maletas.all %}
-                    <span class="badge bg-light text-dark border mb-1 d-block">
-                      🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
-                    </span>
-                  {% empty %}
-                    —
-                  {% endfor %}
-                </td>
-                <td>{{ p.get_estado_display }}</td>
-                <td>
-                  {% if p.notas %}
-                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="tooltip" title="{{ p.notas }}">
-                      📝
-                    </button>
-                  {% else %}
-                    —
-                  {% endif %}
-                </td>
-                <td>
-                  <a href="{% url 'pedidos:pedido_editar' p.pk %}" class="btn btn-sm btn-warning">✏️</a>
-                </td>
-                <td>
-                  <form action="{% url 'pedidos:pedido_eliminar' p.pk %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('¿Eliminar este pedido?');">
-                      🗑️
-                    </button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {# ===== Fin tabla ===== #}
-
-      {# —— FAB para desktop que abre modal —— #}
-      <a href="#" class="btn btn-primary btn-lg rounded-circle fab d-none d-md-block"
-         data-bs-toggle="modal" data-bs-target="#modalNuevoPedido" title="Crear nuevo pedido">
-        <span class="fs-3 fw-bold">+</span>
-      </a>
-      <div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Nuevo pedido</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0" style="height:80vh;">
-              <iframe src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
-                      class="w-100 h-100 border-0" loading="lazy"></iframe>
-            </div>
-          </div>
-        </div>
-      </div>
-    {% else %}
-      <div class="alert alert-info text-center">
-        Aún no tienes pedidos registrados.
-        <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary mt-3">
-          ➕ Crear mi primer pedido
-        </a>
-      </div>
-    {% endif %}
+  </div>
+  {% else %}
+  <div class="alert alert-info text-center">
+    Aún no tienes pedidos registrados.
+    <a
+      href="{% url 'pedidos:pedido_nuevo_cliente' %}"
+      class="btn btn-primary mt-3"
+    >
+      ➕ Crear mi primer pedido
+    </a>
+  </div>
   {% endif %}
 </div>
-{% endblock %}
-
-{% block scripts %}
-  {{ block.super }}
-  <script>
-    // Inicializa tooltips de Bootstrap
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el =>
-      new bootstrap.Tooltip(el)
-    );
-  </script>
+{% endblock %} {% block scripts %} {{ block.super }}
+<script>
+  // Inicializa tooltips de Bootstrap
+  document
+    .querySelectorAll('[data-bs-toggle="tooltip"]')
+    .forEach((el) => new bootstrap.Tooltip(el));
+</script>
 {% endblock %}
