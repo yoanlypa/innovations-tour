@@ -68,25 +68,7 @@
       Si no ha pagado, elige “Pendiente”.
     </small>
 
-{# Estado de pago (radios) #}
-<div class="mb-4">
-  <label class="form-label">{{ form.estado.label }}</label>
-  <div>
-    {% for radio in form.estado %}
-      <div class="form-check form-check-inline">
-        {{ radio.tag }}
-        <label class="form-check-label" for="{{ radio.id_for_label }}">
-          {{ radio.choice_label }}
-        </label>
-      </div>
-    {% endfor %}
-    {% if form.estado.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.estado.errors.0 }}
-      </div>
-    {% endif %}
-  </div>
-</div>
+
 {# —— lugares —— #}
 <div class="row">
   <div class="col-md-6 mb-3">
