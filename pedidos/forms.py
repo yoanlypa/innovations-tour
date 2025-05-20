@@ -170,15 +170,15 @@ from .models import Maleta, Pedido
 
 
 class PedidoFormCliente(forms.ModelForm):
-       # Sólo dos opciones en la creación: pagado o pendiente de pago
-    estado_cliente = forms.ChoiceField(
-        label="Estado de pago",
+    # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
+    estado = forms.ChoiceField(
+        label="Estado",
         choices=[
             ('pagado', 'Pagado'),
             ('pendiente_pago', 'Pendiente de pago'),
         ],
-        widget=forms.RadioSelect,   # Grupo de radios
-        initial='pagado'            # Por defecto “Pagado”
+        widget=forms.RadioSelect,
+        initial='pagado',
     )
     # ──────────────────── Widgets de fecha ────────────────────
     fecha_inicio = forms.DateField(
@@ -210,7 +210,7 @@ class PedidoFormCliente(forms.ModelForm):
         error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
     )
 
-    # ──────────────────── Meta ────────────────────
+
     class Meta:
         model = Pedido
         fields = [
@@ -228,7 +228,6 @@ class PedidoFormCliente(forms.ModelForm):
             "excursion": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "estado_cliente": forms.Select(attrs={"class": "form-select"}),
             "notas": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3}
             ),
