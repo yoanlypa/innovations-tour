@@ -10,7 +10,6 @@
 {% block content %}
 <div class="container my-4">
   <h2 class="mb-4" style="color:#005dab;">📦 Mis pedidos</h2>
-  {% else %}
     {# —— Botón “+ Nuevo” móvil —— #}
     <div class="d-block d-md-none text-end mb-3">
       <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary btn-floating">
