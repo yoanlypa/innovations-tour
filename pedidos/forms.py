@@ -31,59 +31,73 @@ class RegistroForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"placeholder": "Correo electrónico"}),
         }
 
+
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(
         label="Usuario",
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Usuario",
-            "autocomplete": "username"
-        })
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Usuario",
+                "autocomplete": "username",
+            }
+        ),
     )
     password = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput(attrs={
-            "class": "form-control",
-            "placeholder": "Contraseña",
-            "autocomplete": "current-password",
-            "id": "id_login_password"
-        })
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Contraseña",
+                "autocomplete": "current-password",
+                "id": "id_login_password",
+            }
+        ),
     )
+
 
 class CustomRegisterForm(UserCreationForm):
     username = forms.CharField(
         label="Usuario",
-        widget=forms.TextInput(attrs={
-            "class": "form-control",
-            "placeholder": "Usuario",
-            "autocomplete": "username"
-        })
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Usuario",
+                "autocomplete": "username",
+            }
+        ),
     )
     email = forms.EmailField(
         label="Correo electrónico",
-        widget=forms.EmailInput(attrs={
-            "class": "form-control",
-            "placeholder": "Correo electrónico",
-            "autocomplete": "email"
-        })
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Correo electrónico",
+                "autocomplete": "email",
+            }
+        ),
     )
     password1 = forms.CharField(
         label="Contraseña",
-        widget=forms.PasswordInput(attrs={
-            "class": "form-control",
-            "placeholder": "Contraseña",
-            "autocomplete": "new-password",
-            "id": "id_register_password1"
-        })
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Contraseña",
+                "autocomplete": "new-password",
+                "id": "id_register_password1",
+            }
+        ),
     )
     password2 = forms.CharField(
         label="Confirmar contraseña",
-        widget=forms.PasswordInput(attrs={
-            "class": "form-control",
-            "placeholder": "Repite la contraseña",
-            "autocomplete": "new-password",
-            "id": "id_register_password2"
-        })
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Repite la contraseña",
+                "autocomplete": "new-password",
+                "id": "id_register_password2",
+            }
+        ),
     )
 
     class Meta:
@@ -103,6 +117,8 @@ class CustomRegisterForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
 #
 #
 #
@@ -153,7 +169,7 @@ class PedidoForm(forms.ModelForm):
             "fecha_fin": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}
             ),
-            'estado':forms.Select(attrs={'class': 'form-select'}),           
+            "estado": forms.Select(attrs={"class": "form-select"}),
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
@@ -170,11 +186,11 @@ class PedidoFormCliente(forms.ModelForm):
     estado = forms.ChoiceField(
         label="Estado",
         choices=[
-            ('pagado', 'Pagado'),
-            ('pendiente_pago', 'Pendiente de pago'),
+            ("pagado", "Pagado"),
+            ("pendiente_pago", "Pendiente de pago"),
         ],
         widget=forms.RadioSelect,
-        initial='pagado',
+        initial="pagado",
     )
     # ──────────────────── Widgets de fecha ────────────────────
     fecha_inicio = forms.DateField(
@@ -206,7 +222,6 @@ class PedidoFormCliente(forms.ModelForm):
         error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
     )
 
-
     class Meta:
         model = Pedido
         fields = [
@@ -224,10 +239,8 @@ class PedidoFormCliente(forms.ModelForm):
             "excursion": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "notas": forms.Textarea(
-                attrs={"class": "form-control", "rows": 3}
-            ),
-            'estado':forms.Select(attrs={'class': 'form-select'}),
+            "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "estado": forms.Select(attrs={"class": "form-select"}),
         }
 
     # ──────────────────── Inicialización ────────────────────
@@ -282,13 +295,12 @@ MaletaFormSet = inlineformset_factory(
     fields=("guia", "cantidad_pax"),
     widgets={
         "guia": forms.TextInput(attrs={"class": "form-control"}),
-        "cantidad_pax": forms.NumberInput(
-            attrs={"class": "form-control", "min": 1}
-        ),
+        "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
     },
     extra=1,
     can_delete=True,
 )
+
 
 class MaletaForm(forms.ModelForm):
     class Meta:
