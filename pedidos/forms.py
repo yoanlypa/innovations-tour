@@ -216,7 +216,7 @@ class PedidoFormCliente(forms.ModelForm):
             "excursion",
             "lugar_entrega",
             "lugar_recogida",
-            "estado_cliente",
+            "estado",
             "notas",
         ]
         widgets = {
@@ -232,7 +232,7 @@ class PedidoFormCliente(forms.ModelForm):
     # ──────────────────── Inicialización ────────────────────
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["estado_cliente"].initial = "pagado"
+        self.fields["estado"].initial = "pagado"
 
         # Mostrar dd/mm/aaaa cuando editamos
         if self.instance and self.instance.pk:
