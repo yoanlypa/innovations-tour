@@ -42,23 +42,10 @@
       </div>
       <div class="card-footer text-end">
         <a
-          href="{% url 'pedidos:pedido_editar' p.pk %}"
+          href="{% url 'pedidos:pedido_editar_cliente' p.pk %}"
           class="btn btn-sm btn-warning me-1"
           >✏️ Editar</a
         >
-        <form
-          action="{% url 'pedidos:pedido_eliminar' p.pk %}"
-          method="post"
-          class="d-inline"
-        >
-          {% csrf_token %}
-          <button
-            class="btn btn-sm btn-danger"
-            onclick="return confirm('¿Eliminar este pedido?');"
-          >
-            🗑️
-          </button>
-        </form>
       </div>
     </div>
     {% endfor %}

@@ -250,30 +250,26 @@ def pedido_editar_cliente_view(request, pk):
     if pedido.usuario != request.user:
         raise Http404()
 
+    # Aquí siempre usamos PedidoFormCliente, con sólo dos estados
+    FormClass = PedidoFormCliente
     if request.method == "POST":
-        form = PedidoFormCliente(request.POST, instance=pedido)
+        form    = FormClass(request.POST, instance=pedido)
         formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
-        print("── POST ──", request.POST.dict())
-        print("VALID?", form.is_valid(), formset.is_valid())
-        print("Form errors:", form.errors)
-        print("Formset errors:", formset.non_form_errors(), [f.errors for f in formset])
         if form.is_valid() and formset.is_valid():
-            pedido = form.save(commit=False)
-            pedido.save()
+            form.save()
             formset.save()
             messages.success(request, "✅ Pedido actualizado correctamente.")
             return redirect("pedidos:mis_pedidos")
         messages.error(request, "Corrige los errores del formulario.")
     else:
-        form = PedidoFormCliente(instance=pedido)
+        form    = FormClass(instance=pedido)
         formset = MaletaFormSet(instance=pedido, prefix="maleta")
 
-    return render(
-        request,
-        "pedidos/pedido_nuevo_cliente.html",
-        {"form": form, "formset": formset, "es_edicion": True, "pedido": pedido},
-    )
-
+    return render(request, "pedidos/pedido_nuevo_cliente.html", {
+        "form": form,
+        "formset": formset,
+        "es_edicion": True,
+    })
 
 @staff_member_required
 def pedido_nuevo_view(request):

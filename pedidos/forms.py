@@ -235,6 +235,12 @@ class PedidoFormCliente(forms.ModelForm):
             "notas",
         ]
         widgets = {
+            "fecha_inicio": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "fecha_fin": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
             "empresa": forms.TextInput(attrs={"class": "form-control"}),
             "excursion": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
