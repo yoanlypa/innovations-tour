@@ -135,7 +135,7 @@ class PedidoForm(forms.ModelForm):
             "lugar_recogida",
             "fecha_inicio",
             "fecha_fin",
-            "Estado",
+            "estado",
             "notas",
         ]
         widgets = {
@@ -153,7 +153,7 @@ class PedidoForm(forms.ModelForm):
             "fecha_fin": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}
             ),
-            "Estado": forms.Select(attrs={"class": "form-select"}),            
+            "estado": forms.Select(attrs={"class": "form-select"}),            
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
