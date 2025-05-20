@@ -124,50 +124,32 @@ class TareaForm(forms.ModelForm):
 #
 # ========== FORMULARIO DE PEDIDOS ==========
 class PedidoForm(forms.ModelForm):
-
+    # Para staff: permite editar también el estado
     class Meta:
         model = Pedido
-        exclude = ["fecha_creacion"]
         fields = [
-            "empresa",
-            "excursion",
-            "lugar_entrega",
-            "lugar_recogida",
-            "fecha_inicio",
-            "fecha_fin",
-            "estado_cliente",
-            "notas",
-            "productos",
+            'empresa',
+            'excursion',
+            'lugar_entrega',
+            'lugar_recogida',
+            'fecha_inicio',
+            'fecha_fin',
+            'estado',   # unificado
         ]
         widgets = {
-            "empresa": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Nombre de la empresa"}
-            ),
-            "excursion": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Nombre de la excursión"}
-            ),
-            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
-            "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "fecha_inicio": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "fecha_fin": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "estado_cliente": forms.Select(attrs={"class": "form-select"}),            "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "productos": forms.SelectMultiple(attrs={"class": "form-select"}),
+            'empresa':       forms.TextInput(attrs={'class': 'form-control'}),
+            'excursion':     forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega': forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_recogida':forms.TextInput(attrs={'class': 'form-control'}),
+            'fecha_inicio':  forms.DateInput(attrs={'type': 'date',  'class': 'form-control'}),
+            'fecha_fin':     forms.DateInput(attrs={'type': 'date',  'class': 'form-control'}),
+            'estado':        forms.Select(attrs={'class': 'form-select'}),
         }
-
-    def clean_fecha_creacion(self):
-        fecha_str = self.cleaned_data["fecha_creacion"]
-        return convertir_fecha(fecha_str)
-
 
 from .models import Maleta, Pedido
 
 
 class PedidoFormCliente(forms.ModelForm):
-    # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
     estado = forms.ChoiceField(
         label="Estado",
         choices=[
@@ -176,6 +158,10 @@ class PedidoFormCliente(forms.ModelForm):
         ],
         widget=forms.RadioSelect,
         initial='pagado',
+        
+        error_messages={
+            "required": "Este campo es obligatorio",
+        },
     )
     # ──────────────────── Widgets de fecha ────────────────────
     fecha_inicio = forms.DateField(
