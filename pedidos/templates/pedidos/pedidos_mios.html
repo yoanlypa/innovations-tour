@@ -51,12 +51,13 @@
   <div
     class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
   >
-    <table class="table table-striped align-middle text-center mb-0">
-      <thead
+    <table id="tabla-pedidos" class="table table-striped">
+        <thead
         class="table-light"
         style="background-color: #005dab; color: white"
       >
         <tr>
+          <th><input type="checkbox" id="select-all"></th>
           <th>Fecha Inicio</th>
           <th>Fecha Fin</th>
           <th>Empresa</th>
@@ -73,6 +74,7 @@
       <tbody>
         {% for p in pedidos %}
         <tr>
+          <td><input class="select-checkbox" type="checkbox" value="{{ p.pk }}"></td>
           <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
           <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
           <td>{{ p.empresa }}</td>
@@ -175,5 +177,69 @@
   document
     .querySelectorAll('[data-bs-toggle="tooltip"]')
     .forEach((el) => new bootstrap.Tooltip(el));
+</script>
+<script>
+$(document).ready(function(){
+  const table = $('#tabla-pedidos').DataTable({
+    paging:   true,
+    ordering: true,
+    info:     true,
+    dom: 'Bfrtip',
+    buttons: [
+      {
+        text: 'Eliminar seleccionados',
+        action: function () { bulkAction('eliminar') }
+      },
+      {
+        extend: 'collection',
+        text: 'Cambiar estado',
+        buttons: [
+          { text: 'Pendiente de pago', action: () => bulkAction('pendiente_pago') },
+          { text: 'Pagado',            action: () => bulkAction('pagado') },
+          { text: 'Aprobado',          action: () => bulkAction('aprobado') },
+          { text: 'Entregado',         action: () => bulkAction('entregado') },
+          { text: 'Recogido',          action: () => bulkAction('recogido') }
+        ]
+      }
+    ],
+    columnDefs: [
+      { orderable: false, targets: [0, -1] }  // desactivar orden on checkbox y acciones
+    ]
+  });
+
+  function bulkAction(action){
+    const ids = [];
+    table.$('.select-checkbox:checked').each(function(){
+      ids.push($(this).val());
+    });
+    if(!ids.length) { return alert('Selecciona al menos un pedido.'); }
+
+    if(action==='eliminar'){
+      if(!confirm('¿Eliminar los pedidos seleccionados?')) return;
+      ajaxBulk('/pedidos/bulk-delete/', { ids });
+    } else {
+      Swal.fire({
+        title: `¿Cambiar a "${action.replace('_',' ')}"?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, cambiar',
+      }).then(({ isConfirmed })=>{
+        if(isConfirmed) ajaxBulk('/pedidos/bulk-change-estado/', { ids, estado: action });
+      });
+    }
+  }
+   // “Seleccionar todos” para DataTables
+    $('#select-all').on('click', function(){
+      const checked = this.checked;
+      $('.select-checkbox').prop('checked', checked);
+    });
+
+  function ajaxBulk(url, data){
+    $.post(url, {
+      ...data,
+      csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
+    }).done(() => location.reload());
+  }
+});
 </script>
 {% endblock %}

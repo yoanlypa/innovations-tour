@@ -28,7 +28,9 @@ urlpatterns = [
     path("pedidos/eliminar/<int:pk>/", views.pedido_eliminar_view, name="pedido_eliminar"),
     path("pedidos/eliminar-multiple/", views.pedido_eliminar_masivo_view, name="pedido_eliminar_masivo"),
     path('pedidos/ajax/cambiar-estado/<int:pk>/',views.cambiar_estado,name='cambiar_estado'),
-    
+    path('bulk-delete/',       views.bulk_delete,         name='bulk_delete'),
+    path('bulk-change-estado/', views.bulk_change_estado, name='bulk_change_estado'),
+
     # Cliente: mis pedidos
     path("mis-pedidos/", views.pedidos_mios_view, name="mis_pedidos"),
     path("mis-pedidos/nuevo/",views.pedido_nuevo_cliente_view,name="pedido_nuevo_cliente",),

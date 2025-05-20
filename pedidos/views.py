@@ -18,6 +18,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
+from django_filters.views import FilterView
+from .filters import PedidoFilter
 
 from .forms import (
     CustomLoginForm,
@@ -29,7 +31,35 @@ from .forms import (
 )
 from .models import Maleta, Pedido, RegistroCliente, Tarea
 
+#
+# 
+# 
+# 
+# ——————— Vistas back-end para acciones masivas ———————
+@staff_member_required
+@require_POST
+def bulk_delete(request):
+    ids = request.POST.getlist('ids[]') or request.POST.getlist('ids')
+    Pedido.objects.filter(pk__in=ids).delete()
+    return JsonResponse({'ok': True})
 
+@staff_member_required
+@require_POST
+def bulk_change_estado(request):
+    ids    = request.POST.getlist('ids[]') or request.POST.getlist('ids')
+    estado = request.POST['estado']
+    # valida que 'estado' sea uno de los permitidos
+    if estado not in dict(Pedido.ESTADOS):
+        return JsonResponse({'error':'Estado inválido'}, status=400)
+    Pedido.objects.filter(pk__in=ids).update(estado=estado)
+    return JsonResponse({'ok': True})
+
+# 
+# 
+# 
+# 
+# 
+# 
 # ——————— Home ———————
 
 class HomeView(TemplateView):
@@ -41,6 +71,11 @@ class HomeView(TemplateView):
         return super().dispatch(request, *args, **kwargs)
 
 
+# 
+# 
+# 
+# 
+# 
 # ——————— Tareas ———————
 
 @require_http_methods(["POST"])
@@ -155,6 +190,13 @@ def logout_view(request):
 # 
 # 
 # ——————— Pedidos ———————
+
+class PedidoListView(FilterView):
+    model = Pedido
+    template_name = 'pedidos/pedidos_lista.html'
+    context_object_name = 'pedidos'
+    filterset_class = PedidoFilter
+    paginate_by = 25
 
 @staff_member_required
 @require_POST
