@@ -153,7 +153,7 @@ class PedidoForm(forms.ModelForm):
             "fecha_fin": forms.DateInput(
                 attrs={"type": "date", "class": "form-control"}
             ),
-            "estado": forms.Select(attrs={"class": "form-select"}),            
+            'estado':forms.Select(attrs={'class': 'form-select'}),           
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
 
@@ -227,6 +227,7 @@ class PedidoFormCliente(forms.ModelForm):
             "notas": forms.Textarea(
                 attrs={"class": "form-control", "rows": 3}
             ),
+            'estado':forms.Select(attrs={'class': 'form-select'}),
         }
 
     # ──────────────────── Inicialización ────────────────────
