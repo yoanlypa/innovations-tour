@@ -1,102 +1,178 @@
-{% extends "pedidos/base.html" %}
-{% load static %}
-
-{% block title %}Mis pedidos · Innovations Tours{% endblock %}
-
-{% block styles %}
-  <link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}">
-{% endblock %}
-{% block content %}
+{% extends "pedidos/base.html" %} {% load static %} {% block title %}Mis pedidos
+· Innovations Tours{% endblock %} {% block styles %}
+<link rel="stylesheet" href="{% static 'pedidos/css/styles.css' %}" />
+{% endblock %} {% block content %}
 <div class="container">
-  <h2 class="mb-4">Mis pedidos</h2>
+  <h2 class="mb-4" style="color:#005dab;">Mis pedidos</h2>
+    {% if not user.is_staff %}
+    <div class="alert alert-warning">
+      ⚠️ No tienes permiso para ver esta página.
+    </div>
+  {% else %}
 
-  {% if pedidos %}
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead class="table-dark">
-          <tr>
-            <th>Fecha inicio</th><th>Fecha Fin</th><th>Excursión</th><th>Empresa</th>
-            <th>Lugar E/R</th><th>Maletas<br>(Pax / Guía)</th><th>Estado</th><th>Notas</th>
-            <th>Acciones</th>
-
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in pedidos %}
-          <tr>
-            <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
-            <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
-            <td>{{ p.excursion|default:"—" }}</td>
-            <td>{{ p.empresa }}</td>
-            <td>{{ p.lugar_entrega }} / {{ p.lugar_recogida|default:"—" }}</td>
-            <td>
-              {% for m in p.maletas.all %}
-                <div>{{ m.cantidad_pax }} pax / {{ m.guia }}</div>
-              {% empty %}
-                —
-              {% endfor %}
-            </td>
-            <td>
-              <button
-                      class="btn
-                        {% if p.estado == 'pendiente_pago' %}
-                          btn-outline-secondary
-                        {% elif p.estado == 'pagado' %}
-                          btn-success
-                        {% elif p.estado == 'aprobado' %}
-                          btn-primary
-                        {% elif p.estado == 'entregado' %}
-                          btn-info text-dark
-                        {% elif p.estado == 'recogido' %}
-                          btn-dark
-                        {% else %}
-                          btn-outline-secondary
-                        {% endif %}
-                      btn-estado"
-                      data-pk="{{ p.pk }}">
-                      {{ p.get_estado_display }}
-                    </button></td>
-            <td>{{ p.notas|default:"—" }}</td>
-            <td>
-              <a class="btn btn-sm btn-warning"
-                 href="{% url 'pedidos:pedido_editar_cliente' p.pk %}">✏️</a>
-            </td>
-          </tr>
-          
-          {% endfor %}
-        </tbody>
-      </table>
+    <!-- ➕ Nuevo Pedido (móvil) -->
+    <div class="d-block d-md-none text-end mb-3">
+      <a href="{% url 'pedidos:pedido_nuevo' %}"
+         class="btn btn-primary btn-floating">
+        ➕
+      </a>
     </div>
 
-    {# ---------- FAB “+” ---------- #}
-{# FAB que abre el modal #}
-<a href="#" class="btn btn-primary btn-lg rounded-circle fab"
-   data-bs-toggle="modal"
-   data-bs-target="#modalNuevoPedido"
-   title="Crear nuevo pedido">+</a>
+    <!-- ===== Cards para móvil ===== -->
+    <div class="d-block d-md-none">
+      {% for p in pedidos %}
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <strong>#{{ p.id }}</strong> – {{ p.empresa }}
+          </div>
+          <div class="card-body">
+            <p><strong>Inicio:</strong> {{ p.fecha_inicio|date:"d/m/Y" }}</p>
+            <p><strong>Fin:</strong> {{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</p>
+            <p><strong>Excursión:</strong> {{ p.excursion|default:"—" }}</p>
+            <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
+            <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
+            <p><strong>Estado:</strong> {{ p.get_estado_display }}</p>
 
-<div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Nuevo pedido</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body p-0" style="height:80vh;">
-        <iframe src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
-                class="w-100 h-100 border-0"
-                loading="lazy"></iframe>
+            <p><strong>Maletas:</strong></p>
+            {% if p.maletas.all %}
+              {% for m in p.maletas.all %}
+                <span class="badge bg-light text-dark border d-inline-block mb-1">
+                  🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
+                </span>
+              {% endfor %}
+            {% else %}
+              <p>—</p>
+            {% endif %}
+
+            {% if p.notas %}
+              <p><strong>Notas:</strong> {{ p.notas }}</p>
+            {% endif %}
+          </div>
+          <div class="card-footer text-end">
+            <a href="{% url 'pedidos:pedido_editar' p.pk %}"
+               class="btn btn-sm btn-warning me-1">✏️</a>
+            <form action="{% url 'pedidos:pedido_eliminar' p.pk %}"
+                  method="post" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-sm btn-danger"
+                      onclick="return confirm('¿Eliminar este pedido?');">
+                🗑️
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- ===== Fin Cards para móvil ===== -->
+
+  {% if pedidos %}
+  <div
+    class="table-responsive d-none d-md-block shadow-sm rounded-3 overflow-hidden"
+  >
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Fecha inicio</th>
+          <th>Fecha Fin</th>
+          <th>Excursión</th>
+          <th>Empresa</th>
+          <th>Lugar E/R</th>
+          <th>Maletas<br />(Pax / Guía)</th>
+          <th>Estado</th>
+          <th>Notas</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr>
+          <td>{{ p.fecha_inicio|date:"d/m/Y" }}</td>
+          <td>{{ p.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+          <td>{{ p.excursion|default:"—" }}</td>
+          <td>{{ p.empresa }}</td>
+          <td>{{ p.lugar_entrega }} / {{ p.lugar_recogida|default:"—" }}</td>
+          <td>
+            {% for m in p.maletas.all %}
+            <div>{{ m.cantidad_pax }} pax / {{ m.guia }}</div>
+            {% empty %} — {% endfor %}
+          </td>
+          <td>
+            <button
+              class="btn {% if p.estado == 'pendiente_pago' %} btn-outline-secondary {% elif p.estado == 'pagado' %} btn-success {% elif p.estado == 'aprobado' %} btn-primary {% elif p.estado == 'entregado' %} btn-info text-dark {% elif p.estado == 'recogido' %} btn-dark {% else %} btn-outline-secondary {% endif %} btn-estado"
+              data-pk="{{ p.pk }}"
+            >
+              {{ p.get_estado_display }}
+            </button>
+          </td>
+          <td>{{ p.notas|default:"—" }}</td>
+          <td>
+            <a
+              class="btn btn-sm btn-warning"
+              href="{% url 'pedidos:pedido_editar_cliente' p.pk %}"
+              >✏️</a
+            >
+          </td>
+        </tr>
+
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# ---------- FAB “+” ---------- #} {# FAB que abre el modal #}
+  <a
+    href="#"
+    class="btn btn-primary btn-lg rounded-circle fab"
+    data-bs-toggle="modal"
+    data-bs-target="#modalNuevoPedido"
+    title="Crear nuevo pedido"
+    >+</a
+  >
+
+  <div
+    class="modal fade"
+    id="modalNuevoPedido"
+    tabindex="-1"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo pedido</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+          ></button>
+        </div>
+        <div class="modal-body p-0" style="height: 80vh">
+          <iframe
+            src="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
+            class="w-100 h-100 border-0"
+            loading="lazy"
+          ></iframe>
+        </div>
       </div>
     </div>
   </div>
-</div>
   {% else %}
-    <div class="alert alert-info text-center">
-      Aún no tienes pedidos registrados.
-      <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary mt-3">
-        ➕ Crear mi primer pedido
-      </a>
-    </div>
+  <div class="alert alert-info text-center">
+    Aún no tienes pedidos registrados.
+    <a
+      href="{% url 'pedidos:pedido_nuevo_cliente' %}"
+      class="btn btn-primary mt-3"
+    >
+      ➕ Crear mi primer pedido
+    </a>
+  </div>
   {% endif %}
 </div>
+{% endblock %}
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    // tooltips
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      .forEach(el => new bootstrap.Tooltip(el));
+  </script>
 {% endblock %}
