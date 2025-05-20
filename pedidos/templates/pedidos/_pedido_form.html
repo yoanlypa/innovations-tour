@@ -43,31 +43,42 @@
     </label>
     {{ form.empresa }}
     {% if form.empresa.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.empresa.errors.0 }}
-      </div>
+      <div class="invalid-feedback d-block">{{ form.empresa.errors.0 }}</div>
     {% endif %}
   </div>
+
   <div class="col-md-4 mb-3">
     <label for="{{ form.excursion.id_for_label }}" class="form-label">
       Excursión
     </label>
     {{ form.excursion }}
     {% if form.excursion.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.excursion.errors.0 }}
-      </div>
+      <div class="invalid-feedback d-block">{{ form.excursion.errors.0 }}</div>
     {% endif %}
   </div>
+
   <div class="col-md-4 mb-3">
-    <label for="{{ form.estado_cliente.id_for_label }}" class="form-label">
+    <label for="{{ form.estado.id_for_label }}" class="form-label">
       Estado <span class="text-danger">*</span>
     </label>
-    {{ form.estado }}
+    <select name="{{ form.estado.name }}"
+            id="{{ form.estado.id_for_label }}"
+            class="form-select">
+      {% for value, label in form.estado.field.choices %}
+        <option value="{{ value }}"
+                {% if form.estado.value == value %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
     <small class="form-text text-muted">
-      Si no ha pagado, elige “Pendiente”.
+      Si no ha pagado, elige “Pendiente de pago”.
     </small>
-
+    {% if form.estado.errors %}
+      <div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>
+    {% endif %}
+  </div>
+</div>
 
 {# —— lugares —— #}
 <div class="row">
