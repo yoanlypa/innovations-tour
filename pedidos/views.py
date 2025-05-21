@@ -378,7 +378,7 @@ def pedido_editar_view(request, pk):
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get("pedido_id")
     pedido = get_object_or_404(Pedido, pk=pedido_id)
-    servicios = pedido.servicios.all()
+    servicios = pedido.servicios_linea.all()
     data = {
         "empresa": pedido.empresa,
         "usuario": pedido.usuario.username,

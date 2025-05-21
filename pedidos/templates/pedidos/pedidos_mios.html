@@ -116,7 +116,7 @@
               <td>{{ p.lugar_entrega }}</td>
               <td>{{ p.lugar_recogida|default:"—" }}</td>
               <td>
-                {% for s in p.servicios.all %}
+                {% for s in p.servicios_linea.all %}
                       🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
                       {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
                       {% if s.bono %} – <span class="badge bg-secondary">{{ s.bono }}</span>{% endif %}
