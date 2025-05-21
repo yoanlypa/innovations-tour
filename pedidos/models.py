@@ -25,7 +25,7 @@ class Pedido(models.Model):
     fecha_fin = models.DateTimeField("Fecha fin", null=True, blank=True)
     fecha_creacion = models.DateField(default=timezone.now, editable=False)
     fecha_modificacion = models.DateTimeField("Última modificación", auto_now=True)
-
+    excursion = models.CharField("Excursión", max_length=100, blank=True, default="")
     empresa = models.CharField("Empresa", max_length=100)
     servicios = models.CharField("Servicio", max_length=100, blank=True, default="")
     lugar_entrega = models.CharField("Lugar entrega", max_length=100, blank=True, default="")
