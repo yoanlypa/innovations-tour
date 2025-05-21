@@ -196,14 +196,13 @@ class BaseServicioFormSet(BaseInlineFormSet):
                 form.add_error('pax', 'Debe ser mayor que cero')
 
 ServicioFormSet = inlineformset_factory(
-    Pedido, Servicio,
-    form=ServicioForm,
-    formset=BaseServicioFormSet,
-    extra=0,
-    can_delete=True,
-    prefix='serv'                         #   <-- importante para coincidir con el JS
+    parent_model = Pedido,
+    model        = Servicio,
+    form         = ServicioForm,
+    formset      = BaseServicioFormSet,
+    extra        = 0,
+    can_delete   = True
 )
-
 class PedidoFormCliente(forms.ModelForm):
     # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
     estado = forms.ChoiceField(

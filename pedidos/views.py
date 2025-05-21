@@ -29,7 +29,7 @@ from .forms import (
     PedidoFormCliente,
     TareaForm,
 )
-from .models import Maleta, Pedido, RegistroCliente, Tarea
+from .models import Pedido, RegistroCliente, Tarea, Servicio
 
 #
 # 
