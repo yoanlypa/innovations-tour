@@ -307,23 +307,9 @@ class PedidoFormCliente(forms.ModelForm):
 # 
 # 
 # 
-# ──────────────────── Formset de Servicios1 ────────────────────
-ServicioFormSet = inlineformset_factory(
-    Pedido,
-    Servicio,
-    fields=( "excursion", "cantidad_pax", "emisores", "guia", "lugar_entrega", "bono"),
-    widgets={
-        "excursion": forms.TextInput(attrs={"class": "form-control"}),
-        "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
-        "emisores": forms.NumberInput(attrs={"class": "form-control"}),
-        "guia": forms.TextInput(attrs={"class": "form-control"}),
-        "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
-        "bono": forms.TextInput(attrs={"class": "form-control"}),
-    },
-    extra=1,
-    can_delete=True,
-)
-
+# ──────────────────── Base Formset para Servicios ────────────────────
+class BaseServicioFormSet(BaseInlineFormSet):
+    pass
 
 class ServicioForm(forms.ModelForm):
     class Meta:
@@ -337,5 +323,14 @@ class ServicioForm(forms.ModelForm):
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "bono": forms.TextInput(attrs={"class": "form-control"}),
         }
+
+# ──────────────────── Formset de Servicios1 ────────────────────
+ServicioFormSet = inlineformset_factory(
+    Pedido, Servicio,
+    form=ServicioForm,                    #  ← usamos el formulario explícito
+    formset=BaseServicioFormSet,
+    extra=0,
+    can_delete=True
+)
 
 
