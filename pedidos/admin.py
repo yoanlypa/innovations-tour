@@ -11,17 +11,16 @@ from .models import Pedido, RegistroCliente, Tarea, Servicio
 class ServicioAdmin(admin.ModelAdmin):
     list_display = (
         "excursion",
-        "cantidad_pax",
         "emisores",
         "guia",
     )
-    list_filter = ("excursion", "cantidad_pax", "emisores", "guia")
+    list_filter = ("excursion", "pax", "emisores", "guia")
     search_fields = ("excursion",)
  
 class ServiciosInline(admin.TabularInline):
     model = Servicio
     extra = 0
-    readonly_fields = ["excursion", "cantidad_pax","emisores","guia"]
+    readonly_fields = ["excursion", "pax","emisores","guia"]
     can_delete = False
 
 class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
