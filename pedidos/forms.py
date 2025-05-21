@@ -4,9 +4,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.forms.models import BaseInlineFormSet, inlineformset_factory
 from django.utils import timezone
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, BaseInlineFormSet
 from .models import Maleta, Pedido, Producto, Servicio, Tarea
 from .utils import convertir_fecha
 
@@ -178,6 +177,33 @@ class PedidoForm(forms.ModelForm):
         return convertir_fecha(fecha_str)
 
 
+class ServicioForm(forms.ModelForm):
+    class Meta:
+        model  = Servicio
+        fields = ['excursion', 'pax', 'emisores', 'lugar_entrega', 'bono']
+        widgets = {f: forms.TextInput(attrs={'class': 'form-control'})
+                for f in ['excursion', 'lugar_entrega', 'bono']}
+        widgets.update({
+            'pax':      forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+            'emisores': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
+        })
+
+class BaseServicioFormSet(BaseInlineFormSet):
+    def clean(self):
+        super().clean()
+        for form in self.forms:
+            if form.cleaned_data and form.cleaned_data.get('pax', 0) <= 0:
+                form.add_error('pax', 'Debe ser mayor que cero')
+
+ServicioFormSet = inlineformset_factory(
+    Pedido, Servicio,
+    form=ServicioForm,
+    formset=BaseServicioFormSet,
+    extra=0,
+    can_delete=True,
+    prefix='serv'                         #   <-- importante para coincidir con el JS
+)
+
 class PedidoFormCliente(forms.ModelForm):
     # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
     estado = forms.ChoiceField(
@@ -245,28 +271,7 @@ class PedidoFormCliente(forms.ModelForm):
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
             "estado": forms.Select(attrs={"class": "form-select"}),
         }
-    class ServicioForm(forms.ModelForm):
-        class Meta:
-            model  = Servicio
-            fields = ['excursion', 'pax', 'emisores', 'lugar_entrega', 'bono']
-            widgets = {f: forms.TextInput(attrs={'class': 'form-control'})
-                    for f in ['excursion', 'lugar_entrega', 'bono']}
-            widgets.update({
-                'pax':      forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-                'emisores': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            })
 
-    class BaseServicioFormSet(BaseInlineFormSet):
-        def clean(self):
-            super().clean()
-            for form in self.forms:
-                if form.cleaned_data and form.cleaned_data.get('pax', 0) <= 0:
-                    form.add_error('pax', 'Debe ser mayor que cero')
-
-    ServicioFormSet = inlineformset_factory(
-        Pedido, Servicio, form=ServicioForm,
-        formset=BaseServicioFormSet, extra=0, can_delete=True
-    )
     # ──────────────────────────── Validación de campos ────────────────────
     # ──────────────────── Inicialización ────────────────────
     def __init__(self, *args, **kwargs):
