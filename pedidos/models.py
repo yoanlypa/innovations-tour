@@ -44,6 +44,8 @@ class Servicio(models.Model):
     pedido = models.ForeignKey(
         "Pedido", related_name="servicios", on_delete=models.CASCADE
     )
+    cantidad_pax = models.PositiveIntegerField("Cantidad de pax")
+    guia = models.CharField("Guía", max_length=120, blank=True)
     excursion = models.CharField("Excursión", max_length=120)
     pax = models.PositiveIntegerField("PAX")
     emisores = models.PositiveSmallIntegerField("Emisores", default=1)
