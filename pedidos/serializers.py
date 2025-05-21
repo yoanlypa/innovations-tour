@@ -5,7 +5,7 @@ from .models import Servicio, Pedido, Tarea
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servicio
-        fields = ["cantidad_pax", "guia"]
+        fields = [ "excursion", "cantidad_pax", "emisores", "guia", "lugar_entrega", "bono" ]
 
 
 class PedidoSerializer(serializers.ModelSerializer):
