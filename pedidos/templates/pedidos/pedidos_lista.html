@@ -226,9 +226,6 @@
       $('#state-filter').on('change', function(){
         table.column(8).search(this.value).draw();
       });
-      $('#search-box').on('keyup', function(){
-        table.search(this.value).draw();
-      });
 
       // seleccionar todos
       $('#select-all').on('click', function(){

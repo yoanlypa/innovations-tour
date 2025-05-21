@@ -80,18 +80,8 @@
       <div class="col-sm-4 text-end">
         <label class="form-label d-block">&nbsp;</label>
         <button id="bulk-delete-btn" class="btn btn-danger">🗑️ Eliminar seleccionados</button>
-        <div class="btn-group">
-          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-            🔄 Cambiar estado
-          </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item bulk-state" data-state="pendiente_pago">Pendiente de pago</a></li>
-            <li><a class="dropdown-item bulk-state" data-state="pagado">Pagado</a></li>
-            <li><a class="dropdown-item bulk-state" data-state="aprobado">Aprobado</a></li>
-            <li><a class="dropdown-item bulk-state" data-state="entregado">Entregado</a></li>
-            <li><a class="dropdown-item bulk-state" data-state="recogido">Recogido</a></li>
-          </ul>
-        </div>
+        <a href="{% url 'pedidos:pedido_nuevo_cliente' %}" class="btn btn-primary">
+          ➕ Nuevo pedido
       </div>
     </div>
 
@@ -186,11 +176,6 @@
         table.column(8).search(this.value).draw();
       });
 
-      // Buscador libre
-      $('#search-box').on('keyup', function(){
-        table.search(this.value).draw();
-      });
-
       // Seleccionar todos
       $('#select-all').on('click', function(){
         $('.select-row').prop('checked', this.checked);
@@ -203,19 +188,6 @@
         if (!confirm('Eliminar seleccionados?')) return;
         $.post("{% url 'pedidos:bulk_delete' %}", {
           ids: ids,
-          csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
-        }).done(()=> location.reload());
-      });
-
-      // Bulk Change Estado
-      $('.bulk-state').on('click', function(){
-        const estado = this.dataset.state;
-        const ids    = $('.select-row:checked').map((_,cb)=>cb.value).get();
-        if (!ids.length) return alert('Selecciona primero.');
-        if (!confirm(`Cambiar estado a "${estado}"?`)) return;
-        $.post("{% url 'pedidos:bulk_change_estado' %}", {
-          ids: ids,
-          estado: estado,
           csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val()
         }).done(()=> location.reload());
       });
