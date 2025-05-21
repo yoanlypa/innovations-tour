@@ -1,6 +1,6 @@
 // staticfiles/pedidos/js/pedido_form.js
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('pedido-form');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("pedido-form");
   if (!form) return;
 
   // 1) Cargar locale ES si existe
@@ -9,22 +9,24 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 2) Inicializar Flatpickr SIN altInput, mostrando dd/mm/YYYY
-  ["fecha_inicio", "fecha_fin"].forEach(id => {
+  ["fecha_inicio", "fecha_fin"].forEach((id) => {
     const el = document.getElementById(`id_${id}`);
     if (!el) return;
     flatpickr(el, {
-      dateFormat: "d/m/Y",    // formato que ve el usuario y se envía
+      dateFormat: "d/m/Y", // formato que ve el usuario y se envía
       allowInput: true,
-      wrap: false
+      wrap: false,
     });
   });
 
   // 3) Autofocus
-  const first = form.querySelector('input:not([type="hidden"]), select, textarea');
+  const first = form.querySelector(
+    'input:not([type="hidden"]), select, textarea'
+  );
   if (first) first.focus();
 
   // 4) Spinner al enviar
-  form.addEventListener('submit', () => {
+  form.addEventListener("submit", () => {
     const btn = form.querySelector('button[type="submit"]');
     if (btn) {
       btn.disabled = true;
@@ -34,53 +36,53 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
   });
+  // === Servicios dinámicos ===
+  document.addEventListener("DOMContentLoaded", () => {
+    const cont = document.getElementById("servicios-container");
+    const total = document.getElementById("id_serv-TOTAL_FORMS");
+    const addBtn = document.getElementById("add-servicio");
 
-  // 5) Dinámica del formset de maletas
-  const totalInp = form.querySelector('input[name$="-TOTAL_FORMS"]');
-  const cont     = document.getElementById('maletas-container');
-  const addBtn   = document.getElementById('add-maleta');
-  if (!totalInp || !cont || !addBtn) return;
-
-  const prefix = totalInp.name.replace('-TOTAL_FORMS', '');
-  const tpl = idx => `
-    <div class="card mb-3 p-3 position-relative">
-      <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-maleta"></button>
-       <!-- 🔽 campo id oculto (vacío) -->
-    <input type="hidden" name="${prefix}-${idx}-id" id="id_${prefix}-${idx}-id">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label for="id_${prefix}-${idx}-guia" class="form-label">Guía *</label>
-          <input type="text" name="${prefix}-${idx}-guia" id="id_${prefix}-${idx}-guia"
-                 class="form-control">
+    const template = (idx) => `
+      <div class="card mb-3 p-3 position-relative">
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Excursión *</label>
+            <input type="text" name="serv-${idx}-excursion" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Pax *</label>
+            <input type="number" name="serv-${idx}-pax" class="form-control" min="1" value="1">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Emisores *</label>
+            <input type="number" name="serv-${idx}-emisores" class="form-control" min="1" value="1">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Lugar entrega</label>
+            <input type="text" name="serv-${idx}-lugar_entrega" class="form-control">
+          </div>
         </div>
-        <div class="col-md-6">
-          <label for="id_${prefix}-${idx}-cantidad_pax" class="form-label">Cantidad de Pax *</label>
-          <input type="number" name="${prefix}-${idx}-cantidad_pax" id="id_${prefix}-${idx}-cantidad_pax"
-                 class="form-control" min="1" value="1">
+        <div class="mt-2">
+          <label class="form-label">Bono</label>
+          <input type="text" name="serv-${idx}-bono" class="form-control">
         </div>
-      </div>
-      <input type="checkbox" name="${prefix}-${idx}-DELETE" id="id_${prefix}-${idx}-DELETE" hidden>
-    </div>`;
+        <input type="checkbox" hidden name="serv-${idx}-DELETE" id="id_serv-${idx}-DELETE">
+        <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-servicio"></button>
+      </div>`;
 
-  // Si no hay maletas, creamos una sola
-  if (parseInt(totalInp.value, 10) === 0) {
-    cont.insertAdjacentHTML('beforeend', tpl(0));
-    totalInp.value = 1;
-  }
+    function addServicio() {
+      const idx = parseInt(total.value, 10);
+      cont.insertAdjacentHTML("beforeend", template(idx));
+      total.value = idx + 1;
+    }
 
-  // Añadir maleta de uno en uno
-  addBtn.onclick = () => {
-    const idx = parseInt(totalInp.value, 10);
-    cont.insertAdjacentHTML('beforeend', tpl(idx));
-    totalInp.value = idx + 1;
-  };
+    addBtn.addEventListener("click", addServicio);
 
-  // Eliminar maleta
-  cont.onclick = e => {
-    if (!e.target.classList.contains('eliminar-maleta')) return;
-    const card = e.target.closest('.card');
-    const cb = card.querySelector('input[type="checkbox"]');
-    if (cb) cb.checked = true;
-    card.remove();
-  };
+    cont.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("eliminar-servicio")) return;
+      const card = e.target.closest(".card");
+      card.querySelector('[name$="-DELETE"]').checked = true;
+      card.style.display = "none";
+    });
+  });
 });

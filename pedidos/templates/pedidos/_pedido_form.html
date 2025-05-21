@@ -111,54 +111,50 @@
   {% endif %}
 </div>
 
-{# —— maletas —— #}
-<h5 class="mt-4 mb-3">Maletas</h5>
+{# —— Servicios —— #}
+<h5 class="mt-4 mb-3">Servicios</h5>
 {{ formset.management_form }}
-<div id="maletas-container">
-  {% for mf in formset %}
+
+<div id="servicios-container">
+  {% for sf in formset %}
     <div class="card mb-3 p-3 position-relative">
-      {{ mf.id }}
-       <button type="button"
-            name="remove_maleta"
-            class="btn-close position-absolute top-0 end-0 eliminar-maleta"
-            aria-label="Eliminar maleta"></button>
+      {{ sf.id }}
+      <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-servicio"></button>
+
       <div class="row g-3">
-        <div class="col-md-6">
-          <label for="{{ mf.guia.id_for_label }}" class="form-label">
-            Guía <span class="text-danger">*</span>
-          </label>
-          {{ mf.guia }}
-          {% if mf.guia.errors %}
-            <div class="invalid-feedback d-block">{{ mf.guia.errors.0 }}</div>
-          {% endif %}
+        <div class="col-md-4">
+          <label class="form-label">Excursión *</label>
+          {{ sf.excursion }}
         </div>
-        <div class="col-md-6">
-          <label for="{{ mf.cantidad_pax.id_for_label }}" class="form-label">
-            Pax <span class="text-danger">*</span>
-          </label>
-          {{ mf.cantidad_pax }}
-          {% if mf.cantidad_pax.errors %}
-            <div class="invalid-feedback d-block">{{ mf.cantidad_pax.errors.0 }}</div>
-          {% endif %}
+        <div class="col-md-2">
+          <label class="form-label">Pax *</label>
+          {{ sf.pax }}
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Emisores *</label>
+          {{ sf.emisores }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Lugar entrega</label>
+          {{ sf.lugar_entrega }}
         </div>
       </div>
-      <button type="button"
-        name="remove_maleta"
-        class="btn-close position-absolute top-0 end-0 eliminar-maleta"
-        aria-label="Eliminar maleta"></button>
-      <input type="checkbox"
-             name="{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
-             id="id_{{ formset.prefix }}-{{ forloop.counter0 }}-DELETE"
-             hidden>
+
+      <div class="mt-2">
+        <label class="form-label">Bono</label>
+        {{ sf.bono }}
+      </div>
+
+      <input type="checkbox" name="serv-{{ forloop.counter0 }}-DELETE"
+             id="id_serv-{{ forloop.counter0 }}-DELETE" hidden>
     </div>
   {% endfor %}
 </div>
+
 <div class="text-center mb-4">
-  <button type="button" id="add-maleta"
-        name="add_maleta"
-        class="btn btn-outline-secondary">
-  + Añadir maleta
-</button>
+  <button type="button" id="add-servicio" class="btn btn-outline-secondary">
+    + Añadir servicio
+  </button>
 </div>
 
 {# —— submit —— #}

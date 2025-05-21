@@ -37,11 +37,12 @@
 
           <p><strong>Maletas:</strong></p>
           {% if p.maletas.exists %}
-            {% for m in p.maletas.all %}
-              <span class="badge bg-light text-dark border d-inline-block mb-1">
-                🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-              </span>
-            {% endfor %}
+               {% for s in p.servicios.all %}
+                      🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
+                      {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
+                      {% if s.bono %} – <span class="badge bg-secondary">{{ s.bono }}</span>{% endif %}
+                      <br>
+                    {% endfor %}
           {% else %}
             <p>—</p>
           {% endif %}

@@ -24,7 +24,7 @@ from .filters import PedidoFilter
 from .forms import (
     CustomLoginForm,
     CustomRegisterForm,
-    MaletaFormSet,
+    ServicioFormSet,
     PedidoForm,
     PedidoFormCliente,
     TareaForm,
@@ -270,7 +270,7 @@ def pedidos_lista_view(request):
 def pedido_nuevo_cliente_view(request):
     if request.method == "POST":
         form = PedidoFormCliente(request.POST)
-        formset = MaletaFormSet(request.POST, prefix="maleta")
+        formset = ServicioFormSet(request.POST, prefix='serv')
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
@@ -286,7 +286,7 @@ def pedido_nuevo_cliente_view(request):
         messages.error(request, "Corrige los errores del formulario.")
     else:
         form = PedidoFormCliente()
-        formset = MaletaFormSet(prefix="maleta")
+        formset = ServicioFormSet(request.POST, prefix='serv')
 
     template = (
         "pedidos/pedido_nuevo_cliente_modal.html"
@@ -306,7 +306,7 @@ def pedido_editar_cliente_view(request, pk):
     FormClass = PedidoFormCliente
     if request.method == "POST":
         form    = FormClass(request.POST, instance=pedido)
-        formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
+        formset = ServicioFormSet(request.POST, instance=pedido, prefix='serv')
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -315,7 +315,7 @@ def pedido_editar_cliente_view(request, pk):
         messages.error(request, "Corrige los errores del formulario.")
     else:
         form    = FormClass(instance=pedido)
-        formset = MaletaFormSet(instance=pedido, prefix="maleta")
+        formset = ServicioFormSet(instance=pedido, prefix='serv')
 
     return render(request, "pedidos/pedido_nuevo_cliente.html", {
         "form": form,
@@ -327,8 +327,8 @@ def pedido_editar_cliente_view(request, pk):
 @staff_member_required
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
-    formset = MaletaFormSet(
-        request.POST or None, prefix="maleta"
+    formset = ServicioFormSet(
+        request.POST or None, prefix="serv"
     )
     if request.method == "POST" and form.is_valid() and formset.is_valid():
         pedido = form.save(commit=False)
@@ -359,7 +359,7 @@ def pedido_editar_view(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     if request.method == "POST":
         form = PedidoForm(request.POST, instance=pedido)
-        formset = MaletaFormSet(request.POST, instance=pedido, prefix="maleta")
+        formset = ServicioFormSet(request.POST, instance=pedido, prefix="serv")
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -368,7 +368,7 @@ def pedido_editar_view(request, pk):
         messages.error(request, "Hay errores al guardar los cambios.")
     else:
         form = PedidoForm(instance=pedido)
-        formset = MaletaFormSet(instance=pedido, prefix="maleta")
+        formset = ServicioFormSet(instance=pedido, prefix="serv")
 
     return render(request, "pedidos/pedido_form.html", {"form": form, "formset": formset, "pedido": pedido})
 
@@ -398,7 +398,7 @@ def cargar_datos_pedido(request):
 def pedidos_mios_view(request):
     pedidos = (
         Pedido.objects.filter(usuario=request.user)
-        .prefetch_related("maletas")
+        .prefetch_related("serv")
         .order_by("-fecha_inicio")
     )
     return render(request, "pedidos/pedidos_mios.html", {"pedidos": pedidos})

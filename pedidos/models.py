@@ -56,6 +56,24 @@ class Maleta(models.Model):
     def __str__(self):
         return f"{self.guia} ({self.cantidad_pax} pax)"
 
+# ── NUEVO BLOQUE ────────────────────────────────────────────────────────────
+class Servicio(models.Model):
+    """Unidad de servicio dentro de un pedido (antes ‘maleta’)."""
+    pedido        = models.ForeignKey(
+        'Pedido', related_name='servicios', on_delete=models.CASCADE
+    )
+    excursion     = models.CharField('Excursión', max_length=120)
+    pax           = models.PositiveIntegerField('Pax')
+    emisores      = models.PositiveSmallIntegerField('Emisores', default=1)
+    lugar_entrega = models.CharField('Lugar de entrega', max_length=120, blank=True)
+    bono          = models.CharField('Bono', max_length=60, blank=True)
+
+    class Meta:
+        ordering = ['excursion']
+
+    def __str__(self):
+        return f'{self.excursion} – {self.pax} pax'
+# ────────────────────────────────────────────────────────────────────────────
 
 class Tarea(models.Model):
     PRIORIDADES = [
