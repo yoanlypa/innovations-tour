@@ -5,15 +5,24 @@ from django.utils import timezone
 from datetime import timedelta
 from django_object_actions import DjangoObjectActions, action
 
-from .models import Maleta, Pedido, Producto, RegistroCliente, Tarea
+from .models import Pedido, RegistroCliente, Tarea, Servicio
 
 
-class MaletaInline(admin.TabularInline):
-    model = Maleta
+class ServicioAdmin(admin.ModelAdmin):
+    list_display = (
+        "excursion",
+        "cantidad_pax",
+        "emisores",
+        "guia",
+    )
+    list_filter = ("excursion", "cantidad_pax", "emisores", "guia")
+    search_fields = ("excursion",)
+ 
+class ServiciosInline(admin.TabularInline):
+    model = Servicio
     extra = 0
-    readonly_fields = ["guia", "cantidad_pax"]
+    readonly_fields = ["excursion", "cantidad_pax","emisores","guia"]
     can_delete = False
-
 
 class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
     list_display = (
@@ -30,7 +39,7 @@ class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
     list_filter = ("estado", "empresa")
     search_fields = ("empresa", "excursion", "usuario__username")
     ordering = ["-fecha_inicio"]
-    inlines = [MaletaInline]
+    inlines = [ServiciosInline]
     change_actions = ('borrar_directo',)
     actions = ['delete_selected','borrar_antiguos']
     list_per_page = 20
@@ -79,10 +88,6 @@ class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
     accion_eliminar.short_description = 'Eliminar'
     accion_eliminar.allow_tags = True
 
-class ProductoAdmin(admin.ModelAdmin):
-    list_display = ("nombre", "cantidad", "almacen")
-    search_fields = ("nombre",)
-
 
 class TareaAdmin(admin.ModelAdmin):
     list_display = (
@@ -94,10 +99,11 @@ class TareaAdmin(admin.ModelAdmin):
     )
     list_filter = ("completada", "prioridad")
     search_fields = ("titulo",)
+    
 
 
+admin.site.register(Servicio, ServicioAdmin)
 admin.site.register(Pedido, PedidoAdmin)
-admin.site.register(Producto, ProductoAdmin)
 admin.site.register(Tarea, TareaAdmin)
 admin.site.register(RegistroCliente)
 admin.site.site_header = "Control Radioguías Admin"

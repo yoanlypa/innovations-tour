@@ -59,14 +59,14 @@
             <p><strong>Entrega:</strong> {{ p.lugar_entrega }}</p>
             <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
             <p><strong>Estado:</strong>   {{ p.get_estado_display }}</p>
-
-            <p><strong>Maletas:</strong></p>
-            {% if p.maletas.exists %}
-              {% for m in p.maletas.all %}
-                <span class="badge bg-light text-dark border d-inline-block mb-1">
-                  🎒 {{ m.cantidad_pax }} pax / Guía: {{ m.guia }}
-                </span>
-              {% endfor %}
+            <p><strong>Servicios:</strong></p>
+            {% if p.servicios.exists %}
+              {% for s in p.servicios.all %}
+                      🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
+                      {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
+                      {% if s.bono %} – <span class="badge bg-secondary">{{ s.bono }}</span>{% endif %}
+                      <br>
+                    {% endfor %}
             {% else %}
               <p>—</p>
             {% endif %}

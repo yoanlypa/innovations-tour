@@ -6,10 +6,16 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from django.forms import inlineformset_factory, BaseInlineFormSet
-from .models import Maleta, Pedido, Producto, Servicio, Tarea
+from .models import  Pedido, Producto, Servicio, Tarea
 from .utils import convertir_fecha
 
 
+#
+#
+#
+#
+#
+# ========== FORMULARIO DE Login/Registro ==========
 class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={"placeholder": "Usuario"}))
     password = forms.CharField(
@@ -175,34 +181,6 @@ class PedidoForm(forms.ModelForm):
     def clean_fecha_creacion(self):
         fecha_str = self.cleaned_data["fecha_creacion"]
         return convertir_fecha(fecha_str)
-
-
-class ServicioForm(forms.ModelForm):
-    class Meta:
-        model  = Servicio
-        fields = ['excursion', 'pax', 'emisores', 'lugar_entrega', 'bono']
-        widgets = {f: forms.TextInput(attrs={'class': 'form-control'})
-                for f in ['excursion', 'lugar_entrega', 'bono']}
-        widgets.update({
-            'pax':      forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'emisores': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-        })
-
-class BaseServicioFormSet(BaseInlineFormSet):
-    def clean(self):
-        super().clean()
-        for form in self.forms:
-            if form.cleaned_data and form.cleaned_data.get('pax', 0) <= 0:
-                form.add_error('pax', 'Debe ser mayor que cero')
-
-ServicioFormSet = inlineformset_factory(
-    parent_model = Pedido,
-    model        = Servicio,
-    form         = ServicioForm,
-    formset      = BaseServicioFormSet,
-    extra        = 0,
-    can_delete   = True
-)
 class PedidoFormCliente(forms.ModelForm):
     # Solo dejamos un radio para el estado inicial: pagado / pendiente_pago
     estado = forms.ChoiceField(
@@ -214,6 +192,37 @@ class PedidoFormCliente(forms.ModelForm):
         widget=forms.RadioSelect,
         initial="pagado",
     )
+    class Meta:
+        model = Pedido
+        fields = [
+            "fecha_inicio",
+            "fecha_fin",
+            "empresa",
+            "excursion",
+            "lugar_entrega",
+            "lugar_recogida",
+            "estado",
+            "notas",
+        ]
+        widgets = {
+            "fecha_inicio": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "fecha_fin": forms.DateInput(
+                attrs={"type": "date", "class": "form-control"}
+            ),
+            "empresa": forms.TextInput(attrs={"class": "form-control"}),
+            "excursion": forms.TextInput(attrs={"class": "form-control"}),
+            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
+            "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
+            "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "estado": forms.Select(attrs={"class": "form-select"}),
+        }
+
+    # 
+    # 
+    # 
+    # 
     # ──────────────────── Widgets de fecha ────────────────────
     fecha_inicio = forms.DateField(
         required=True,
@@ -244,33 +253,7 @@ class PedidoFormCliente(forms.ModelForm):
         error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
     )
 
-    class Meta:
-        model = Pedido
-        fields = [
-            "fecha_inicio",
-            "fecha_fin",
-            "empresa",
-            "excursion",
-            "lugar_entrega",
-            "lugar_recogida",
-            "estado",
-            "notas",
-        ]
-        widgets = {
-            "fecha_inicio": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "fecha_fin": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "empresa": forms.TextInput(attrs={"class": "form-control"}),
-            "excursion": forms.TextInput(attrs={"class": "form-control"}),
-            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
-            "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-            "estado": forms.Select(attrs={"class": "form-select"}),
-        }
-
+  
     # ──────────────────────────── Validación de campos ────────────────────
     # ──────────────────── Inicialización ────────────────────
     def __init__(self, *args, **kwargs):
@@ -317,41 +300,42 @@ class PedidoFormCliente(forms.ModelForm):
         return cleaned
 
 
-# ──────────────────── Formset de maletas ────────────────────
-MaletaFormSet = inlineformset_factory(
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# ──────────────────── Formset de Servicios1 ────────────────────
+ServicioFormSet = inlineformset_factory(
     Pedido,
-    Maleta,
-    fields=("guia", "cantidad_pax"),
+    Servicio,
+    fields=( "excursion", "cantidad_pax", "emisores", "guia", "lugar_entrega", "bono"),
     widgets={
-        "guia": forms.TextInput(attrs={"class": "form-control"}),
+        "excursion": forms.TextInput(attrs={"class": "form-control"}),
         "cantidad_pax": forms.NumberInput(attrs={"class": "form-control", "min": 1}),
+        "emisores": forms.NumberInput(attrs={"class": "form-control"}),
+        "guia": forms.TextInput(attrs={"class": "form-control"}),
+        "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
+        "bono": forms.TextInput(attrs={"class": "form-control"}),
     },
     extra=1,
     can_delete=True,
 )
 
 
-class MaletaForm(forms.ModelForm):
+class ServicioForm(forms.ModelForm):
     class Meta:
-        model = Maleta
-        fields = ["guia", "cantidad_pax"]
+        model = Servicio
+        fields = ["excursion", "cantidad_pax", "emisores", "guia", "lugar_entrega", "bono"]
         widgets = {
-            "guia": forms.TextInput(attrs={"class": "form-control"}),
-            "cantidad_pax": forms.NumberInput(attrs={"class": "form-control"}),
+            "excursion": forms.TextInput(attrs={"class": "form-control"}),
+            "cantidad_pax": forms.NumberInput(attrs={"class": "form-control"}), 
+            "emisores": forms.NumberInput(attrs={"class": "form-control"}),
+            "guia": forms.TextInput(attrs={"class": "form-control"}),      
+            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
+            "bono": forms.TextInput(attrs={"class": "form-control"}),
         }
 
 
-#
-#
-#
-#
-# ========== FORMULARIO DE PRODUCTOS ==========
-class ProductoForm(forms.ModelForm):
-    class Meta:
-        model = Producto
-        fields = ["nombre", "cantidad", "almacen"]
-        widgets = {
-            "nombre": forms.TextInput(attrs={"class": "form-control"}),
-            "cantidad": forms.NumberInput(attrs={"class": "form-control"}),
-            "almacen": forms.TextInput(attrs={"class": "form-control"}),
-        }

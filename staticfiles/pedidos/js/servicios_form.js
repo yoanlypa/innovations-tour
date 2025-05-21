@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const addMaletaBtn = document.getElementById('add-maleta');
-    const maletasContainer = document.getElementById('maletas-container');
+    const addServicioBtn = document.getElementById('add-servicio');
+    const serviciosContainer = document.getElementById('servicios-container');
     const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
   
-    if (!addMaletaBtn || !maletasContainer || !totalFormsInput) return;
+    if (!addServicioBtn || !serviciosContainer || !totalFormsInput) return;
   
-    addMaletaBtn.addEventListener('click', (e) => {
+    addServicioBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const totalForms = parseInt(totalFormsInput.value, 10);
   
-      // Clonar la primera maleta como plantilla
-      const firstForm = maletasContainer.querySelector('.maleta-form');
+      // Clonar el primer servicio como plantilla
+      const firstForm = serviciosContainer.querySelector('.servicio-form');
       if (!firstForm) return;
   
       const newForm = firstForm.cloneNode(true);
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   
       // Agregar el nuevo formulario
-      maletasContainer.appendChild(newForm);
+      serviciosContainer.appendChild(newForm);
   
       // Actualizar el TOTAL_FORMS
       totalFormsInput.value = totalForms + 1;

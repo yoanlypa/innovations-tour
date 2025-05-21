@@ -35,8 +35,8 @@
           <p><strong>Recogida:</strong> {{ p.lugar_recogida|default:"—" }}</p>
           <p><strong>Estado:</strong>   {{ p.get_estado_display }}</p>
 
-          <p><strong>Maletas:</strong></p>
-          {% if p.maletas.exists %}
+          <p><strong>Servicios:</strong></p>
+          {% if p.servicios.exists %}
                {% for s in p.servicios.all %}
                       🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
                       {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
@@ -99,7 +99,7 @@
             <th>Excursión</th>
             <th>Entrega</th>
             <th>Recogida</th>
-            <th>Maletas</th>
+            <th>Servicios</th>
             <th>Estado</th>
             <th>Notas</th>
             <th>Editar</th>
@@ -116,10 +116,12 @@
               <td>{{ p.lugar_entrega }}</td>
               <td>{{ p.lugar_recogida|default:"—" }}</td>
               <td>
-                {% for m in p.maletas.all %}
-                  <span class="badge bg-light text-dark border mb-1 d-block">
-                    🎒 {{ m.cantidad_pax }} pax / {{ m.guia }}
-                  </span>
+                {% for s in p.servicios.all %}
+                      🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
+                      {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
+                      {% if s.bono %} – <span class="badge bg-secondary">{{ s.bono }}</span>{% endif %}
+                      <br>
+                    {% endfor %}
                 {% empty %}
                   —
                 {% endfor %}

@@ -13,12 +13,12 @@ class Producto(models.Model):
 
 
 class Pedido(models.Model):
-    ESTADOS= [
-        ('pendiente_pago', 'Pendiente de pago'),
-        ('pagado',         'Pagado'),
-        ('aprobado',       'Aprobado'),
-        ('entregado',      'Entregado'),
-        ('recogido',       'Recogido'),
+    ESTADOS = [
+        ("pendiente_pago", "Pendiente de pago"),
+        ("pagado", "Pagado"),
+        ("aprobado", "Aprobado"),
+        ("entregado", "Entregado"),
+        ("recogido", "Recogido"),
     ]
 
     fecha_inicio = models.DateTimeField("Fecha inicio", default=timezone.now)
@@ -27,53 +27,35 @@ class Pedido(models.Model):
     fecha_modificacion = models.DateTimeField("Última modificación", auto_now=True)
 
     empresa = models.CharField("Empresa", max_length=100)
-    excursion = models.CharField("Excursión", max_length=255, blank=True, null=True)
-    lugar_entrega = models.CharField(
-        "Lugar entrega", max_length=100, blank=True, default=""
-    )
-    lugar_recogida = models.CharField(
-        "Lugar recogida", max_length=100, blank=True, default=""
-    )
+    servicios = models.CharField("Servicio", max_length=100, blank=True, default="")
+    lugar_entrega = models.CharField("Lugar entrega", max_length=100, blank=True, default="")
+    lugar_recogida = models.CharField("Lugar recogida", max_length=100, blank=True, default="")
     notas = models.TextField("Notas", blank=True)
-
-    estado = models.CharField("Estado", max_length=20, choices=ESTADOS, default='pagado')
-    
+    estado = models.CharField("Estado", max_length=20, choices=ESTADOS, default="pagado")
     entregado = models.BooleanField("Entregado", default=False)
     recogido = models.BooleanField("Recogido", default=False)
-
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
-    productos = models.ManyToManyField(Producto, blank=True, related_name="pedidos")
 
     def __str__(self):
         return f"{self.empresa} – {self.excursion or 'Sin excursión'} ({self.fecha_inicio.date()})"
 
 
-class Maleta(models.Model):
-    pedido = models.ForeignKey(Pedido, related_name="maletas", on_delete=models.CASCADE)
-    guia = models.CharField("Guía", max_length=255)
-    cantidad_pax = models.PositiveIntegerField("PAX")
-
-    def __str__(self):
-        return f"{self.guia} ({self.cantidad_pax} pax)"
-
-# ── NUEVO BLOQUE ────────────────────────────────────────────────────────────
 class Servicio(models.Model):
-    """Unidad de servicio dentro de un pedido (antes ‘maleta’)."""
-    pedido        = models.ForeignKey(
-        'Pedido', related_name='servicios', on_delete=models.CASCADE
+    pedido = models.ForeignKey(
+        "Pedido", related_name="servicios", on_delete=models.CASCADE
     )
-    excursion     = models.CharField('Excursión', max_length=120)
-    pax           = models.PositiveIntegerField('Pax')
-    emisores      = models.PositiveSmallIntegerField('Emisores', default=1)
-    lugar_entrega = models.CharField('Lugar de entrega', max_length=120, blank=True)
-    bono          = models.CharField('Bono', max_length=60, blank=True)
+    excursion = models.CharField("Excursión", max_length=120)
+    pax = models.PositiveIntegerField("PAX")
+    emisores = models.PositiveSmallIntegerField("Emisores", default=1)
+    lugar_entrega = models.CharField("Lugar de entrega", max_length=120, blank=True)
+    bono = models.CharField("Bono", max_length=60, blank=True)
 
     class Meta:
-        ordering = ['excursion']
+        ordering = ["excursion"]
 
     def __str__(self):
-        return f'{self.excursion} – {self.pax} pax'
-# ────────────────────────────────────────────────────────────────────────────
+        return f"{self.excursion} – {self.pax} pax"
+
 
 class Tarea(models.Model):
     PRIORIDADES = [

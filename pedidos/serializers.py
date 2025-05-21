@@ -1,16 +1,15 @@
 from rest_framework import serializers
+from .models import Servicio, Pedido, Tarea
 
-from .models import Maleta, Pedido, Tarea
 
-
-class MaletaSerializer(serializers.ModelSerializer):
+class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Maleta
+        model = Servicio
         fields = ["cantidad_pax", "guia"]
 
 
 class PedidoSerializer(serializers.ModelSerializer):
-    maletas = MaletaSerializer(many=True)
+    servicios = ServicioSerializer(many=True)
     usuario = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
@@ -24,16 +23,16 @@ class PedidoSerializer(serializers.ModelSerializer):
             "lugar_recogida",
             "fecha_inicio",
             "fecha_fin",
-            'estado',
+            "estado",
             "notas",
-            "maletas",
+            "servicios",
         ]
 
     def create(self, validated_data):
-        maletas_data = validated_data.pop("maletas")
+        servicios_data = validated_data.pop("servicios")
         pedido = Pedido.objects.create(**validated_data)
-        for maleta in maletas_data:
-            Maleta.objects.create(pedido=pedido, **maleta)
+        for servicio in servicios_data:
+            Servicio.objects.create(pedido=pedido, **servicio)
         return pedido
 
 
@@ -41,3 +40,4 @@ class TareaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tarea
         fields = "__all__"
+    

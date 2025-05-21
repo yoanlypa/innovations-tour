@@ -378,18 +378,17 @@ def pedido_editar_view(request, pk):
 def cargar_datos_pedido(request):
     pedido_id = request.GET.get("pedido_id")
     pedido = get_object_or_404(Pedido, pk=pedido_id)
-    maletas = pedido.maletas.all()
+    servicios = pedido.servicios.all()
     data = {
         "empresa": pedido.empresa,
         "usuario": pedido.usuario.username,
-        "excursion": pedido.excursion or "",
         "lugar_entrega": pedido.lugar_entrega or "",
         "lugar_recogida": pedido.lugar_recogida or "",
         "fecha_inicio": pedido.fecha_inicio.isoformat() if pedido.fecha_inicio else "",
         "fecha_fin": pedido.fecha_fin.isoformat() if pedido.fecha_fin else "",
-        "estado_cliente": pedido.estado_cliente,
+        "estado": pedido.ESTADOS[pedido.estado],
         "notas": pedido.notas or "",
-        "maletas": [{"guia": m.guia, "cantidad_pax": m.cantidad_pax} for m in maletas],
+        "servicios": [{"excursion": s.excursion, "cantidad_pax": s.cantidad_pax, "emisores": s.emisores, "guia": s.guia, "lugar_entrega": s.lugar_entrega, "bono": s.bono} for s in servicios],
     }
     return JsonResponse(data)
 
