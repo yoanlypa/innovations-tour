@@ -44,11 +44,10 @@ class Servicio(models.Model):
     pedido = models.ForeignKey(
         "Pedido", related_name="servicios_linea", on_delete=models.CASCADE
     )
-    cantidad_pax = models.PositiveIntegerField("Cantidad de pax")
-    guia = models.CharField("Guía", max_length=120, blank=True)
     excursion = models.CharField("Excursión", max_length=120)
     pax = models.PositiveIntegerField("PAX")
     emisores = models.PositiveSmallIntegerField("Emisores", default=1)
+    guia = models.CharField("Guía", max_length=120, blank=True)
     lugar_entrega = models.CharField("Lugar de entrega", max_length=120, blank=True)
     bono = models.CharField("Bono", max_length=60, blank=True)
 
