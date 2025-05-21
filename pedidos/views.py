@@ -388,7 +388,7 @@ def cargar_datos_pedido(request):
         "fecha_fin": pedido.fecha_fin.isoformat() if pedido.fecha_fin else "",
         "estado": pedido.ESTADOS[pedido.estado],
         "notas": pedido.notas or "",
-        "servicios": [{"excursion": s.excursion, "cantidad_pax": s.cantidad_pax, "emisores": s.emisores, "guia": s.guia, "lugar_entrega": s.lugar_entrega, "bono": s.bono} for s in servicios],
+        "servicios": [{"excursion": s.excursion, "pax": s.pax, "emisores": s.emisores, "guia": s.guia, "lugar_entrega": s.lugar_entrega, "bono": s.bono} for s in servicios],
     }
     return JsonResponse(data)
 
