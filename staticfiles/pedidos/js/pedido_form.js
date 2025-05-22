@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function addServicio() {
     const idx = parseInt(total.value, 10);
     cont.insertAdjacentHTML('beforeend', template(idx));
-    total.value = idx + 1;
+    total.value = idx;
   }
   addBtn.addEventListener('click', addServicio);
 
