@@ -8,37 +8,31 @@
 {% block content %}
 <div class="container my-5">
   <div class="row justify-content-center">
-    <div class="col-12 col-lg-8">
       <div class="card shadow-lg rounded-4 border-0">
         <div class="card-body p-4 p-md-5">
-          <h2 class="card-title text-center mb-4 text-primary">
-            {% if es_edicion %}Editar pedido{% else %}Crear nuevo pedido{% endif %}
-          </h2>
-               <form
-                  id="pedido-form"
-                  method="post"
-                  novalidate
+
+               <form id="pedido-form" method="post" novalidate
                   {% if es_edicion %}
                     action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
                   {% else %}
                     action="{% url 'pedidos:pedido_nuevo_cliente' %}"
                   {% endif %}
                 >
-                  {% csrf_token %}
+                {% csrf_token %}
+                {{ form.as_p }}
                 {% include "pedidos/_pedido_form.html" %}
+                  <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary px-5">
+                      {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+                    </button>
+                  </div>
                 </form>
-                <div class="text-center">
-                  <button type="submit" form="pedido-form" class="btn btn-primary px-5">
-                    {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
-              </button>
-        </div>
+          </div>
       </div>
     </div>
   </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-  {{ block.super }}
   {# Si necesitas scripts adicionales, añádelos aquí #}
 {% endblock %}
