@@ -2,7 +2,6 @@
 
 <form method="POST" id="pedido-form">
   {% csrf_token %}
-
   {{ form.as_p }}
 
   {# —— Servicios —— #}
@@ -16,38 +15,37 @@
                 class="btn-close eliminar-servicio position-absolute top-0 end-0"
                 aria-label="Eliminar servicio"></button>
 
-        <div class="row g-3">
-          <div class="col-md-4">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-lg-4">
             <label for="{{ sf.excursion.id_for_label }}" class="form-label">
               Excursión <span class="text-danger">*</span>
             </label>
             {{ sf.excursion }}
           </div>
-          <div class="col-md-2">
+          <div class="col-6 col-lg-1">
             <label for="{{ sf.pax.id_for_label }}" class="form-label">
               Pax <span class="text-danger">*</span>
             </label>
             {{ sf.pax }}
           </div>
-          <div class="col-md-2">
+          <div class="col-6 col-lg-1">
             <label for="{{ sf.emisores.id_for_label }}" class="form-label">
               Emisores <span class="text-danger">*</span>
             </label>
             {{ sf.emisores }}
           </div>
-          <div class="col-md-4">
+          <div class="col-12 col-lg-3">
             <label for="{{ sf.lugar_entrega.id_for_label }}" class="form-label">
               Lugar de entrega
             </label>
             {{ sf.lugar_entrega }}
           </div>
-        </div>
-
-        <div class="mt-2">
-          <label for="{{ sf.bono.id_for_label }}" class="form-label">
-            Bono
-          </label>
-          {{ sf.bono }}
+          <div class="col-12 col-lg-3">
+            <label for="{{ sf.bono.id_for_label }}" class="form-label">
+              Bono
+            </label>
+            {{ sf.bono }}
+          </div>
         </div>
 
         {{ sf.DELETE }}  {# checkbox hidden del formset #}
@@ -55,7 +53,6 @@
     {% endfor %}
   </div>
 
-  {# Aquí debe verse el botón — no dentro de <head> ni fuera del form #}
   <div class="text-center mb-4">
     <button type="button" id="add-servicio" class="btn btn-outline-secondary">
       + Añadir servicio

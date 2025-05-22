@@ -313,17 +313,23 @@ class BaseServicioFormSet(BaseInlineFormSet):
 
 class ServicioForm(forms.ModelForm):
     class Meta:
-        model = Servicio
-        fields = ["excursion", "pax", "emisores", "guia", "lugar_entrega", "bono"]
+        model  = Servicio
+        fields = ['excursion', 'pax', 'emisores', 'lugar_entrega', 'bono']
         widgets = {
-            "excursion": forms.TextInput(attrs={"class": "form-control"}),
-            "pax": forms.NumberInput(attrs={"class": "form-control"}), 
-            "emisores": forms.NumberInput(attrs={"class": "form-control"}),
-            "guia": forms.TextInput(attrs={"class": "form-control"}),      
-            "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
-            "bono": forms.TextInput(attrs={"class": "form-control"}),
+            'excursion':    forms.TextInput(attrs={'class': 'form-control'}),
+            'lugar_entrega':forms.TextInput(attrs={'class': 'form-control'}),
+            'bono':         forms.TextInput(attrs={'class': 'form-control'}),
+            'pax':          forms.NumberInput(attrs={
+                                'class':'form-control form-control-sm',
+                                'min':1,
+                                'style':'max-width:80px;'
+                            }),
+            'emisores':     forms.NumberInput(attrs={
+                                'class':'form-control form-control-sm',
+                                'min':1,
+                                'style':'max-width:80px;'
+                            }),
         }
-
 # ──────────────────── Formset de Servicios1 ────────────────────
 ServicioFormSet = inlineformset_factory(
     Pedido, Servicio,
