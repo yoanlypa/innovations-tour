@@ -286,7 +286,7 @@ def pedido_nuevo_cliente_view(request):
         messages.error(request, "Corrige los errores del formulario.")
     else:
         form = PedidoFormCliente()
-        formset = ServicioFormSet(request.POST, prefix='serv')
+        formset = ServicioFormSet(request.POST, prefix='servicio')
 
     template = (
         "pedidos/pedido_nuevo_cliente_modal.html"
@@ -306,7 +306,7 @@ def pedido_editar_cliente_view(request, pk):
     FormClass = PedidoFormCliente
     if request.method == "POST":
         form    = FormClass(request.POST, instance=pedido)
-        formset = ServicioFormSet(request.POST, instance=pedido, prefix='serv')
+        formset = ServicioFormSet(request.POST, instance=pedido, prefix='servicio')
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -315,7 +315,7 @@ def pedido_editar_cliente_view(request, pk):
         messages.error(request, "Corrige los errores del formulario.")
     else:
         form    = FormClass(instance=pedido)
-        formset = ServicioFormSet(instance=pedido, prefix='serv')
+        formset = ServicioFormSet(instance=pedido, prefix='servicio')
 
     return render(request, "pedidos/pedido_nuevo_cliente.html", {
         "form": form,
@@ -328,7 +328,7 @@ def pedido_editar_cliente_view(request, pk):
 def pedido_nuevo_view(request):
     form = PedidoForm(request.POST or None)
     formset = ServicioFormSet(
-        request.POST or None, prefix="serv"
+        request.POST or None, prefix="servicio"
     )
     if request.method == "POST" and form.is_valid() and formset.is_valid():
         pedido = form.save(commit=False)
@@ -359,7 +359,7 @@ def pedido_editar_view(request, pk):
     pedido = get_object_or_404(Pedido, pk=pk)
     if request.method == "POST":
         form = PedidoForm(request.POST, instance=pedido)
-        formset = ServicioFormSet(request.POST, instance=pedido, prefix="serv")
+        formset = ServicioFormSet(request.POST, instance=pedido, prefix="servicio")
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
@@ -368,7 +368,7 @@ def pedido_editar_view(request, pk):
         messages.error(request, "Hay errores al guardar los cambios.")
     else:
         form = PedidoForm(instance=pedido)
-        formset = ServicioFormSet(instance=pedido, prefix="serv")
+        formset = ServicioFormSet(instance=pedido, prefix="servicio")
 
     return render(request, "pedidos/pedido_form.html", {"form": form, "formset": formset, "pedido": pedido})
 
@@ -397,7 +397,7 @@ def cargar_datos_pedido(request):
 def pedidos_mios_view(request):
     pedidos = (
         Pedido.objects.filter(usuario=request.user)
-        .prefetch_related("serv")
+        .prefetch_related("servicio")
         .order_by("-fecha_inicio")
     )
     return render(request, "pedidos/pedidos_mios.html", {"pedidos": pedidos})

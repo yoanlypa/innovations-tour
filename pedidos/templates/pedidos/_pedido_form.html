@@ -2,7 +2,7 @@
 
 <form method="POST" id="pedido-form">
   {% csrf_token %}
-  
+
   {{ form.as_p }}
 
   {# —— Servicios —— #}
@@ -55,6 +55,7 @@
     {% endfor %}
   </div>
 
+  {# Aquí debe verse el botón — no dentro de <head> ni fuera del form #}
   <div class="text-center mb-4">
     <button type="button" id="add-servicio" class="btn btn-outline-secondary">
       + Añadir servicio
