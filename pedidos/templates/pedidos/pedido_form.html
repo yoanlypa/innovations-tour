@@ -1,140 +1,71 @@
-{% extends "pedidos/base.html" %} {% load static %} {% block content %}
-<div class="container mt-4">
-  <h2 style="color: #005dab">
-    📝 {% if pedido %}Editar{% else %}Nuevo{% endif %} Pedido
-  </h2>
+{# templates/pedidos/_pedido_form.html #}
+{% load static %}
 
-  <form method="post" novalidate>
-    {% csrf_token %} {% if messages %} {% for msg in messages %}
-    <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-    {% endfor %} {% endif %} {% if form.errors %}
-    <div class="alert alert-danger">{{ form.errors }}</div>
-    {% endif %} {% if formset.non_form_errors %}
-    <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
-    {% endif %}
-    <!-- Formulario de Pedido -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-6">
-        {{ form.empresa.label_tag }} {{ form.empresa }}
-      </div>
-      <div class="col-md-6">
-        {{ form.excursion.label_tag }} {{ form.excursion }}
-      </div>
-      <div class="col-md-6">
-        {{ form.lugar_entrega.label_tag }} {{ form.lugar_entrega }}
-      </div>
-      <div class="col-md-6">
-        {{ form.lugar_recogida.label_tag }} {{ form.lugar_recogida }}
-      </div>
-      <div class="col-md-6">
-        {{ form.fecha_inicio.label_tag }} {{ form.fecha_inicio }}
-      </div>
-      <div class="col-md-6">
-        {{ form.fecha_fin.label_tag }} {{ form.fecha_fin }}
-      </div>
-      <div class="col-md-6">{{ form.estado.label_tag }} {{ form.estado }}</div>
-      <div class="col-12">{{ form.notas.label_tag }} {{ form.notas }}</div>
-      <div class="col-12">
-        {{ form.productos.label_tag }} {{ form.productos }}
-      </div>
-    </div>
+<form method="POST" id="pedido-form">
+  {% csrf_token %}
+  {{ form.as_p }}
 
-    <!-- Formset de Servicios -->
-    <div class="border p-3 mb-4 rounded">
-      <h5>🎒 Servicios</h5>
-      {{ formset.management_form }}
-      <div id="servicios-container">
-        {% for sform in formset %}
-        <div class="servicio-form mb-3 p-2 border rounded">
-          {{ sform.id }}
-          <div class="row g-2">
-            <div class="col-md-6">
-              {{ sform.excursion.label_tag }} {{ sform.excursion }}
-            </div>
-            <div class="col-md-5">
-              {{ sform.pax.label_tag }} {{ sform.pax }}
-            </div>
-            <div class="col-md-5">
-              {{ sform.emisores.label_tag }} {{ sform.emisores }}
-            </div>
-            <div class="col-md-6">
-              {{ sform.guia.label_tag }} {{ sform.guia }}
-            </div>
+  <h5 class="mt-4 mb-3">Servicios</h5>
+  {{ formset.management_form }}
+  <div id="servicios-container">
+    {% for sf in formset %}
+      <div class="card mb-3 p-3 position-relative">
+        {{ sf.id }}
+        <button type="button"
+                class="btn-close eliminar-servicio position-absolute top-0 end-0"
+                aria-label="Eliminar servicio"></button>
 
-            <div class="col-md-1 d-flex align-items-center">
-              <button
-                type="button"
-                class="btn btn-danger btn-sm eliminar-servicio"
-              >
-                🗑️
-              </button>
-            </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="{{ sf.excursion.id_for_label }}" class="form-label">
+              Excursión <span class="text-danger">*</span>
+            </label>
+            {{ sf.excursion }}
+          </div>
+          <div class="col-md-2">
+            <label for="{{ sf.pax.id_for_label }}" class="form-label">
+              Pax <span class="text-danger">*</span>
+            </label>
+            {{ sf.pax }}
+          </div>
+          <div class="col-md-2">
+            <label for="{{ sf.emisores.id_for_label }}" class="form-label">
+              Emisores <span class="text-danger">*</span>
+            </label>
+            {{ sf.emisores }}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ sf.lugar_entrega.id_for_label }}" class="form-label">
+              Lugar de entrega
+            </label>
+            {{ sf.lugar_entrega }}
           </div>
         </div>
-        {% endfor %}
+
+        <div class="mt-2">
+          <label for="{{ sf.bono.id_for_label }}" class="form-label">
+            Bono
+          </label>
+          {{ sf.bono }}
+        </div>
+
+        {{ sf.DELETE }} {# checkbox hidden del formset #}
       </div>
-      <button type="button" id="add-servicio" class="btn btn-secondary mt-2">
-        ➕ Añadir Servicios
-      </button>
-    </div>
+    {% endfor %}
+  </div>
 
-    <div class="text-end">
-      <button
-        type="submit"
-        name="action"
-        value="guardar"
-        class="btn btn-success"
-      >
-        💾 Guardar
-      </button>
-      <button
-        type="submit"
-        name="action"
-        value="guardar_otro"
-        class="btn btn-outline-primary"
-      >
-        ➕ Guardar y otro
-      </button>
-    </div>
-  </form>
-</div>
-{% endblock %} {% block scripts %}
-<script src="{% static 'pedidos/js/servicios_form.js' %}"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    let totalForms = document.getElementById("id_serv-TOTAL_FORMS");
-    let formIndex = parseInt(totalForms.value);
-    const template = document.querySelector(".servicio-form").cloneNode(true);
-    const container = document.getElementById("servicios-container");
+  <div class="text-center mb-4">
+    <button type="button" id="add-servicio" class="btn btn-outline-secondary">
+      + Añadir servicio
+    </button>
+  </div>
 
-    document.getElementById("add-servicio").addEventListener("click", () => {
-      const nuevo = template.cloneNode(true);
-      nuevo.querySelectorAll("input").forEach((input) => {
-        const name = input.name.replace(/servicio-\d+-/, `servicio-${formIndex}-`);
-        const id = input.id.replace(/servicio-\d+-/, `servicio-${formIndex}-`);
-        input.name = name;
-        input.id = id;
-        input.value = "";
-      });
-      container.appendChild(nuevo);
-      formIndex++;
-      totalForms.value = formIndex;
-    });
+  <button type="submit" class="btn btn-primary w-100">
+    {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+  </button>
+</form>
 
-    document.addEventListener("click", function (e) {
-      if (e.target.classList.contains("eliminar-servicio")) {
-        const formDiv = e.target.closest(".servicio-form");
-        const deleteInput = formDiv.querySelector('input[name$="-DELETE"]');
-        if (deleteInput) {
-          deleteInput.value = "on";
-          formDiv.style.display = "none";
-        } else {
-          formDiv.remove();
-          formIndex--;
-          totalForms.value = formIndex;
-        }
-      }
-    });
-  });
-</script>
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}
