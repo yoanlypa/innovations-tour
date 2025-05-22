@@ -47,26 +47,30 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">Excursión *</label>
-            <input type="text" name="serv-${idx}-excursion" class="form-control">
+            <input type="text" name="servicio-${idx}-excursion" class="form-control">
           </div>
           <div class="col-md-2">
             <label class="form-label">Pax *</label>
-            <input type="number" name="serv-${idx}-pax" class="form-control" min="1" value="1">
+            <input type="number" name="servicio-${idx}-pax" class="form-control" min="1" value="1">
           </div>
           <div class="col-md-2">
             <label class="form-label">Emisores *</label>
-            <input type="number" name="serv-${idx}-emisores" class="form-control" min="1" value="1">
+            <input type="number" name="servicio-${idx}-emisores" class="form-control" min="1" value="1">
           </div>
           <div class="col-md-4">
             <label class="form-label">Lugar entrega</label>
-            <input type="text" name="serv-${idx}-lugar_entrega" class="form-control">
+            <input type="text" name="servicio-${idx}-lugar_entrega" class="form-control">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Guia *</label>
+            <input type="number" name="servicio-${idx}-guia" class="form-control">
           </div>
         </div>
         <div class="mt-2">
           <label class="form-label">Bono</label>
-          <input type="text" name="serv-${idx}-bono" class="form-control">
+          <input type="text" name="servicio-${idx}-bono" class="form-control">
         </div>
-        <input type="checkbox" hidden name="serv-${idx}-DELETE" id="id_serv-${idx}-DELETE">
+        <input type="checkbox" hidden name="servicio-${idx}-DELETE" id="id_servicio-${idx}-DELETE">
         <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-servicio"></button>
       </div>`;
 

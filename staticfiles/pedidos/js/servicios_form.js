@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const addServicioBtn = document.getElementById('add-servicio');
     const serviciosContainer = document.getElementById('servicios-container');
-    const totalFormsInput = document.getElementById('id_form-TOTAL_FORMS');
+    const totalFormsInput = document.getElementById('id_servicio-TOTAL_FORMS');
   
     if (!addServicioBtn || !serviciosContainer || !totalFormsInput) return;
   

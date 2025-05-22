@@ -44,9 +44,9 @@
                       <br>
                     {% endfor %}
           {% else %}
-            <p>—</p>
+            <p class="text-muted">No hay servicios asignados.</p>
           {% endif %}
-
+        
           {% if p.notas %}
             <p><strong>Notas:</strong> {{ p.notas }}</p>
           {% endif %}
@@ -116,16 +116,16 @@
               <td>{{ p.lugar_entrega }}</td>
               <td>{{ p.lugar_recogida|default:"—" }}</td>
               <td>
-                {% for s in p.servicios_linea.all %}
+          {% if p.servicios.exists %}
+               {% for s in p.servicios.all %}
                       🎧 <strong>{{ s.excursion }}</strong> – {{ s.pax }} pax – {{ s.emisores }} emis
                       {% if s.lugar_entrega %} – {{ s.lugar_entrega }}{% endif %}
                       {% if s.bono %} – <span class="badge bg-secondary">{{ s.bono }}</span>{% endif %}
                       <br>
                     {% endfor %}
-                {% empty %}
-                  —
-                {% endfor %}
-              </td>
+          {% else %}
+            <p class="text-muted">No hay servicios asignados.</p>
+          {% endif %}
               <td>{{ p.get_estado_display }}</td>
               <td>
                 {% if p.notas %}

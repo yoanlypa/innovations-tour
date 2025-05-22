@@ -102,7 +102,7 @@
 <script src="{% static 'pedidos/js/servicios_form.js' %}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    let totalForms = document.getElementById("id_servicio-TOTAL_FORMS");
+    let totalForms = document.getElementById("id_serv-TOTAL_FORMS");
     let formIndex = parseInt(totalForms.value);
     const template = document.querySelector(".servicio-form").cloneNode(true);
     const container = document.getElementById("servicios-container");

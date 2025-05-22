@@ -270,7 +270,7 @@ def pedidos_lista_view(request):
 def pedido_nuevo_cliente_view(request):
     if request.method == "POST":
         form = PedidoFormCliente(request.POST)
-        formset = ServicioFormSet(request.POST, prefix='serv')
+        formset = ServicioFormSet(request.POST, prefix='servicio')
         if form.is_valid() and formset.is_valid():
             pedido = form.save(commit=False)
             pedido.usuario = request.user
