@@ -1,53 +1,53 @@
-{% load static %}
+{# SOLO este fragmento, sin <form> ni <head> #}
 
 <h5 class="mt-4 mb-3">Servicios</h5>
-{{ formset.management_form }} {# —— Servicios —— #}
+
+{# ¡Importante! va dentro del único <form> #}
+{{ formset.management_form }}
 
 <div id="servicios-container">
   {% for sf in formset %}
-  <div class="card mb-3 p-3 position-relative">
-    {{ sf.id }}
-    <button
-      type="button"
-      class="btn-close eliminar-servicio position-absolute top-0 end-0"
-      aria-label="Eliminar servicio"
-    ></button>
+    <div class="card mb-3 p-3 position-relative">
+      {{ sf.id }}
+      <button type="button"
+              class="btn-close eliminar-servicio position-absolute top-0 end-0"
+              aria-label="Eliminar servicio"></button>
 
-    <div class="row g-3 align-items-end">
-      <div class="col-12 col-lg-4">
-        <label for="{{ sf.excursion.id_for_label }}" class="form-label">
-          Excursión <span class="text-danger">*</span>
-        </label>
-        {{ sf.excursion }}
+      <div class="row g-3 align-items-end">
+        <div class="col-12 col-lg-4">
+          <label for="{{ sf.excursion.id_for_label }}" class="form-label">
+            Excursión <span class="text-danger">*</span>
+          </label>
+          {{ sf.excursion }}
+        </div>
+        <div class="col-6 col-lg-1">
+          <label for="{{ sf.pax.id_for_label }}" class="form-label">
+            Pax <span class="text-danger">*</span>
+          </label>
+          {{ sf.pax }}
+        </div>
+        <div class="col-6 col-lg-1">
+          <label for="{{ sf.emisores.id_for_label }}" class="form-label">
+            Emisores <span class="text-danger">*</span>
+          </label>
+          {{ sf.emisores }}
+        </div>
+        <div class="col-12 col-lg-3">
+          <label for="{{ sf.lugar_entrega.id_for_label }}" class="form-label">
+            Lugar de entrega
+          </label>
+          {{ sf.lugar_entrega }}
+        </div>
+        <div class="col-12 col-lg-3">
+          <label for="{{ sf.bono.id_for_label }}" class="form-label">
+            Bono
+          </label>
+          {{ sf.bono }}
+        </div>
       </div>
-      <div class="col-6 col-lg-1">
-        <label for="{{ sf.pax.id_for_label }}" class="form-label">
-          Pax <span class="text-danger">*</span>
-        </label>
-        {{ sf.pax }}
-      </div>
-      <div class="col-6 col-lg-1">
-        <label for="{{ sf.emisores.id_for_label }}" class="form-label">
-          Emisores <span class="text-danger">*</span>
-        </label>
-        {{ sf.emisores }}
-      </div>
-      <div class="col-12 col-lg-3">
-        <label for="{{ sf.lugar_entrega.id_for_label }}" class="form-label">
-          Lugar de entrega
-        </label>
-        {{ sf.lugar_entrega }}
-      </div>
-      <div class="col-12 col-lg-3">
-        <label for="{{ sf.bono.id_for_label }}" class="form-label">
-          Bono
-        </label>
-        {{ sf.bono }}
-      </div>
+
+      {{ sf.DELETE }}  {# checkbox hidden del formset #}
     </div>
-
-    {{ sf.DELETE }} {# checkbox hidden del formset #}
-  </div>
   {% endfor %}
 </div>
 
@@ -56,7 +56,3 @@
     + Añadir servicio
   </button>
 </div>
-
-{% block scripts %}
-<script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
-{% endblock %}

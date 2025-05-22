@@ -8,16 +8,13 @@
 {% block content %}
 <div class="container my-5">
   <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
       <div class="card shadow-lg rounded-4 border-0">
         <div class="card-body p-4 p-md-5">
-
-               <form id="pedido-form" method="post" novalidate
-                  {% if es_edicion %}
-                    action="{% url 'pedidos:pedido_editar_cliente' pedido.pk %}"
-                  {% else %}
-                    action="{% url 'pedidos:pedido_nuevo_cliente' %}"
-                  {% endif %}
-                >
+          <h2 class="card-title text-center mb-4 text-primary">
+            {% if es_edicion %}Editar pedido{% else %}Crear nuevo pedido{% endif %}
+          </h2>
+               <form id="pedido-form" method="post" novalidate>
                 {% csrf_token %}
                 {{ form.as_p }}
                 {% include "pedidos/_pedido_form.html" %}
@@ -31,8 +28,11 @@
       </div>
     </div>
   </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
-  {# Si necesitas scripts adicionales, añádelos aquí #}
+  {{ block.super }}
+  <!-- tu JS de servicios + flatpickr, etc. -->
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
 {% endblock %}
