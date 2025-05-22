@@ -1,165 +1,74 @@
 {% load static %}
-{# templates/pedidos/_pedido_form.html #}
-{# ✂️ Aquí NO debe haber etiqueta <form> ✂️ #}
 
-{# —— errores globales —— #}
-{% if form.non_field_errors %}
-  <div class="alert alert-danger">
-    {{ form.non_field_errors }}
-  </div>
-{% endif %}
+<form method="POST" id="pedido-form">
+  {% csrf_token %}
+  
+  {{ form.as_p }}
 
-{# —— fecha de inicio + fecha fin —— #}
-<div class="row">
-  <div class="col-md-6 mb-3">
-    <label for="{{ form.fecha_inicio.id_for_label }}" class="form-label">
-      Fecha de inicio <span class="text-danger">*</span>
-    </label>
-    {{ form.fecha_inicio }}
-    {% if form.fecha_inicio.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.fecha_inicio.errors.0 }}
-      </div>
-    {% endif %}
-  </div>
-  <div class="col-md-6 mb-3">
-    <label for="{{ form.fecha_fin.id_for_label }}" class="form-label">
-      Fecha fin
-    </label>
-    {{ form.fecha_fin }}
-    {% if form.fecha_fin.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.fecha_fin.errors.0 }}
-      </div>
-    {% endif %}
-  </div>
-</div>
+  {# —— Servicios —— #}
+  <h5 class="mt-4 mb-3">Servicios</h5>
+  {{ formset.management_form }}
+  <div id="servicios-container">
+    {% for sf in formset %}
+      <div class="card mb-3 p-3 position-relative">
+        {{ sf.id }}
+        <button type="button"
+                class="btn-close eliminar-servicio position-absolute top-0 end-0"
+                aria-label="Eliminar servicio"></button>
 
-{# —— empresa, excursión, estado —— #}
-<div class="row">
-  <div class="col-md-4 mb-3">
-    <label for="{{ form.empresa.id_for_label }}" class="form-label">
-      Empresa <span class="text-danger">*</span>
-    </label>
-    {{ form.empresa }}
-    {% if form.empresa.errors %}
-      <div class="invalid-feedback d-block">{{ form.empresa.errors.0 }}</div>
-    {% endif %}
-  </div>
-
-  <div class="col-md-4 mb-3">
-    <label for="{{ form.excursion.id_for_label }}" class="form-label">
-      Excursión
-    </label>
-    {{ form.excursion }}
-    {% if form.excursion.errors %}
-      <div class="invalid-feedback d-block">{{ form.excursion.errors.0 }}</div>
-    {% endif %}
-  </div>
-
-  <div class="col-md-4 mb-3">
-    <label for="{{ form.estado.id_for_label }}" class="form-label">
-      Estado <span class="text-danger">*</span>
-    </label>
-    {{ form.estado }}
-    {% if form.estado.errors %}
-      <div class="invalid-feedback d-block">{{ form.estado.errors.0 }}</div>
-    {% endif %}
-    <small class="form-text text-muted">
-      Por favor, elija pendiente de pago si el pedido no ha sido pagado.
-      <br>
-    </small>
-  </div>
-</div>
-
-{# —— lugares —— #}
-<div class="row">
-  <div class="col-md-6 mb-3">
-    <label for="{{ form.lugar_entrega.id_for_label }}" class="form-label">
-      Lugar de entrega
-    </label>
-    {{ form.lugar_entrega }}
-    {% if form.lugar_entrega.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.lugar_entrega.errors.0 }}
-      </div>
-    {% endif %}
-  </div>
-  <div class="col-md-6 mb-3">
-    <label for="{{ form.lugar_recogida.id_for_label }}" class="form-label">
-      Lugar de recogida
-    </label>
-    {{ form.lugar_recogida }}
-    {% if form.lugar_recogida.errors %}
-      <div class="invalid-feedback d-block">
-        {{ form.lugar_recogida.errors.0 }}
-      </div>
-    {% endif %}
-  </div>
-</div>
-
-{# —— notas —— #}
-<div class="mb-3">
-  <label for="{{ form.notas.id_for_label }}" class="form-label">
-    Notas
-  </label>
-  {{ form.notas }}
-  {% if form.notas.errors %}
-    <div class="invalid-feedback d-block">
-      {{ form.notas.errors.0 }}
-    </div>
-  {% endif %}
-</div>
-
-{# —— Servicios —— #}
-<h5 class="mt-4 mb-3">Servicios</h5>
-{{ formset.management_form }}
-
-<div id="servicios-container">
-  {% for sf in formset %}
-    <div class="card mb-3 p-3 position-relative">
-      {{ sf.id }}
-      <button type="button" class="btn-close position-absolute top-0 end-0 eliminar-servicio"></button>
-
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Excursión *</label>
-          {{ sf.excursion }}
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label for="{{ sf.excursion.id_for_label }}" class="form-label">
+              Excursión <span class="text-danger">*</span>
+            </label>
+            {{ sf.excursion }}
+          </div>
+          <div class="col-md-2">
+            <label for="{{ sf.pax.id_for_label }}" class="form-label">
+              Pax <span class="text-danger">*</span>
+            </label>
+            {{ sf.pax }}
+          </div>
+          <div class="col-md-2">
+            <label for="{{ sf.emisores.id_for_label }}" class="form-label">
+              Emisores <span class="text-danger">*</span>
+            </label>
+            {{ sf.emisores }}
+          </div>
+          <div class="col-md-4">
+            <label for="{{ sf.lugar_entrega.id_for_label }}" class="form-label">
+              Lugar de entrega
+            </label>
+            {{ sf.lugar_entrega }}
+          </div>
         </div>
-        <div class="col-md-2">
-          <label class="form-label">Pax *</label>
-          {{ sf.pax }}
+
+        <div class="mt-2">
+          <label for="{{ sf.bono.id_for_label }}" class="form-label">
+            Bono
+          </label>
+          {{ sf.bono }}
         </div>
-        <div class="col-md-2">
-          <label class="form-label">Emisores *</label>
-          {{ sf.emisores }}
-        </div>
-        <div class="col-md-4">
-          <label class="form-label">Lugar entrega</label>
-          {{ sf.lugar_entrega }}
-        </div>
+
+        {{ sf.DELETE }}  {# checkbox hidden del formset #}
       </div>
+    {% endfor %}
+  </div>
 
-      <div class="mt-2">
-        <label class="form-label">Bono</label>
-        {{ sf.bono }}
-      </div>
+  <div class="text-center mb-4">
+    <button type="button" id="add-servicio" class="btn btn-outline-secondary">
+      + Añadir servicio
+    </button>
+  </div>
 
-      <input type="checkbox" name="serv-{{ forloop.counter0 }}-DELETE"
-             id="id_serv-{{ forloop.counter0 }}-DELETE" hidden>
-    </div>
-  {% endfor %}
-</div>
+  <div class="text-center">
+    <button type="submit" class="btn btn-primary px-5">
+      {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
+    </button>
+  </div>
+</form>
 
-<div class="text-center mb-4">
-  <button type="button" id="add-servicio" class="btn btn-outline-secondary">
-    + Añadir servicio
-  </button>
-</div>
-
-{# —— submit —— #}
-<div class="text-center">
-  <button type="submit" class="btn btn-primary px-5">
-    {% if es_edicion %}Actualizar{% else %}Guardar pedido{% endif %}
-  </button>
-</div>
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'pedidos/js/pedido_form.js' %}"></script>
+{% endblock %}
