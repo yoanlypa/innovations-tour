@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === Servicios dinámicos ===
   document.addEventListener("DOMContentLoaded", () => {
     const cont = document.getElementById("servicios-container");
-    const total = document.getElementById("id_serv-TOTAL_FORMS");
+    const total = document.getElementById("id_servicio-TOTAL_FORMS");
     const addBtn = document.getElementById("add-servicio");
 
     const template = (idx) => `
