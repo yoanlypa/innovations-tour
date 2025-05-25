@@ -9,14 +9,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1) Flatpickr en fechas
   //
   // (asume que Flatpickr y su locale ES ya se cargaron en base.html)
-  ['fecha_inicio', 'fecha_fin'].forEach(id => {
-    const el = document.getElementById(`id_${id}`);
-    if (!el) return;
-    flatpickr(el, {
-      dateFormat: 'd/m/Y',
-      allowInput: true
-    });
+['fecha_inicio','fecha_fin'].forEach(id => {
+  const el = document.getElementById(`id_${id}`);
+  if (!el) return;
+  flatpickr(el, {
+    altInput: true,
+    altFormat: 'd/m/Y',    // formato visible
+    dateFormat: 'Y-m-d',   // valor real que envía el input
+    allowInput: true       // permite teclear, pero luego valida
   });
+});
 
   //
   // 2) Autofocus en primer campo
