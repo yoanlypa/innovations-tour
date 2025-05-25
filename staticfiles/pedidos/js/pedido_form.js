@@ -1,36 +1,38 @@
 // static/pedidos/js/pedido_form.js
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('pedido_form.js cargado');  // ← confirma en consola
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("pedido_form.js cargado"); // ← confirma en consola
 
-  const form = document.getElementById('pedido-form');
+  const form = document.getElementById("pedido-form");
   if (!form) return;
 
   //
   // 1) Flatpickr en fechas
   //
   // (asume que Flatpickr y su locale ES ya se cargaron en base.html)
-['fecha_inicio','fecha_fin'].forEach(id => {
-  const el = document.getElementById(`id_${id}`);
-  if (!el) return;
-  flatpickr(el, {
-    altInput: true,
-    altFormat: 'd/m/Y',    // formato visible
-    dateFormat: 'Y-m-d',   // valor real que envía el input
-    allowInput: true       // permite teclear, pero luego valida
+  ["fecha_inicio", "fecha_fin"].forEach((id) => {
+    const el = document.getElementById(`id_${id}`);
+    if (!el) return;
+    flatpickr(el, {
+      altInput: true,
+      altFormat: "d/m/Y", // formato visible
+      dateFormat: "Y-m-d", // valor real que envía el input
+      allowInput: true, // permite teclear, pero luego valida
+    });
   });
-});
 
   //
   // 2) Autofocus en primer campo
   //
-  const primer = form.querySelector('input:not([type=hidden]), select, textarea');
+  const primer = form.querySelector(
+    "input:not([type=hidden]), select, textarea"
+  );
   if (primer) primer.focus();
 
   //
   // 3) Spinner y deshabilitar botón al enviar
   //
-  form.addEventListener('submit', () => {
-    const btn = form.querySelector('button[type=submit]');
+  form.addEventListener("submit", () => {
+    const btn = form.querySelector("button[type=submit]");
     if (!btn) return;
     btn.disabled = true;
     btn.innerHTML = `
@@ -42,12 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
   //
   // 4) Servicios dinámicos
   //
-  const cont   = document.getElementById('servicios-container');
-  const total  = document.getElementById('id_servicio-TOTAL_FORMS');
-  const addBtn = document.getElementById('add-servicio');
+  const cont = document.getElementById("servicios-container");
+  const total = document.getElementById("id_servicio-TOTAL_FORMS");
+  const addBtn = document.getElementById("add-servicio");
   if (!cont || !total || !addBtn) return;
 
-  const template = idx => `
+  const template = (idx) => `
     <div class="card mb-3 p-3 position-relative">
       <div class="row g-3">
         <div class="col-md-4">
@@ -77,16 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function addServicio() {
     const idx = parseInt(total.value, 10);
-    cont.insertAdjacentHTML('beforeend', template(idx));
+    cont.insertAdjacentHTML("beforeend", template(idx));
     total.value = idx;
   }
-  addBtn.addEventListener('click', addServicio);
+  addBtn.addEventListener("click", addServicio);
 
-  cont.addEventListener('click', e => {
-    if (!e.target.classList.contains('eliminar-servicio')) return;
-    const card = e.target.closest('.card');
-    const del  = card.querySelector('[name$="-DELETE"]');
+  cont.addEventListener("click", (e) => {
+    if (!e.target.classList.contains("eliminar-servicio")) return;
+    const card = e.target.closest(".card");
+    const del = card.querySelector('[name$="-DELETE"]');
     if (del) del.checked = true;
-    card.style.display = 'none';
+    card.style.display = "none";
   });
 });

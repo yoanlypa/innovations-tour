@@ -129,14 +129,17 @@
     <!-- Inicialización Flatpickr sobre input[type=date] -->
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-        if (window.flatpickr && flatpickr.l10ns && flatpickr.l10ns.es) {
-          flatpickr.localize(flatpickr.l10ns.es);
-        }
-        flatpickr("input[type='date']", {
-          dateFormat: "Y-m-d",
-          allowInput: true
+          ['fecha_inicio','fecha_fin'].forEach(id => {
+        const el = document.getElementById(`id_${id}`);
+        if (!el) return;
+        flatpickr(el, {
+          altInput: true,
+          altFormat: 'd/m/Y',    // formato visible
+          dateFormat: 'Y-m-d',   // valor real que envía el input
+          allowInput: true       // permite teclear, pero luego valida
         });
       });
+            });
     </script>
 
     <!-- SweetAlert2 para alerts bonitas -->

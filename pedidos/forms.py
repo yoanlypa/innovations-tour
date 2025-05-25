@@ -168,15 +168,22 @@ class PedidoForm(forms.ModelForm):
             ),
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
-            "fecha_inicio": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "fecha_fin": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
             "estado": forms.Select(attrs={"class": "form-select"}),
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
+    fecha_inicio = forms.DateField(
+        input_formats=['%Y-%m-%d','%d/%m/%Y'],
+        widget=forms.DateInput(
+            attrs={'class':'form-control','type':'date'}
+        )
+    )
+    fecha_fin = forms.DateField(
+        required=False,
+        input_formats=['%Y-%m-%d','%d/%m/%Y'],
+        widget=forms.DateInput(
+            attrs={'class':'form-control','type':'date'}
+        )
+    )
 
     def clean_fecha_creacion(self):
         fecha_str = self.cleaned_data["fecha_creacion"]
@@ -205,55 +212,35 @@ class PedidoFormCliente(forms.ModelForm):
             "notas",
         ]
         widgets = {
-            "fecha_inicio": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
-            "fecha_fin": forms.DateInput(
-                attrs={"type": "date", "class": "form-control"}
-            ),
             "empresa": forms.TextInput(attrs={"class": "form-control"}),
             "excursion": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_entrega": forms.TextInput(attrs={"class": "form-control"}),
             "lugar_recogida": forms.TextInput(attrs={"class": "form-control"}),
             "notas": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
             "estado": forms.Select(attrs={"class": "form-select"}),
-        }
-
-    # 
-    # 
-    # 
-    # 
-    # ──────────────────── Widgets de fecha ────────────────────
+   }      
     fecha_inicio = forms.DateField(
-        required=True,
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "dd/mm/aaaa",
-                "autocomplete": "off",
-            }
-        ),
-        input_formats=["%Y-%m-%d", "%d/%m/%Y"],
-        error_messages={
-            "invalid": "Introduce una fecha válida (dd/mm/aaaa)",
-            "required": "Este campo es obligatorio",
-        },
-    )
+                required=True,
+                widget=forms.DateInput(
+                    attrs={'class':'form-control','type':'date', 'placeholder': 'dd/mm/aaaa', 'autocomplete': 'off'}
+                ),
+                input_formats=["%Y-%m-%d", "%d/%m/%Y"],
+                error_messages={
+                    "invalid": "Introduce una fecha válida (dd/mm/aaaa)",
+                    "required": "Este campo es obligatorio",
+                },
+            )
 
     fecha_fin = forms.DateField(
-        required=False,  # puede quedar vacío
-        widget=forms.TextInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "dd/mm/aaaa",
-                "autocomplete": "off",
-            }
-        ),
-        input_formats=["%Y-%m-%d", "%d/%m/%Y", ""],
-        error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
-    )
+                required=False,  # puede quedar vacío
+                widget=forms.DateInput(
+                    attrs={'class':'form-control','type':'date', 'placeholder': 'dd/mm/aaaa', 'autocomplete': 'off'}
+                ),  
+                input_formats=["%Y-%m-%d", "%d/%m/%Y", ""],
+                error_messages={"invalid": "Introduce una fecha válida (dd/mm/aaaa)"},
+            )
 
-  
+
     # ──────────────────────────── Validación de campos ────────────────────
     # ──────────────────── Inicialización ────────────────────
     def __init__(self, *args, **kwargs):
