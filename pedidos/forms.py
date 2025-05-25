@@ -324,5 +324,4 @@ ServicioFormSet = inlineformset_factory(
     form=ServicioForm,
     extra=1,
     can_delete=True,
-    prefix='servicio'
-)
+    )
