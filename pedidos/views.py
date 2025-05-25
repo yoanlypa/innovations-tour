@@ -268,33 +268,49 @@ def pedidos_lista_view(request):
 
 @login_required
 def pedido_nuevo_cliente_view(request):
+    # Detecta si estamos en modo modal (embed)
+    embed = request.GET.get('embed') == '1' or request.POST.get('embed') == '1'
+
+    # Instanciamos formulario y formset de servicios
+    form = PedidoFormCliente(request.POST or None)
+    servicio_formset = ServicioFormSet(request.POST or None, prefix='servicio')
+
     if request.method == "POST":
-        form = PedidoFormCliente(request.POST)
-        formset = ServicioFormSet(request.POST, prefix='servicio')
-        if form.is_valid() and formset.is_valid():
+        if form.is_valid() and servicio_formset.is_valid():
+            # 1) Guardamos el pedido
             pedido = form.save(commit=False)
             pedido.usuario = request.user
             pedido.save()
-            formset.instance = pedido
-            formset.save()
 
-            if request.GET.get("embed") == "1":
-                return HttpResponse("<script>window.parent.location.reload();</script>")
+            # 2) Asociamos y guardamos los servicios
+            servicio_formset.instance = pedido
+            servicio_formset.save()
 
+            # 3) Si estamos en el modal, recarga la ventana padre
+            if embed:
+                return HttpResponse(
+                    "<script>window.parent.location.reload();</script>"
+                )
+
+            # 4) modo normal: mensaje y redirect
             messages.success(request, "✅ Pedido creado correctamente.")
             return redirect("pedidos:mis_pedidos")
-        messages.error(request, "Corrige los errores del formulario.")
-    else:
-        form = PedidoFormCliente()
-        formset = ServicioFormSet(request.POST, prefix='servicio')
+        else:
+            messages.error(request, "Por favor corrige los errores.")
 
+    # Elegimos plantilla según embed
     template = (
         "pedidos/pedido_nuevo_cliente_modal.html"
-        if request.GET.get("embed") == "1"
+        if embed
         else "pedidos/pedido_nuevo_cliente.html"
     )
-    return render(request, template, {"form": form, "formset": formset})
-
+    return render(request, template, {
+        "form": form,
+        "formset": servicio_formset,
+        "es_edicion": False,
+        # Pasamos embed al template para incluir hidden si hace falta
+        "embed": embed,
+    })
 
 @login_required
 def pedido_editar_cliente_view(request, pk):

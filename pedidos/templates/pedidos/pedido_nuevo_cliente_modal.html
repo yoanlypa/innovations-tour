@@ -13,6 +13,9 @@
     action="{% url 'pedidos:pedido_nuevo_cliente' %}?embed=1"
   >
     {% csrf_token %}
+    {% if embed %}
+  <input type="hidden" name="embed" value="1">
+{% endif %}
     {% include "pedidos/_pedido_form.html" %}
   </form>
 </div>

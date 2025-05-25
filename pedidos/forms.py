@@ -319,11 +319,10 @@ class ServicioForm(forms.ModelForm):
         }
 # ──────────────────── Formset de Servicios1 ────────────────────
 ServicioFormSet = inlineformset_factory(
-    Pedido, Servicio,
-    form=ServicioForm,                    #  ← usamos el formulario explícito
-    formset=BaseServicioFormSet,
-    extra=0,
-    can_delete=True
+    Pedido,
+    Servicio,
+    form=ServicioForm,
+    extra=1,
+    can_delete=True,
+    prefix='servicio'
 )
-
-
