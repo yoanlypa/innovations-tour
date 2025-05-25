@@ -42,7 +42,7 @@ class Pedido(models.Model):
 
 class Servicio(models.Model):
     pedido = models.ForeignKey(
-        "Pedido", related_name="servicios", on_delete=models.CASCADE
+        "Pedido", related_name="servicios_linea", on_delete=models.CASCADE
     )
     excursion = models.CharField("Excursión", max_length=120)
     pax = models.PositiveIntegerField("PAX")

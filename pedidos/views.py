@@ -397,7 +397,7 @@ def cargar_datos_pedido(request):
 def pedidos_mios_view(request):
     pedidos = (
         Pedido.objects.filter(usuario=request.user)
-        .prefetch_related("servicios")
+        .prefetch_related("servicios_linea")
         .order_by("-fecha_inicio")
     )
     return render(request, "pedidos/pedidos_mios.html", {"pedidos": pedidos})
