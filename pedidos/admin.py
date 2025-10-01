@@ -33,7 +33,7 @@ class PedidoAdmin(DjangoObjectActions,admin.ModelAdmin):
         "usuario",
         "acciones",
     )
-    readonly_fields = ("fecha_creacion",)
+    readonly_fields = ("fecha_creacion", "fecha_modificacion", "updates")
     list_editable = ("estado",)  # permite cambiar el estado directamente desde la lista
     list_filter = ("estado", "empresa")
     search_fields = ("empresa", "excursion", "usuario__username")
