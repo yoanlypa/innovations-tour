@@ -40,23 +40,55 @@ class Pedido(models.Model):
     def __str__(self):
         return f"{self.empresa} – {self.excursion or 'Sin excursión'} ({self.fecha_inicio.date()})"
 
-
-class Servicio(models.Model):
-    pedido = models.ForeignKey(
-        "Pedido", related_name="servicios_linea", on_delete=models.CASCADE
-    )
-    excursion = models.CharField("Excursión", max_length=120)
-    pax = models.PositiveIntegerField("PAX")
-    emisores = models.PositiveSmallIntegerField("Emisores", default=1)
-    guia = models.CharField("Guía", max_length=120, blank=True)
-    lugar_entrega = models.CharField("Lugar de entrega", max_length=120, blank=True)
-    bono = models.CharField("Bono", max_length=60, blank=True)
-
-    class Meta:
-        ordering = ["excursion"]
-
-    def __str__(self):
-        return f"{self.excursion} – {self.pax} pax"
+    def _log_update(self, event, user=None, note=None):
+            """Añade un evento al historial 'updates'."""
+            entry = {
+                "ts": timezone.now().isoformat(),  # ISO 8601
+                "event": event,                    # p.ej. 'created', 'delivered', 'collected'
+            }
+            if user:
+                entry["user_id"] = user.pk
+                entry["user"] = getattr(user, "username", "") or getattr(user, "email", "")
+            if note:
+                entry["note"] = str(note)
+            self.updates = (self.updates or []) + [entry]
+    
+        def save(self, *args, **kwargs):
+            is_new = self.pk is None
+            # si es nuevo y no hay updates, añade 'created' ANTES de guardar
+            if is_new and not self.updates:
+                self.updates = [{"ts": timezone.now().isoformat(), "event": "created"}]
+            super().save(*args, **kwargs)
+    
+        def set_delivered(self, user=None, note=None):
+            self.estado = "entregado"
+            self.entregado = True
+            self._log_update("delivered", user=user, note=note)
+            self.save(update_fields=["estado", "entregado", "updates", "fecha_modificacion"])
+    
+        def set_collected(self, user=None, note=None):
+            self.estado = "recogido"
+            self.recogido = True
+            self._log_update("collected", user=user, note=note)
+            self.save(update_fields=["estado", "recogido", "updates", "fecha_modificacion"])
+    
+    
+    class Servicio(models.Model):
+        pedido = models.ForeignKey(
+            "Pedido", related_name="servicios_linea", on_delete=models.CASCADE
+        )
+        excursion = models.CharField("Excursión", max_length=120)
+        pax = models.PositiveIntegerField("PAX")
+        emisores = models.PositiveSmallIntegerField("Emisores", default=1)
+        guia = models.CharField("Guía", max_length=120, blank=True)
+        lugar_entrega = models.CharField("Lugar de entrega", max_length=120, blank=True)
+        bono = models.CharField("Bono", max_length=60, blank=True)
+    
+        class Meta:
+            ordering = ["excursion"]
+    
+        def __str__(self):
+            return f"{self.excursion} – {self.pax} pax"
 
 
 class Tarea(models.Model):
