@@ -20,6 +20,7 @@ from django.views.decorators.http import require_GET, require_http_methods, requ
 from django.views.generic import CreateView, DeleteView, ListView, TemplateView, UpdateView
 from django_filters.views import FilterView
 from .filters import PedidoFilter
+from .serializers import PedidoOpsSerializer
 
 from .forms import (
     CustomLoginForm,
