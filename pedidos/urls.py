@@ -1,15 +1,17 @@
+from rest_framework.routers import DefaultRouter
 from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from . import views
-from .views import (HomeView, acceso_view,  # Import the missing views
-                    logout_view, pedido_editar_cliente_view,
-                    pedido_nuevo_cliente_view)
+from .views import HomeView, acceso_view, logout_view, pedido_editar_cliente_view, pedido_nuevo_cliente_view, PedidoOpsViewSet, me_view
 
 app_name = "pedidos"
+router = DefaultRouter()
+router.register(r"ops/pedidos", PedidoOpsViewSet, basename="ops-pedidos")
 
 urlpatterns = [
     # TAREAS
+
     path("tareas/", views.TareaListView.as_view(), name="tareas"),
     path("tareas/nueva/", views.TareaCreateView.as_view(), name="tarea_nueva"),
     path("tareas/editar/<int:pk>/", views.TareaUpdateView.as_view(), name="tarea_editar"),
@@ -38,6 +40,8 @@ urlpatterns = [
     # LOGIN / REGISTRO
     path("acceso/", views.acceso_view, name="acceso"),
     path("logout/", views.logout_view, name="logout"),
+    path("me/", me_view, name="me"),
+  
     
     # PASSWORD RESET
     path("password_reset/",auth_views.PasswordResetView.as_view(template_name="pedidos/password_reset.html"),name="password_reset",),
@@ -49,3 +53,4 @@ urlpatterns = [
     # path('api/sincronizar-usuario/', views.SincronizarUsuarioAPIView.as_view(), name='sincronizar_usuario'),
     #
 ]
+urlpatterns += router.urls
