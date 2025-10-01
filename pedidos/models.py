@@ -23,8 +23,8 @@ class Pedido(models.Model):
 
     fecha_inicio = models.DateTimeField("Fecha inicio", default=timezone.now)
     fecha_fin = models.DateTimeField("Fecha fin", null=True, blank=True)
-    fecha_creacion = models.DateField(default=timezone.now, editable=False)
-    fecha_modificacion = models.DateTimeField("Última modificación", auto_now=True)
+    fecha_creacion = models.DateTimeField(default=timezone.now, editable=False)
+    fecha_modificacion = models.DateTimeField(auto_now=True)
     excursion = models.CharField("Excursión", max_length=100, blank=True, default="")
     empresa = models.CharField("Empresa", max_length=100)
     servicios = models.CharField("Servicio", max_length=100, blank=True, default="")
@@ -35,6 +35,7 @@ class Pedido(models.Model):
     entregado = models.BooleanField("Entregado", default=False)
     recogido = models.BooleanField("Recogido", default=False)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
+    updates = models.JSONField(default=list, blank=True, editable=False)
 
     def __str__(self):
         return f"{self.empresa} – {self.excursion or 'Sin excursión'} ({self.fecha_inicio.date()})"
