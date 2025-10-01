@@ -469,21 +469,18 @@ class PedidoOpsViewSet(viewsets.ModelViewSet):
 
         return qs
 
-    @action(detail=True, methods=["post"])
-    def delivered(self, request, pk=None):
-        obj = self.get_object()
-        obj.estado = "entregado"
-        obj.entregado = True
-        obj.save(update_fields=["estado", "entregado", "fecha_modificacion"])
-        return Response({"ok": True, "status": "entregado", "id": obj.id})
+@action(detail=True, methods=["post"])
+def delivered(self, request, pk=None):
+    obj = self.get_object()
+    obj.set_delivered(user=request.user)  # ← registra update
+    return Response({"ok": True, "status": "entregado", "id": obj.id})
 
-    @action(detail=True, methods=["post"])
-    def collected(self, request, pk=None):
-        obj = self.get_object()
-        obj.estado = "recogido"
-        obj.recogido = True
-        obj.save(update_fields=["estado", "recogido", "fecha_modificacion"])
-        return Response({"ok": True, "status": "recogido", "id": obj.id})
+@action(detail=True, methods=["post"])
+def collected(self, request, pk=None):
+    obj = self.get_object()
+    obj.set_collected(user=request.user)  # ← registra update
+    return Response({"ok": True, "status": "recogido", "id": obj.id})
+
 
 # ---- Perfil sencillo para saber si es staff ----
 @api_view(["GET"])
