@@ -7,26 +7,13 @@ class ServicioSerializer(serializers.ModelSerializer):
         model = Servicio
         fields = [ "excursion", "pax", "emisores", "guia", "lugar_entrega", "bono" ]
 
-
 class PedidoSerializer(serializers.ModelSerializer):
     servicios = ServicioSerializer(many=True)
     usuario = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
     class Meta:
         model = Pedido
-        fields = [
-            "id",
-            "usuario",
-            "empresa",
-            "excursion",
-            "lugar_entrega",
-            "lugar_recogida",
-            "fecha_inicio",
-            "fecha_fin",
-            "estado",
-            "notas",
-            "servicios",
-        ]
+        fields = "__all__"
+        read_only_fields = ["id", "fecha_creacion", "fecha_modificacion", "updates"]
 
     def create(self, validated_data):
         servicios_data = validated_data.pop("servicios")
