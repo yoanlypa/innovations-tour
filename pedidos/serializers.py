@@ -36,6 +36,16 @@ class PedidoSerializer(serializers.ModelSerializer):
         return pedido
 
 
+class PedidoOpsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pedido
+        fields = [
+            "id", "empresa", "excursion",
+            "lugar_entrega", "lugar_recogida",
+            "fecha_inicio", "fecha_fin",
+            "estado", "entregado", "recogido",
+            "fecha_creacion", "fecha_modificacion",
+        ]
 class TareaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tarea
