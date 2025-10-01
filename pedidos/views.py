@@ -417,3 +417,81 @@ def pedidos_mios_view(request):
         .order_by("-fecha_inicio")
     )
     return render(request, "pedidos/pedidos_mios.html", {"pedidos": pedidos})
+
+def _parse_dt(value: str):
+    if not value:
+        return None
+    try:
+        # ISO → aware
+        dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if timezone.is_naive(dt):
+            dt = timezone.make_aware(dt)
+        return dt
+    except Exception:
+        return None
+
+class IsAuthenticatedAndOwnerOrStaff(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_authenticated)
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_staff:
+            return True
+        return getattr(obj, "usuario_id", None) == request.user.id
+
+class PedidoOpsViewSet(viewsets.ModelViewSet):
+    """
+    /api/ops/pedidos/ → listado para operaciones de trabajadores
+    Staff: ve todos; no staff: ve los propios (usuario=request.user)
+    Filtros: ?status=pagado,entregado&date_from=ISO&date_to=ISO
+    """
+    serializer_class = PedidoOpsSerializer
+    permission_classes = [IsAuthenticatedAndOwnerOrStaff]
+
+    def get_queryset(self):
+        qs = Pedido.objects.all().order_by("-fecha_modificacion")
+        user = self.request.user
+        if not user.is_staff:
+            qs = qs.filter(usuario=user)
+
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            parts = [p.strip() for p in status_param.split(",") if p.strip()]
+            if parts:
+                qs = qs.filter(estado__in=parts)
+
+        date_from = _parse_dt(self.request.query_params.get("date_from"))
+        date_to = _parse_dt(self.request.query_params.get("date_to"))
+        if date_from:
+            qs = qs.filter(fecha_inicio__gte=date_from)
+        if date_to:
+            qs = qs.filter(fecha_inicio__lte=date_to)
+
+        return qs
+
+    @action(detail=True, methods=["post"])
+    def delivered(self, request, pk=None):
+        obj = self.get_object()
+        obj.estado = "entregado"
+        obj.entregado = True
+        obj.save(update_fields=["estado", "entregado", "fecha_modificacion"])
+        return Response({"ok": True, "status": "entregado", "id": obj.id})
+
+    @action(detail=True, methods=["post"])
+    def collected(self, request, pk=None):
+        obj = self.get_object()
+        obj.estado = "recogido"
+        obj.recogido = True
+        obj.save(update_fields=["estado", "recogido", "fecha_modificacion"])
+        return Response({"ok": True, "status": "recogido", "id": obj.id})
+
+# ---- Perfil sencillo para saber si es staff ----
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def me_view(request):
+    u = request.user
+    return Response({
+        "id": u.id,
+        "username": getattr(u, "username", ""),
+        "email": getattr(u, "email", ""),
+        "is_staff": getattr(u, "is_staff", False),
+    })
